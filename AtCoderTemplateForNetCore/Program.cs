@@ -14,8 +14,11 @@ namespace AtCoderTemplateForNetCore
         static void Main(string[] args)
         {
             IAtCoderQuestion question = new QuestionA();    // 問題に合わせて書き換え
-            var answer = question.Solve(Console.In);
-            Console.WriteLine(answer);
+            var answers = question.Solve(Console.In);
+            foreach (var answer in answers)
+            {
+                Console.WriteLine(answer);
+            }
         }
     }
 }
@@ -29,13 +32,13 @@ namespace AtCoderTemplateForNetCore.Questions
 
     public interface IAtCoderQuestion
     {
-        string Solve(string input);
-        string Solve(TextReader inputStream);
+        IEnumerable<string> Solve(string input);
+        IEnumerable<string> Solve(TextReader inputStream);
     }
 
     public abstract class AtCoderQuestionBase : IAtCoderQuestion
     {
-        public string Solve(string input)
+        public IEnumerable<string> Solve(string input)
         {
             var stream = new MemoryStream(Encoding.Unicode.GetBytes(input));
             var reader = new StreamReader(stream, Encoding.Unicode);
@@ -43,7 +46,7 @@ namespace AtCoderTemplateForNetCore.Questions
             return Solve(reader);
         }
 
-        public abstract string Solve(TextReader inputStream);
+        public abstract IEnumerable<string> Solve(TextReader inputStream);
     }
 
     #endregion

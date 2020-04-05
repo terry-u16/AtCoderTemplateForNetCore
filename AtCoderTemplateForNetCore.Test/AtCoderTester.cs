@@ -1,62 +1,84 @@
 using System;
 using Xunit;
 using AtCoderTemplateForNetCore.Questions;
+using System.Collections.Generic;
 
 namespace AtCoderTemplateForNetCore.Test
 {
     public class AtCoderTester
     {
         [Theory]
-        [InlineData("", "")]
+        [InlineData(@"", @"")]
         public void QuestionATest(string input, string output)
         {
+            var outputs = SplitByNewLine(output);
             IAtCoderQuestion question = new QuestionA();
-            var answer = question.Solve(input);
-            Assert.Equal(output, answer);
+
+            var answers = question.Solve(input);
+
+            Assert.Equal(outputs, answers);
         }
 
         //[Theory]
-        //[InlineData("", "")] 
+        //[InlineData(@"", @"")]
         public void QuestionBTest(string input, string output)
         {
+            var outputs = SplitByNewLine(output);
             IAtCoderQuestion question = new QuestionB();
-            var answer = question.Solve(input);
-            Assert.Equal(output, answer);
+
+            var answers = question.Solve(input);
+
+            Assert.Equal(outputs, answers);
         }
 
         //[Theory]
-        //[InlineData("", "")] 
+        //[InlineData(@"", @"")]
         public void QuestionCTest(string input, string output)
         {
+            var outputs = SplitByNewLine(output);
             IAtCoderQuestion question = new QuestionC();
-            var answer = question.Solve(input);
-            Assert.Equal(output, answer);
+
+            var answers = question.Solve(input);
+
+            Assert.Equal(outputs, answers);
         }
 
         //[Theory]
-        //[InlineData("", "")] 
+        //[InlineData(@"", @"")]
         public void QuestionDTest(string input, string output)
         {
+            var outputs = SplitByNewLine(output);
             IAtCoderQuestion question = new QuestionD();
-            var answer = question.Solve(input);
-            Assert.Equal(output, answer);
+
+            var answers = question.Solve(input);
+
+            Assert.Equal(outputs, answers);
         }
 
         //[Theory]
-        //[InlineData("", "")] 
+        //[InlineData(@"", @"")]
         public void QuestionETest(string input, string output)
         {
+            var outputs = SplitByNewLine(output);
             IAtCoderQuestion question = new QuestionE();
-            var answer = question.Solve(input);
-            Assert.Equal(output, answer);
+
+            var answers = question.Solve(input);
+
+            Assert.Equal(outputs, answers);
         }
+
         //[Theory]
-        //[InlineData("", "")] 
+        //[InlineData(@"", @"")]
         public void QuestionFTest(string input, string output)
         {
+            var outputs = SplitByNewLine(output);
             IAtCoderQuestion question = new QuestionF();
-            var answer = question.Solve(input);
-            Assert.Equal(output, answer);
+
+            var answers = question.Solve(input);
+
+            Assert.Equal(outputs, answers);
         }
+
+        IEnumerable<string> SplitByNewLine(string input) => input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
     }
 }

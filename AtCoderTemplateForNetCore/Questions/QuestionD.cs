@@ -9,7 +9,7 @@ namespace AtCoderTemplateForNetCore.Questions
 {
     public class QuestionD : AtCoderQuestionBase
     {
-        public override string Solve(TextReader inputStream)
+        public override IEnumerable<string> Solve(TextReader inputStream)
         {
             throw new NotImplementedException();
         }
