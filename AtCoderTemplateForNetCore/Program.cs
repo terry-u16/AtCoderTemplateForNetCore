@@ -66,6 +66,36 @@ namespace AtCoderTemplateForNetCore.Extensions
         internal static long[] ReadLongArray(this TextReader reader, char separator = ' ') => ReadStringArray(reader, separator).Select(long.Parse).ToArray();
         internal static double[] ReadDoubleArray(this TextReader reader, char separator = ' ') => ReadStringArray(reader, separator).Select(double.Parse).ToArray();
         internal static string[] ReadStringArray(this TextReader reader, char separator = ' ') => reader.ReadLine().Split(separator);
+
+        // Supports primitive type only.
+        internal static T1 ReadValue<T1>(this TextReader reader) => (T1)Convert.ChangeType(reader.ReadLine(), typeof(T1));
+
+        internal static (T1, T2) ReadValues<T1, T2>(this TextReader reader, char separator = ' ')
+        {
+            var inputs = ReadStringArray(reader, separator);
+            var v1 = (T1)Convert.ChangeType(inputs[0], typeof(T1));
+            var v2 = (T2)Convert.ChangeType(inputs[1], typeof(T2));
+            return (v1, v2);
+        }
+
+        internal static (T1, T2, T3) ReadValues<T1, T2, T3>(this TextReader reader, char separator = ' ')
+        {
+            var inputs = ReadStringArray(reader, separator);
+            var v1 = (T1)Convert.ChangeType(inputs[0], typeof(T1));
+            var v2 = (T2)Convert.ChangeType(inputs[1], typeof(T2));
+            var v3 = (T3)Convert.ChangeType(inputs[2], typeof(T3));
+            return (v1, v2, v3);
+        }
+
+        internal static (T1, T2, T3, T4) ReadValues<T1, T2, T3, T4>(this TextReader reader, char separator = ' ')
+        {
+            var inputs = ReadStringArray(reader, separator);
+            var v1 = (T1)Convert.ChangeType(inputs[0], typeof(T1));
+            var v2 = (T2)Convert.ChangeType(inputs[1], typeof(T2));
+            var v3 = (T3)Convert.ChangeType(inputs[2], typeof(T3));
+            var v4 = (T4)Convert.ChangeType(inputs[3], typeof(T4));
+            return (v1, v2, v3, v4);
+        }
     }
 }
 
