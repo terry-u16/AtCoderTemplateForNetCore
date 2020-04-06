@@ -2,6 +2,7 @@ using System;
 using Xunit;
 using AtCoderTemplateForNetCore.Questions;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AtCoderTemplateForNetCore.Test
 {
@@ -14,7 +15,7 @@ namespace AtCoderTemplateForNetCore.Test
             var outputs = SplitByNewLine(output);
             IAtCoderQuestion question = new QuestionA();
 
-            var answers = question.Solve(input);
+            var answers = question.Solve(input).Select(o => o.ToString());
 
             Assert.Equal(outputs, answers);
         }
@@ -26,7 +27,7 @@ namespace AtCoderTemplateForNetCore.Test
             var outputs = SplitByNewLine(output);
             IAtCoderQuestion question = new QuestionB();
 
-            var answers = question.Solve(input);
+            var answers = question.Solve(input).Select(o => o.ToString());
 
             Assert.Equal(outputs, answers);
         }
@@ -38,7 +39,7 @@ namespace AtCoderTemplateForNetCore.Test
             var outputs = SplitByNewLine(output);
             IAtCoderQuestion question = new QuestionC();
 
-            var answers = question.Solve(input);
+            var answers = question.Solve(input).Select(o => o.ToString());
 
             Assert.Equal(outputs, answers);
         }
@@ -50,7 +51,7 @@ namespace AtCoderTemplateForNetCore.Test
             var outputs = SplitByNewLine(output);
             IAtCoderQuestion question = new QuestionD();
 
-            var answers = question.Solve(input);
+            var answers = question.Solve(input).Select(o => o.ToString());
 
             Assert.Equal(outputs, answers);
         }
@@ -62,7 +63,7 @@ namespace AtCoderTemplateForNetCore.Test
             var outputs = SplitByNewLine(output);
             IAtCoderQuestion question = new QuestionE();
 
-            var answers = question.Solve(input);
+            var answers = question.Solve(input).Select(o => o.ToString());
 
             Assert.Equal(outputs, answers);
         }
@@ -74,7 +75,7 @@ namespace AtCoderTemplateForNetCore.Test
             var outputs = SplitByNewLine(output);
             IAtCoderQuestion question = new QuestionF();
 
-            var answers = question.Solve(input);
+            var answers = question.Solve(input).Select(o => o.ToString());
 
             Assert.Equal(outputs, answers);
         }

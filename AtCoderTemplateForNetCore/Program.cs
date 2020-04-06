@@ -32,13 +32,13 @@ namespace AtCoderTemplateForNetCore.Questions
 
     public interface IAtCoderQuestion
     {
-        IEnumerable<string> Solve(string input);
-        IEnumerable<string> Solve(TextReader inputStream);
+        IEnumerable<object> Solve(string input);
+        IEnumerable<object> Solve(TextReader inputStream);
     }
 
     public abstract class AtCoderQuestionBase : IAtCoderQuestion
     {
-        public IEnumerable<string> Solve(string input)
+        public IEnumerable<object> Solve(string input)
         {
             var stream = new MemoryStream(Encoding.Unicode.GetBytes(input));
             var reader = new StreamReader(stream, Encoding.Unicode);
@@ -46,7 +46,7 @@ namespace AtCoderTemplateForNetCore.Questions
             return Solve(reader);
         }
 
-        public abstract IEnumerable<string> Solve(TextReader inputStream);
+        public abstract IEnumerable<object> Solve(TextReader inputStream);
     }
 
     #endregion
