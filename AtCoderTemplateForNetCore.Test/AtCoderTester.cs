@@ -80,6 +80,6 @@ namespace AtCoderTemplateForNetCore.Test
             Assert.Equal(outputs, answers);
         }
 
-        IEnumerable<string> SplitByNewLine(string input) => input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+        IEnumerable<string> SplitByNewLine(string input) => input?.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None) ?? Enumerable.Empty<string>();
     }
 }
