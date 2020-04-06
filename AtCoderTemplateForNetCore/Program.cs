@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Threading.Tasks;
+﻿// ここにQuestionクラスをコピペ
 using AtCoderTemplateForNetCore.Questions;
 using AtCoderTemplateForNetCore.Extensions;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace AtCoderTemplateForNetCore
 {
@@ -23,12 +23,10 @@ namespace AtCoderTemplateForNetCore
     }
 }
 
+#region Base Classes
+
 namespace AtCoderTemplateForNetCore.Questions
 {
-    // ここにQuestionクラスをコピペ
-
-
-    #region Base Classes
 
     public interface IAtCoderQuestion
     {
@@ -49,8 +47,9 @@ namespace AtCoderTemplateForNetCore.Questions
         public abstract IEnumerable<object> Solve(TextReader inputStream);
     }
 
-    #endregion
 }
+
+#endregion
 
 #region Extensions
 
