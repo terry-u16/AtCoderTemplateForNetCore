@@ -96,6 +96,56 @@ namespace AtCoderTemplateForNetCore.Extensions
             var v4 = (T4)Convert.ChangeType(inputs[3], typeof(T4));
             return (v1, v2, v3, v4);
         }
+
+        internal static (T1, T2, T3, T4, T5) ReadValues<T1, T2, T3, T4, T5>(this TextReader reader, char separator = ' ')
+        {
+            var inputs = ReadStringArray(reader, separator);
+            var v1 = (T1)Convert.ChangeType(inputs[0], typeof(T1));
+            var v2 = (T2)Convert.ChangeType(inputs[1], typeof(T2));
+            var v3 = (T3)Convert.ChangeType(inputs[2], typeof(T3));
+            var v4 = (T4)Convert.ChangeType(inputs[3], typeof(T4));
+            var v5 = (T5)Convert.ChangeType(inputs[4], typeof(T5));
+            return (v1, v2, v3, v4, v5);
+        }
+
+        internal static (T1, T2, T3, T4, T5, T6) ReadValues<T1, T2, T3, T4, T5, T6>(this TextReader reader, char separator = ' ')
+        {
+            var inputs = ReadStringArray(reader, separator);
+            var v1 = (T1)Convert.ChangeType(inputs[0], typeof(T1));
+            var v2 = (T2)Convert.ChangeType(inputs[1], typeof(T2));
+            var v3 = (T3)Convert.ChangeType(inputs[2], typeof(T3));
+            var v4 = (T4)Convert.ChangeType(inputs[3], typeof(T4));
+            var v5 = (T5)Convert.ChangeType(inputs[4], typeof(T5));
+            var v6 = (T6)Convert.ChangeType(inputs[5], typeof(T6));
+            return (v1, v2, v3, v4, v5, v6);
+        }
+
+        internal static (T1, T2, T3, T4, T5, T6, T7) ReadValues<T1, T2, T3, T4, T5, T6, T7>(this TextReader reader, char separator = ' ')
+        {
+            var inputs = ReadStringArray(reader, separator);
+            var v1 = (T1)Convert.ChangeType(inputs[0], typeof(T1));
+            var v2 = (T2)Convert.ChangeType(inputs[1], typeof(T2));
+            var v3 = (T3)Convert.ChangeType(inputs[2], typeof(T3));
+            var v4 = (T4)Convert.ChangeType(inputs[3], typeof(T4));
+            var v5 = (T5)Convert.ChangeType(inputs[4], typeof(T5));
+            var v6 = (T6)Convert.ChangeType(inputs[5], typeof(T6));
+            var v7 = (T7)Convert.ChangeType(inputs[6], typeof(T7));
+            return (v1, v2, v3, v4, v5, v6, v7);
+        }
+
+        internal static (T1, T2, T3, T4, T5, T6, T7, T8) ReadValues<T1, T2, T3, T4, T5, T6, T7, T8>(this TextReader reader, char separator = ' ')
+        {
+            var inputs = ReadStringArray(reader, separator);
+            var v1 = (T1)Convert.ChangeType(inputs[0], typeof(T1));
+            var v2 = (T2)Convert.ChangeType(inputs[1], typeof(T2));
+            var v3 = (T3)Convert.ChangeType(inputs[2], typeof(T3));
+            var v4 = (T4)Convert.ChangeType(inputs[3], typeof(T4));
+            var v5 = (T5)Convert.ChangeType(inputs[4], typeof(T5));
+            var v6 = (T6)Convert.ChangeType(inputs[5], typeof(T6));
+            var v7 = (T7)Convert.ChangeType(inputs[6], typeof(T7));
+            var v8 = (T8)Convert.ChangeType(inputs[7], typeof(T8));
+            return (v1, v2, v3, v4, v5, v6, v7, v8);
+        }
     }
 }
 
