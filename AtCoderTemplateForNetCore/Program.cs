@@ -70,7 +70,7 @@ namespace AtCoderTemplateForNetCore.Extensions
         // Supports primitive type only.
         internal static T1 ReadValue<T1>(this TextReader reader) => (T1)Convert.ChangeType(reader.ReadLine(), typeof(T1));
 
-        internal static (T1, T2) ReadValues<T1, T2>(this TextReader reader, char separator = ' ')
+        internal static (T1, T2) ReadValue<T1, T2>(this TextReader reader, char separator = ' ')
         {
             var inputs = ReadStringArray(reader, separator);
             var v1 = (T1)Convert.ChangeType(inputs[0], typeof(T1));
@@ -78,7 +78,7 @@ namespace AtCoderTemplateForNetCore.Extensions
             return (v1, v2);
         }
 
-        internal static (T1, T2, T3) ReadValues<T1, T2, T3>(this TextReader reader, char separator = ' ')
+        internal static (T1, T2, T3) ReadValue<T1, T2, T3>(this TextReader reader, char separator = ' ')
         {
             var inputs = ReadStringArray(reader, separator);
             var v1 = (T1)Convert.ChangeType(inputs[0], typeof(T1));
@@ -87,7 +87,7 @@ namespace AtCoderTemplateForNetCore.Extensions
             return (v1, v2, v3);
         }
 
-        internal static (T1, T2, T3, T4) ReadValues<T1, T2, T3, T4>(this TextReader reader, char separator = ' ')
+        internal static (T1, T2, T3, T4) ReadValue<T1, T2, T3, T4>(this TextReader reader, char separator = ' ')
         {
             var inputs = ReadStringArray(reader, separator);
             var v1 = (T1)Convert.ChangeType(inputs[0], typeof(T1));
@@ -97,7 +97,7 @@ namespace AtCoderTemplateForNetCore.Extensions
             return (v1, v2, v3, v4);
         }
 
-        internal static (T1, T2, T3, T4, T5) ReadValues<T1, T2, T3, T4, T5>(this TextReader reader, char separator = ' ')
+        internal static (T1, T2, T3, T4, T5) ReadValue<T1, T2, T3, T4, T5>(this TextReader reader, char separator = ' ')
         {
             var inputs = ReadStringArray(reader, separator);
             var v1 = (T1)Convert.ChangeType(inputs[0], typeof(T1));
@@ -108,7 +108,7 @@ namespace AtCoderTemplateForNetCore.Extensions
             return (v1, v2, v3, v4, v5);
         }
 
-        internal static (T1, T2, T3, T4, T5, T6) ReadValues<T1, T2, T3, T4, T5, T6>(this TextReader reader, char separator = ' ')
+        internal static (T1, T2, T3, T4, T5, T6) ReadValue<T1, T2, T3, T4, T5, T6>(this TextReader reader, char separator = ' ')
         {
             var inputs = ReadStringArray(reader, separator);
             var v1 = (T1)Convert.ChangeType(inputs[0], typeof(T1));
@@ -120,7 +120,7 @@ namespace AtCoderTemplateForNetCore.Extensions
             return (v1, v2, v3, v4, v5, v6);
         }
 
-        internal static (T1, T2, T3, T4, T5, T6, T7) ReadValues<T1, T2, T3, T4, T5, T6, T7>(this TextReader reader, char separator = ' ')
+        internal static (T1, T2, T3, T4, T5, T6, T7) ReadValue<T1, T2, T3, T4, T5, T6, T7>(this TextReader reader, char separator = ' ')
         {
             var inputs = ReadStringArray(reader, separator);
             var v1 = (T1)Convert.ChangeType(inputs[0], typeof(T1));
@@ -133,7 +133,7 @@ namespace AtCoderTemplateForNetCore.Extensions
             return (v1, v2, v3, v4, v5, v6, v7);
         }
 
-        internal static (T1, T2, T3, T4, T5, T6, T7, T8) ReadValues<T1, T2, T3, T4, T5, T6, T7, T8>(this TextReader reader, char separator = ' ')
+        internal static (T1, T2, T3, T4, T5, T6, T7, T8) ReadValue<T1, T2, T3, T4, T5, T6, T7, T8>(this TextReader reader, char separator = ' ')
         {
             var inputs = ReadStringArray(reader, separator);
             var v1 = (T1)Convert.ChangeType(inputs[0], typeof(T1));
