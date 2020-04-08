@@ -23,7 +23,7 @@ namespace AtCoderTemplateForNetCore
     }
 }
 
-#region Base Classes
+#region Base Class
 
 namespace AtCoderTemplateForNetCore.Questions
 {
@@ -45,8 +45,63 @@ namespace AtCoderTemplateForNetCore.Questions
         }
 
         public abstract IEnumerable<object> Solve(TextReader inputStream);
-    }
 
+        protected IEnumerable<ReadOnlyMemory<T>> GetPermutations<T>(IEnumerable<T> collection) where T : IComparable<T> => GetPermutations(collection, false);
+
+        protected IEnumerable<ReadOnlyMemory<T>> GetPermutations<T>(IEnumerable<T> collection, bool isSorted) where T : IComparable<T>
+        {
+            var a = collection.ToArray();
+
+            if (!isSorted && a.Length > 1)
+            {
+                Array.Sort(a);
+            }
+
+            yield return a; // ソート済み初期配列
+ 
+            if (a.Length <= 2)
+            {
+                if (a.Length == 2 && a[0].CompareTo(a[1]) != 0)
+                {
+                    (a[0], a[1]) = (a[1], a[0]);
+                    yield return a;
+                    yield break;
+                }
+
+                yield break;
+            }
+
+            bool flag = true;
+            while (flag)
+            {
+                flag = false;
+                for (int i = a.Length - 2; i >= 0; i--)
+                {
+                    // iよりi+1の方が大きい（昇順）なら
+                    if (a[i].CompareTo(a[i + 1]) < 0)
+                    {
+                        // 後ろから見ていってi<jとなるところを探して
+                        int j;
+                        for (j = a.Length - 1; a[i].CompareTo(a[j]) >= 0; j--) { }
+
+                        // iとjを入れ替えて
+                        (a[i], a[j]) = (a[j], a[i]);
+
+                        // i+1以降を反転
+                        if (i < a.Length - 2)
+                        {
+                            var sliced = a.AsSpan().Slice(i + 1);
+                            sliced.Reverse();
+                        }
+                        
+                        flag = true;
+                        yield return a;
+                        break;
+                    }
+                }
+            }
+        }
+    }
 }
 
 #endregion
