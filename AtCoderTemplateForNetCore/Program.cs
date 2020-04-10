@@ -1,4 +1,5 @@
 ﻿// ここにQuestionクラスをコピペ
+using AtCoderTemplateForNetCore.Algorithms;
 using AtCoderTemplateForNetCore.Collections;
 using AtCoderTemplateForNetCore.Questions;
 using AtCoderTemplateForNetCore.Extensions;
