@@ -1,4 +1,5 @@
-﻿using AtCoderTemplateForNetCore.Questions;
+﻿using AtCoderTemplateForNetCore.Collections;
+using AtCoderTemplateForNetCore.Questions;
 using AtCoderTemplateForNetCore.Extensions;
 using System;
 using System.Collections.Generic;
