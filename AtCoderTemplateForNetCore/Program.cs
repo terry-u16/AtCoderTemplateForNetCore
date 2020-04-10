@@ -47,10 +47,20 @@ namespace AtCoderTemplateForNetCore.Questions
         }
 
         public abstract IEnumerable<object> Solve(TextReader inputStream);
+    }
+}
 
-        protected IEnumerable<ReadOnlyMemory<T>> GetPermutations<T>(IEnumerable<T> collection) where T : IComparable<T> => GetPermutations(collection, false);
+#endregion
 
-        protected IEnumerable<ReadOnlyMemory<T>> GetPermutations<T>(IEnumerable<T> collection, bool isSorted) where T : IComparable<T>
+#region Algorithm
+
+namespace AtCoderTemplateForNetCore.Algorithms
+{
+    public static class BasicAlgorithm
+    {
+        public static IEnumerable<ReadOnlyMemory<T>> GetPermutations<T>(IEnumerable<T> collection) where T : IComparable<T> => GetPermutations(collection, false);
+
+        public static IEnumerable<ReadOnlyMemory<T>> GetPermutations<T>(IEnumerable<T> collection, bool isSorted) where T : IComparable<T>
         {
             var a = collection.ToArray();
 
@@ -60,7 +70,7 @@ namespace AtCoderTemplateForNetCore.Questions
             }
 
             yield return a; // ソート済み初期配列
- 
+
             if (a.Length <= 2)
             {
                 if (a.Length == 2 && a[0].CompareTo(a[1]) != 0)
@@ -95,7 +105,7 @@ namespace AtCoderTemplateForNetCore.Questions
                             var sliced = a.AsSpan().Slice(i + 1);
                             sliced.Reverse();
                         }
-                        
+
                         flag = true;
                         yield return a;
                         break;
