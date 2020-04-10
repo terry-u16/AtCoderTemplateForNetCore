@@ -1,6 +1,7 @@
 using System;
 using Xunit;
 using AtCoderTemplateForNetCore.Questions;
+using AtCoderTemplateForNetCore.Algorithms;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,24 +10,13 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
 {
     public class PermutationTest
     {
-        class DummyQuestion : AtCoderQuestionBase
-        {
-            public override IEnumerable<object> Solve(TextReader inputStream)
-            {
-                throw new NotImplementedException();
-            }
-
-            public IEnumerable<ReadOnlyMemory<T>> GetPermutationsForTest<T>(IEnumerable<T> collection, bool isSorted) where T : IComparable<T> => GetPermutations(collection, isSorted);
-        }
-
         [Fact]
         public void Permutation1Test()
         {
             var input = Enumerable.Range(1, 1);
             var expected = new[] { new int[] { 1 } };
-            var question = new DummyQuestion();
 
-            var actual = question.GetPermutationsForTest(input, false);
+            var actual = BasicAlgorithm.GetPermutations(input, false);
 
             AssertSequentialEqual(expected, actual);
         }
@@ -36,9 +26,8 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
         {
             var input = Enumerable.Range(1, 2);
             var expected = new[] { new int[] { 1, 2 }, new int[] { 2, 1 } };
-            var question = new DummyQuestion();
 
-            var actual = question.GetPermutationsForTest(input, false);
+            var actual = BasicAlgorithm.GetPermutations(input, false);
             AssertSequentialEqual(expected, actual);
         }
 
@@ -47,9 +36,8 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
         {
             var input = Enumerable.Range(1, 2).Reverse();
             var expected = new[] { new int[] { 1, 2 }, new int[] { 2, 1 } };
-            var question = new DummyQuestion();
 
-            var actual = question.GetPermutationsForTest(input, false);
+            var actual = BasicAlgorithm.GetPermutations(input, false);
             AssertSequentialEqual(expected, actual);
         }
 
@@ -58,9 +46,8 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
         {
             var input = new int[] { 1, 1 };
             var expected = new[] { new int[] { 1, 1 } };
-            var question = new DummyQuestion();
 
-            var actual = question.GetPermutationsForTest(input, false);
+            var actual = BasicAlgorithm.GetPermutations(input, false);
             AssertSequentialEqual(expected, actual);
         }
 
@@ -76,9 +63,8 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
                 new int[] { 3, 1, 2 },
                 new int[] { 3, 2, 1 }
             };
-            var question = new DummyQuestion();
 
-            var actual = question.GetPermutationsForTest(input, false);
+            var actual = BasicAlgorithm.GetPermutations(input, false);
             AssertSequentialEqual(expected, actual);
         }
 
@@ -91,9 +77,8 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
                 new int[] { 2, 1, 2 },
                 new int[] { 2, 2, 1 }
             };
-            var question = new DummyQuestion();
 
-            var actual = question.GetPermutationsForTest(input, false);
+            var actual = BasicAlgorithm.GetPermutations(input, false);
             AssertSequentialEqual(expected, actual);
         }
 
@@ -102,17 +87,15 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
         {
             var input = Enumerable.Empty<int>();
             var expected = new [] { new int[] { } };
-            var question = new DummyQuestion();
 
-            var actual = question.GetPermutationsForTest(input, false);
+            var actual = BasicAlgorithm.GetPermutations(input, false);
             AssertSequentialEqual(expected, actual);
         }
 
         [Fact]
         public void PermutationNullThrowsExceptionTest()
         {
-            var question = new DummyQuestion();
-            Assert.Throws<ArgumentNullException>(() => question.GetPermutationsForTest(default(IEnumerable<int>), false).ToArray());            
+            Assert.Throws<ArgumentNullException>(() => BasicAlgorithm.GetPermutations(default(IEnumerable<int>), false).ToArray());            
         }
 
         private static void AssertSequentialEqual(int[][] expected, IEnumerable<ReadOnlyMemory<int>> actual)
