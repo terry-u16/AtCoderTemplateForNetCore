@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Collections;
 
 namespace AtCoderTemplateForNetCore
 {
@@ -167,6 +168,111 @@ namespace AtCoderTemplateForNetCore.Collections
         public bool IsInSameGroup(UnionFindNode<T> other) => this.FindRoot() == other.FindRoot();
 
         public override string ToString() => $"{Item} root:{FindRoot().Item}";
+    }
+
+    public class PriorityQueue<T> : IEnumerable<T> where T : IComparable<T>
+    {
+        private List<T> _heap = new List<T>();
+        private readonly int _reverseFactor;
+        public int Count => _heap.Count;
+        public bool IsDescending => _reverseFactor == 1;
+
+        public PriorityQueue() : this(null, true) { }
+
+        public PriorityQueue(IEnumerable<T> collection) : this(collection, true) { }
+
+        public PriorityQueue(bool descending) : this(null, descending) { }
+
+        public PriorityQueue(IEnumerable<T> collection, bool descending)
+        {
+            _reverseFactor = descending ? 1 : -1;
+            if (collection != null)
+            {
+                _heap = new List<T>(collection);
+            }
+            else
+            {
+                _heap = new List<T>();
+            }
+        }
+
+        public void Enqueue(T item)
+        {
+            _heap.Add(item);
+            UpHeap();
+        }
+
+        public T Dequeue()
+        {
+            var item = _heap[0];
+            DownHeap();
+            return item;
+        }
+
+        private void UpHeap()
+        {
+            var child = Count - 1;
+            while (child > 0)
+            {
+                int parent = (child - 1) / 2;
+
+                if (Compare(_heap[child], _heap[parent]) > 0)
+                {
+                    SwapAt(child, parent);
+                    child = parent;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        private void DownHeap()
+        {
+            _heap[0] = _heap[Count - 1];
+            _heap.RemoveAt(Count - 1);
+
+            var parent = 0;
+            while (true)
+            {
+                var leftChild = 2 * parent + 1;
+                
+                if (leftChild > Count - 1)
+                {
+                    break;
+                }
+
+                var target = (leftChild < Count - 1) && (Compare(_heap[leftChild], _heap[leftChild + 1]) < 0) ? leftChild + 1 : leftChild;
+
+                if (Compare(_heap[parent], _heap[target]) < 0)
+                {
+                    SwapAt(parent, target);
+                }
+                else
+                {
+                    break;
+                }
+
+                parent = target;
+            }
+        }
+
+        private int Compare(T a, T b) => _reverseFactor * a.CompareTo(b);
+
+        private void SwapAt(int n, int m) => (_heap[n], _heap[m]) = (_heap[m], _heap[n]);
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            var copy = new List<T>(_heap);
+            while (Count > 0)
+            {
+                yield return Dequeue();
+            }
+            _heap = copy;
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
 
