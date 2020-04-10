@@ -81,6 +81,20 @@ namespace AtCoderTemplateForNetCore.Algorithms
             return a;
         }
 
+        public static long Lcm(long a, long b)
+        {
+            if (a <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(a), $"{nameof(b)}は正の整数である必要があります。");
+            }
+            if (b <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(b), $"{nameof(b)}は正の整数である必要があります。");
+            }
+
+            return a / Gcd(a, b) * b;
+        }
+
         public static IEnumerable<ReadOnlyMemory<T>> GetPermutations<T>(IEnumerable<T> collection) where T : IComparable<T> => GetPermutations(collection, false);
 
         public static IEnumerable<ReadOnlyMemory<T>> GetPermutations<T>(IEnumerable<T> collection, bool isSorted) where T : IComparable<T>
