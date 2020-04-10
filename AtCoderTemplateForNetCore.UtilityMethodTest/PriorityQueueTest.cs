@@ -84,5 +84,21 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
             Assert.Equal(values, priorityQueue);
             Assert.Equal(length, priorityQueue.Count);
         }
+
+        [Fact]
+        public void EnumerableCancellTest()
+        {
+            var values = new[] { 4, 1, 3, 0, 2, 5, 8, 11, 10 };
+            var queue = new PriorityQueue<int>(values);
+
+            Array.Sort(values);
+            Array.Reverse(values);
+
+            foreach (var value in queue.Take(5))
+            {
+            }
+
+            Assert.Equal(values.Length, queue.Count);
+        }
     }
 }

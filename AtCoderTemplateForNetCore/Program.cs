@@ -265,11 +265,17 @@ namespace AtCoderTemplateForNetCore.Collections
         public IEnumerator<T> GetEnumerator()
         {
             var copy = new List<T>(_heap);
-            while (Count > 0)
+            try
             {
-                yield return Dequeue();
+                while (Count > 0)
+                {
+                    yield return Dequeue();
+                }
             }
-            _heap = copy;
+            finally
+            {
+                _heap = copy;
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
