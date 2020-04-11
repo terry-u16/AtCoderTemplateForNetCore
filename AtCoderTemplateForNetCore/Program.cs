@@ -240,8 +240,8 @@ namespace AtCoderTemplateForNetCore.Algorithms
                 case 1:
                     return a;
                 case int m when m >= 0: // ジャンプテーブル化はできなくなる
-                    var p = Pow(a, m / 2);
-                    return p * p * Pow(a, m & 0x01); // m % 2
+                    var p = Pow(a, m >> 1);             // m / 2
+                    return p * p * Pow(a, m & 0x01);    // m % 2
                 default:
                     throw new ArgumentOutOfRangeException(nameof(n), $"べき指数{nameof(n)}は0以上の整数でなければなりません。");
             }
