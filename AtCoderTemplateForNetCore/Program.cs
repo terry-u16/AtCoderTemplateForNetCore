@@ -154,6 +154,190 @@ namespace AtCoderTemplateForNetCore.Algorithms
             }
         }
     }
+
+    public readonly struct Modular : IEquatable<Modular>, IComparable<Modular>
+    {
+        private const int _defaultMod = 1000000007;
+        public int Value { get; }
+        public int Mod { get; }
+
+        public Modular(long value, int mod = _defaultMod)
+        {
+            if (mod < 2 || mod > 1073741789)
+            {
+                // 1073741789はint.MaxValue / 2 = 1073741823以下の最大の素数
+                throw new ArgumentOutOfRangeException(nameof(mod), $"{nameof(mod)}は2以上1073741789以下の素数でなければなりません。"); 
+            }
+            Mod = mod;
+
+            if (value >= 0 && value < mod)
+            {
+                Value = (int)value;
+            }
+            else
+            {
+                Value = (int)(value % mod);
+                if (Value < 0)
+                {
+                    Value += mod;
+                }
+            }
+        }
+
+        public static Modular operator +(in Modular a, in Modular b)
+        {
+            CheckModEquals(a, b);
+
+            var result = a.Value + b.Value;
+            if (result > a.Mod)
+            {
+                result -= a.Mod;    // 剰余演算を避ける
+            }
+            return new Modular(result, a.Mod);
+        }
+
+        public static Modular operator -(in Modular a, in Modular b)
+        {
+            CheckModEquals(a, b);
+
+            var result = a.Value - b.Value;
+            if (result < 0)
+            {
+                result += a.Mod;    // 剰余演算を避ける
+            }
+            return new Modular(result, a.Mod);
+        }
+
+        public static Modular operator *(in Modular a, in Modular b)
+        {
+            CheckModEquals(a, b);
+            return new Modular((long)a.Value * b.Value, a.Mod);
+        }
+
+        public static Modular operator /(in Modular a, in Modular b)
+        {
+            CheckModEquals(a, b);
+            return a * Pow(b, a.Mod - 2);
+        }
+
+        // 需要は不明だけど一応
+        public static bool operator ==(in Modular left, in Modular right) => left.Equals(right);
+        public static bool operator !=(in Modular left, in Modular right) => !(left == right);
+        public static bool operator <(in Modular left, in Modular right) => left.CompareTo(right) < 0;
+        public static bool operator <=(in Modular left, in Modular right) => left.CompareTo(right) <= 0;
+        public static bool operator >(in Modular left, in Modular right) => left.CompareTo(right) > 0;
+        public static bool operator >=(in Modular left, in Modular right) => left.CompareTo(right) >= 0;
+
+        public static explicit operator int(in Modular a) => a.Value;
+        public static explicit operator long(in Modular a) => a.Value;
+
+        public static Modular Pow(in Modular a, int n)
+        {
+            switch (n)
+            {
+                case 0:
+                    return new Modular(1, a.Mod);
+                case 1:
+                    return a;
+                case int m when m >= 0: // ジャンプテーブル化はできなくなる
+                    var p = Pow(a, m / 2);
+                    return p * p * Pow(a, m & 0x01); // m % 2
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(n), $"べき指数{nameof(n)}は0以上の整数でなければなりません。");
+            }
+        }
+
+        private static Dictionary<int, List<int>> _factorialCache;
+        private static Dictionary<int, List<int>> FactorialCache => _factorialCache ??= new Dictionary<int, List<int>>();
+        private static Dictionary<(int, int), List<int>> _permutationCache;
+        private static Dictionary<(int, int), List<int>> PermutationCache => _permutationCache ??= new Dictionary<(int, int), List<int>>();
+
+        public static Modular Factorial(int n, int mod = _defaultMod)
+        {
+            if (n < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(n), $"{nameof(n)}は0以上の整数でなければなりません。");
+            }
+            if (mod < 2)
+            {
+                throw new ArgumentOutOfRangeException(nameof(mod), $"{nameof(mod)}は2以上の素数でなければなりません。");
+            }
+
+            if (!FactorialCache.ContainsKey(mod))
+            {
+                FactorialCache.Add(mod, new List<int>() { 1 });
+            }
+
+            var cache = FactorialCache[mod];
+            for (int i = cache.Count; i <= n; i++)  // Countが1（0!までキャッシュ済み）のとき1!～n!まで計算
+            {
+                cache.Add((int)((long)cache[i - 1] * i % mod));
+            }
+            return new Modular(cache[n], mod);
+        }
+
+        public static Modular Permutation(int n, int r, int mod = _defaultMod)
+        {
+            CheckNR(n, r);
+
+            if (!PermutationCache.ContainsKey((mod, n)))
+            {
+                PermutationCache.Add((mod, n), new List<int>() { 1 });
+            }
+
+            var cache = PermutationCache[(mod, n)];
+            for (int i = cache.Count; i <= r; i++)  // Countが1（nP0までキャッシュ済み）のときnP1～nPrまで計算
+            {
+                cache.Add((int)((long)cache[i - 1] * (n - (i - 1)) % mod));
+            }
+            return new Modular(cache[r], mod);
+        }
+
+        public static Modular Combination(int n, int r, int mod = _defaultMod)
+        {
+            CheckNR(n, r);
+            r = Math.Min(r, n - r);
+            return n == r ? new Modular(1, mod) : Permutation(n, r, mod) / Factorial(r, mod);   // nCr = n! / (n-r)!r! = nPr / n!
+        }
+
+        private static void CheckModEquals(in Modular a, in Modular b)
+        {
+            if (a.Mod != b.Mod)
+            {
+                throw new ArgumentException($"{nameof(a)}, {nameof(b)}", $"両者の法{nameof(Mod)}は等しくなければなりません。");
+            }
+        }
+
+        private static void CheckNR(int n, int r)
+        {
+            if (n <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(n), $"{nameof(n)}は正の整数でなければなりません。");
+            }
+            if (r < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(r), $"{nameof(r)}は0以上の整数でなければなりません。");
+            }
+            if (n < r)
+            {
+                throw new ArgumentOutOfRangeException($"{nameof(n)},{nameof(r)}", $"{nameof(r)}は{nameof(n)}以下でなければなりません。");
+            }
+        }
+
+        public override string ToString() => $"{Value} (mod {Mod})";
+
+        public override bool Equals(object obj) => obj is Modular m ? Equals(m) : false;
+
+        public bool Equals([System.Diagnostics.CodeAnalysis.AllowNull] Modular other) => Value == other.Value && Mod == other.Mod;
+
+        public int CompareTo([System.Diagnostics.CodeAnalysis.AllowNull] Modular other)
+        {
+            CheckModEquals(this, other);
+            return Value.CompareTo(other.Value);
+        }
+
+        public override int GetHashCode() => Value ^ Mod;
+    }
 }
 
 #endregion
