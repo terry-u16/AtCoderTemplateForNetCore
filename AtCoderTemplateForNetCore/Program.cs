@@ -444,6 +444,8 @@ namespace AtCoderTemplateForNetCore.Collections
             return item;
         }
 
+        public T Peek() => _heap[0];
+
         private void UpHeap()
         {
             var child = Count - 1;

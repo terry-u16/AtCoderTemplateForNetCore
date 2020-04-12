@@ -113,5 +113,14 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
 
             Assert.Equal(values.Length, queue.Count);
         }
+
+        [Fact]
+        public void PeekTest()
+        {
+            var values = new[] { 4, 1, 3, 0, 2, 5, 8, 11, 10 };
+            var queue = new PriorityQueue<int>(values);
+
+            Assert.Equal(11, queue.Peek());
+        }
     }
 }
