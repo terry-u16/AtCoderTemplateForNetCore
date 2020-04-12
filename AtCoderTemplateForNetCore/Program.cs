@@ -159,7 +159,7 @@ namespace AtCoderTemplateForNetCore.Algorithms
     {
         private const int _defaultMod = 1000000007;
         public int Value { get; }
-        public int Mod { get; }
+        public int Mod { get; }     // 配列とかで引数なしコンストラクタが呼ばれると0で初期化されて死ぬ（ガイドライン違反）（int?にすると割り算が2倍遅くなる）（諦め）（運用でカバー）
 
         public Modular(long value, int mod = _defaultMod)
         {
@@ -299,6 +299,8 @@ namespace AtCoderTemplateForNetCore.Algorithms
             r = Math.Min(r, n - r);
             return n == r ? new Modular(1, mod) : Permutation(n, r, mod) / Factorial(r, mod);   // nCr = n! / (n-r)!r! = nPr / n!
         }
+
+        public static Modular[] CreateArray(int length, int mod = _defaultMod) => Enumerable.Repeat(new Modular(0, mod), length).ToArray();
 
         private static void CheckModEquals(in Modular a, in Modular b)
         {

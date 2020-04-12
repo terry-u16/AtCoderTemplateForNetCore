@@ -135,5 +135,14 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
             var fact = Modular.Combination(n, r);
             Assert.Equal(expected, fact.Value);
         }
+
+        [Fact]
+        public void CreateArrayTest()
+        {
+            var modulars = Modular.CreateArray(5);
+            modulars[0] = new Modular(1);
+
+            Assert.Equal(new[] { 1, 0, 0, 0, 0 }.Select(i => new Modular(i)), modulars);
+        }
     }
 }
