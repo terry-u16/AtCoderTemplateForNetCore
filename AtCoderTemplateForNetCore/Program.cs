@@ -522,30 +522,35 @@ namespace AtCoderTemplateForNetCore.Collections
 
     public static class SearchExtension
     {
-        public static int GetLowerBoundIndex<T>(this IReadOnlyList<T> collection, T minValue) where T : IComparable<T>
+        public static Range GetRangeGreaterEqual<T>(this Span<T> span, T minValue) where T : IComparable<T> => GetRangeGreaterEqual((ReadOnlySpan<T>)span, minValue);
+
+        public static Range GetRangeGreaterEqual<T>(this ReadOnlySpan<T> span, T minValue) where T : IComparable<T>
         {
             int ng = -1;
-            int ok = collection.Count;
+            int ok = span.Length;
 
-            return BoundaryBinarySearch(i => collection[i].CompareTo(minValue) >= 0, ng, ok);
+            return BoundaryBinarySearch(span, v => v.CompareTo(minValue) >= 0, ng, ok)..;
         }
 
-        public static int GetUpperBoundIndex<T>(this IReadOnlyList<T> collection, T maxValue) where T : IComparable<T>
+        public static Range GetRangeSmallerEqual<T>(this Span<T> span, T maxValue) where T : IComparable<T> => GetRangeSmallerEqual((ReadOnlySpan<T>)span, maxValue);
+
+        public static Range GetRangeSmallerEqual<T>(this ReadOnlySpan<T> span, T maxValue) where T : IComparable<T>
         {
-            int ng = collection.Count;
+            int ng = span.Length;
             int ok = -1;
 
-            return BoundaryBinarySearch(i => collection[i].CompareTo(maxValue) <= 0, ng, ok);
+            return ..(BoundaryBinarySearch(span, v => v.CompareTo(maxValue) <= 0, ng, ok) + 1);
         }
 
-        private static int BoundaryBinarySearch(Predicate<int> predicate, int ng, int ok)
+        private static int BoundaryBinarySearch<T>(ReadOnlySpan<T> span, Predicate<T> predicate, int ng, int ok)
         {
             // めぐる式二分探索
+            // Span.BinarySearchだとできそうでできない（lower_boundがダメ）
             while (Math.Abs(ok - ng) > 1)
             {
                 int mid = (ok + ng) / 2;
 
-                if (predicate(mid))
+                if (predicate(span[mid]))
                 {
                     ok = mid;
                 }
