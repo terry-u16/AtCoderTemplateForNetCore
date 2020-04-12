@@ -519,6 +519,44 @@ namespace AtCoderTemplateForNetCore.Collections
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
     }
+
+    public static class SearchExtension
+    {
+        public static int GetLowerBoundIndex<T>(this IReadOnlyList<T> collection, T minValue) where T : IComparable<T>
+        {
+            int ng = -1;
+            int ok = collection.Count;
+
+            return BoundaryBinarySearch(i => collection[i].CompareTo(minValue) >= 0, ng, ok);
+        }
+
+        public static int GetUpperBoundIndex<T>(this IReadOnlyList<T> collection, T maxValue) where T : IComparable<T>
+        {
+            int ng = collection.Count;
+            int ok = -1;
+
+            return BoundaryBinarySearch(i => collection[i].CompareTo(maxValue) <= 0, ng, ok);
+        }
+
+        private static int BoundaryBinarySearch(Predicate<int> predicate, int ng, int ok)
+        {
+            // めぐる式二分探索
+            while (Math.Abs(ok - ng) > 1)
+            {
+                int mid = (ok + ng) / 2;
+
+                if (predicate(mid))
+                {
+                    ok = mid;
+                }
+                else
+                {
+                    ng = mid;
+                }
+            }
+            return ok;
+        }
+    }
 }
 
 #endregion
