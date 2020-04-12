@@ -420,13 +420,14 @@ namespace AtCoderTemplateForNetCore.Collections
         public PriorityQueue(IEnumerable<T> collection, bool descending)
         {
             _reverseFactor = descending ? 1 : -1;
+            _heap = new List<T>();
+
             if (collection != null)
             {
-                _heap = new List<T>(collection);
-            }
-            else
-            {
-                _heap = new List<T>();
+                foreach (var item in collection)
+                {
+                    Enqueue(item);
+                }
             }
         }
 

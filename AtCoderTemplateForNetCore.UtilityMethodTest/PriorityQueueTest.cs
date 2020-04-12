@@ -37,10 +37,23 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
             }
         }
 
+        [Fact]
+        public void InitializeWithCollectionTest()
+        {
+            var values = new[] { 4, 1, 3, 0, 2, 5, 8, 11, 10 };
+            var queue = new PriorityQueue<int>(values);
+
+            Array.Sort(values);
+            Array.Reverse(values);
+
+            Assert.Equal(values, queue);
+        }
+
+
         [Theory]
         [InlineData(42, 10)]
         [InlineData(255, 1000)]
-        [InlineData(2020, 1000000)]
+        [InlineData(2020, 100000)]
         public void DescendingEnqueueDequeueRandomTest(int seed, int length)
         {
             var priorityQueue = new PriorityQueue<int>();
