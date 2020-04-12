@@ -338,7 +338,7 @@ namespace AtCoderTemplateForNetCore.Algorithms
             return Value.CompareTo(other.Value);
         }
 
-        public override int GetHashCode() => Value ^ Mod;
+        public override int GetHashCode() => (Value, Mod).GetHashCode();
     }
 }
 
