@@ -153,6 +153,65 @@ namespace AtCoderTemplateForNetCore.Algorithms
                 }
             }
         }
+
+        public static long Factorial(int n)
+        {
+            if (n < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(n), $"{n}は0以上の整数でなければなりません。");
+            }
+
+            long result = 1;
+            for (int i = 2; i <= n; i++)
+            {
+                result *= i;
+            }
+            return result;
+        }
+
+        public static long Permutation(int n, int r)
+        {
+            CheckNR(n, r);
+            long result = 1;
+            for (int i = 0; i < r; i++)
+            {
+                result *= n - i;
+            }
+            return result;
+        }
+
+        public static long Combination(int n, int r)
+        {
+            CheckNR(n, r);
+            r = Math.Min(r, n - r);
+
+            // See https://stackoverflow.com/questions/1838368/calculating-the-amount-of-combinations
+            long result = 1;
+            for (int i = 1; i <= r; i++)
+            {
+                result *= n--;
+                result /= i;
+            }
+            return result;
+        }
+
+        public static long CombinationWithRepetition(int n, int r) => Combination(n + r - 1, r);
+
+        private static void CheckNR(int n, int r)
+        {
+            if (n <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(n), $"{nameof(n)}は正の整数でなければなりません。");
+            }
+            if (r < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(r), $"{nameof(r)}は0以上の整数でなければなりません。");
+            }
+            if (n < r)
+            {
+                throw new ArgumentOutOfRangeException($"{nameof(n)},{nameof(r)}", $"{nameof(r)}は{nameof(n)}以下でなければなりません。");
+            }
+        }
     }
 
     public readonly struct Modular : IEquatable<Modular>, IComparable<Modular>
