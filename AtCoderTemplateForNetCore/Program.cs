@@ -197,6 +197,39 @@ namespace AtCoderTemplateForNetCore.Algorithms
 
         public static long CombinationWithRepetition(int n, int r) => Combination(n + r - 1, r);
 
+        public static IEnumerable<(int prime, int count)> PrimeFactorization(int n)
+        {
+            if (n <= 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(n), $"{n}は2以上の整数でなければなりません。");
+            }
+
+            var dictionary = new Dictionary<int, int>();
+            for (int i = 2; i * i <= n; i++)
+            {
+                while (n % i == 0)
+                {
+                    if (dictionary.ContainsKey(i))
+                    {
+                        dictionary[i]++;
+                    }
+                    else
+                    {
+                        dictionary[i] = 1;
+                    }
+
+                    n /= i;
+                }
+            }
+
+            if (n > 1)
+            {
+                dictionary[n] = 1;
+            }
+
+            return dictionary.Select(p => (p.Key, p.Value));
+        }
+
         private static void CheckNR(int n, int r)
         {
             if (n <= 0)
