@@ -388,8 +388,7 @@ namespace AtCoderTemplateForNetCore.Algorithms
         public static Modular Combination(int n, int r, int mod = _defaultMod)
         {
             CheckNR(n, r);
-            r = Math.Min(r, n - r);
-            return n == r ? new Modular(1, mod) : Permutation(n, r, mod) / Factorial(r, mod);   // nCr = n! / (n-r)!r! = nPr / n!
+            return n == r ? new Modular(1, mod) : Factorial(n, mod) / (Factorial(r, mod) * Factorial(n - r, mod));   // n!まで計算済みなので nCr = n! / (n-r)!r! = nPr / n!とするより速い
         }
 
         public static Modular[] CreateArray(int length, int mod = _defaultMod) => Enumerable.Repeat(new Modular(0, mod), length).ToArray();
