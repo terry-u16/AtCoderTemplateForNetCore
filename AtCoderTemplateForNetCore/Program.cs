@@ -343,8 +343,6 @@ namespace AtCoderTemplateForNetCore.Algorithms
 
         private static Dictionary<int, List<int>> _factorialCache;
         private static Dictionary<int, List<int>> FactorialCache => _factorialCache ??= new Dictionary<int, List<int>>();
-        private static Dictionary<(int, int), List<int>> _permutationCache;
-        private static Dictionary<(int, int), List<int>> PermutationCache => _permutationCache ??= new Dictionary<(int, int), List<int>>();
 
         public static Modular Factorial(int n, int mod = _defaultMod)
         {
@@ -373,18 +371,7 @@ namespace AtCoderTemplateForNetCore.Algorithms
         public static Modular Permutation(int n, int r, int mod = _defaultMod)
         {
             CheckNR(n, r);
-
-            if (!PermutationCache.ContainsKey((mod, n)))
-            {
-                PermutationCache.Add((mod, n), new List<int>() { 1 });
-            }
-
-            var cache = PermutationCache[(mod, n)];
-            for (int i = cache.Count; i <= r; i++)  // Countが1（nP0までキャッシュ済み）のときnP1～nPrまで計算
-            {
-                cache.Add((int)((long)cache[i - 1] * (n - (i - 1)) % mod));
-            }
-            return new Modular(cache[r], mod);
+            return Factorial(n) / Factorial(n - r);
         }
 
         public static Modular Combination(int n, int r, int mod = _defaultMod)
