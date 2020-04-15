@@ -251,7 +251,8 @@ namespace AtCoderTemplateForNetCore.Algorithms
     {
         private const int _defaultMod = 1000000007;
         public int Value { get; }
-        public int Mod { get; }     // 配列とかで引数なしコンストラクタが呼ばれると0で初期化されて死ぬ（ガイドライン違反）（int?にすると割り算が2倍遅くなる）（諦め）（運用でカバー）
+        private readonly int? _mod;     // int?にすると遅くなるけど意図せずmod=0とかで初期化されて意味不明な計算結果になるよりはマシ
+        public int Mod => _mod ?? throw new InvalidOperationException($"{nameof(Mod)}がnullです。new {nameof(Modular)}(long value, int mod)で初期化してください。");
 
         public Modular(long value, int mod = _defaultMod)
         {
@@ -260,7 +261,7 @@ namespace AtCoderTemplateForNetCore.Algorithms
                 // 1073741789はint.MaxValue / 2 = 1073741823以下の最大の素数
                 throw new ArgumentOutOfRangeException(nameof(mod), $"{nameof(mod)}は2以上1073741789以下の素数でなければなりません。"); 
             }
-            Mod = mod;
+            _mod = mod;
 
             if (value >= 0 && value < mod)
             {
