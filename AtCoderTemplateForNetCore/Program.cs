@@ -247,6 +247,7 @@ namespace AtCoderTemplateForNetCore.Algorithms
         }
     }
 
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
     public readonly struct Modular : IEquatable<Modular>, IComparable<Modular>
     {
         private const int _defaultMod = 1000000007;
