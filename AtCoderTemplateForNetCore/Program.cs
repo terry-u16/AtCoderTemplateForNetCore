@@ -600,7 +600,7 @@ namespace AtCoderTemplateForNetCore.Collections
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
-    public static class SearchExtension
+    public static class SearchExtensions
     {
         public static Range GetRangeGreaterEqual<T>(this Span<T> span, T minValue) where T : IComparable<T> => GetRangeGreaterEqual((ReadOnlySpan<T>)span, minValue);
 
@@ -643,7 +643,7 @@ namespace AtCoderTemplateForNetCore.Collections
         }
     }
 
-    public static class TupleExtension
+    public static class TupleExtensions
     {
         public static IEnumerable<(T1 v1, T2 v2)> Zip<T1, T2>(this (IEnumerable<T1> First, IEnumerable<T2> Second) t) 
             => t.First.Zip(t.Second, (v1, v2) => (v1, v2));
