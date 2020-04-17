@@ -651,6 +651,52 @@ namespace AtCoderTemplateForNetCore.Collections
         public static IEnumerable<(T1 v1, T2 v2, T3 v3)> Zip<T1, T2, T3>(this (IEnumerable<T1> First, IEnumerable<T2> Second, IEnumerable<T3> Third) t) 
             => (t.First, t.Second).Zip().Zip(t.Third, (v12, v3) => (v12.v1, v12.v2, v3));
     }
+
+    public static class ArrayExtensions
+    {
+        public static T[] SetAll<T>(this T[] array, Func<int, T> func)
+        {
+            for (int i = 0; i < array.Length; i++)
+                array[i] = func(i);
+            return array;
+        }
+
+        public static T[,] SetAll<T>(this T[,] array, Func<int, int, T> func)
+        {
+            var length0 = array.GetLength(0);
+            var length1 = array.GetLength(1);
+            for (int i = 0; i < length0; i++)
+                for (int j = 0; j < length1; j++)
+                    array[i, j] = func(i, j);
+            return array;
+        }
+
+        public static T[,,] SetAll<T>(this T[,,] array, Func<int, int, int, T> func)
+        {
+            var length0 = array.GetLength(0);
+            var length1 = array.GetLength(1);
+            var length2 = array.GetLength(2);
+            for (int i = 0; i < length0; i++)
+                for (int j = 0; j < length1; j++)
+                    for (int k = 0; k < length2; k++)
+                        array[i, j, k] = func(i, j, k);
+            return array;
+        }
+
+        public static T[,,,] SetAll<T>(this T[,,,] array, Func<int, int, int, int, T> func)
+        {
+            var length0 = array.GetLength(0);
+            var length1 = array.GetLength(1);
+            var length2 = array.GetLength(2);
+            var length3 = array.GetLength(3);
+            for (int i = 0; i < length0; i++)
+                for (int j = 0; j < length1; j++)
+                    for (int k = 0; k < length2; k++)
+                        for (int l = 0; l < length3; l++)
+                            array[i, j, k, l] = func(i, j, k, l);
+            return array;
+        }
+    }
 }
 
 #endregion
