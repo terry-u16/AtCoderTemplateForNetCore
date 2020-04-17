@@ -642,6 +642,15 @@ namespace AtCoderTemplateForNetCore.Collections
             return ok;
         }
     }
+
+    public static class TupleExtension
+    {
+        public static IEnumerable<(T1 v1, T2 v2)> Zip<T1, T2>(this (IEnumerable<T1> First, IEnumerable<T2> Second) t) 
+            => t.First.Zip(t.Second, (v1, v2) => (v1, v2));
+
+        public static IEnumerable<(T1 v1, T2 v2, T3 v3)> Zip<T1, T2, T3>(this (IEnumerable<T1> First, IEnumerable<T2> Second, IEnumerable<T3> Third) t) 
+            => (t.First, t.Second).Zip().Zip(t.Third, (v12, v3) => (v12.v1, v12.v2, v3));
+    }
 }
 
 #endregion
