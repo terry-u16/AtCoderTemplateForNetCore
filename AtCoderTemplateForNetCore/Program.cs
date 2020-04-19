@@ -247,6 +247,25 @@ namespace AtCoderTemplateForNetCore.Algorithms
         }
     }
 
+    public static class AlgorithmHelpers
+    {
+        public static void UpdateWhenSmall<T>(ref T value, T other) where T : IComparable<T>
+        {
+            if (other.CompareTo(value) < 0)
+            {
+                value = other;
+            }
+        }
+
+        public static void UpdateWhenLarge<T>(ref T value, T other) where T : IComparable<T>
+        {
+            if (other.CompareTo(value) > 0)
+            {
+                value = other;
+            }
+        }
+    }
+
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
     public readonly struct Modular : IEquatable<Modular>, IComparable<Modular>
     {
