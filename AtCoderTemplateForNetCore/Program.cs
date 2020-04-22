@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Collections;
 
 namespace AtCoderTemplateForNetCore
 {
@@ -617,6 +618,108 @@ namespace AtCoderTemplateForNetCore.Collections
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
+    public class SegmentTree<T> : IEnumerable<T>
+    {
+        private readonly T[] _data;
+        private readonly T _identityElement;
+        private readonly Func<T, T, T> _queryOperation;
+
+        private readonly int _leafOffset;   // n - 1
+        private readonly int _leafLength;   // n (= 2^k)
+
+        public int Length { get; }          // 実データ長
+        public ReadOnlySpan<T> Data => _data[_leafOffset..(_leafOffset + Length)];
+
+        public SegmentTree(ICollection<T> data, Func<T, T, T> queryOperation, T identityElement)
+        {
+            Length = data.Count;
+            _leafLength = GetMinimumPow2(data.Count);
+            _leafOffset = _leafLength - 1;
+            _data = new T[_leafOffset + _leafLength];
+            _queryOperation = queryOperation;
+            _identityElement = identityElement;
+
+            data.CopyTo(_data, _leafOffset);
+            BuildTree();
+        }
+
+        public T this[int index]
+        {
+            get => Data[index];
+            set
+            {
+                index += _leafOffset;
+                _data[index] = value;
+                while (index > 0)
+                {
+                    // 一つ上の親の更新
+                    index = (index - 1) / 2;
+                    _data[index] = _queryOperation(_data[index * 2 + 1], _data[index * 2 + 2]);
+                }
+            }
+        }
+
+        public T Query(Range range)
+        {
+            var (offset, length) = range.GetOffsetAndLength(Length);
+            return Query(offset, offset + length);
+        }
+
+        public T Query(int begin, int end) => Query(begin, end, 0, 0, _leafLength);
+
+        private T Query(int begin, int end, int index, int left, int right)
+        {
+            if (right <= begin || end <= left)      // 範囲外
+            {
+                return _identityElement;
+            }
+            else if (begin <= left && right <= end) // 全部含まれる
+            {
+                return _data[index];
+            }
+            else    // 一部だけ含まれる
+            {
+                var leftValue = Query(begin, end, index * 2 + 1, left, (left + right) / 2);     // 左の子
+                var rightValue = Query(begin, end, index * 2 + 2, (left + right) / 2, right);   // 右の子
+                return _queryOperation(leftValue, rightValue);
+            }
+        }
+
+        private void BuildTree()
+        {
+            foreach (ref var unusedLeaf in _data.AsSpan()[(_leafOffset + Length)..])
+            {
+                unusedLeaf = _identityElement;  // 単位元埋め
+            }
+
+            for (int i = _leafLength - 2; i >= 0; i--)  // 葉の親から順番に一つずつ上がっていく
+            {
+                _data[i] = _queryOperation(_data[2 * i + 1], _data[2 * i + 2]); // f(left, right)
+            }
+        }
+
+        private int GetMinimumPow2(int n)
+        {
+            var p = 1;
+            while (p < n)
+            {
+                p *= 2;
+            }
+            return p;
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            var upperIndex = _leafOffset + Length;
+            for (int i = _leafOffset; i < upperIndex; i++)
+            {
+                yield return _data[i];
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
     public static class SearchExtensions
