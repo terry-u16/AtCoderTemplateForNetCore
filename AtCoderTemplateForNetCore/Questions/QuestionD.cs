@@ -3,6 +3,7 @@ using AtCoderTemplateForNetCore.Collections;
 using AtCoderTemplateForNetCore.Questions;
 using AtCoderTemplateForNetCore.Extensions;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
