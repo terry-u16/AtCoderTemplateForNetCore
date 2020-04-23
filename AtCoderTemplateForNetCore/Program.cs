@@ -247,6 +247,45 @@ namespace AtCoderTemplateForNetCore.Algorithms
         }
     }
 
+    public static class StringAlgorithm
+    {
+        public static int[] ZAlgorithm(string s) => ZAlgorithm(s.AsSpan());
+
+        public static int[] ZAlgorithm(ReadOnlySpan<char> s)
+        {
+            var z = new int[s.Length];
+            z[0] = s.Length;
+            var offset = 1;
+            var length = 0;
+
+            while (offset < s.Length)
+            {
+                while (offset + length < s.Length && s[length] == s[offset + length])
+                {
+                    length++;
+                }
+                z[offset] = length;
+
+                if (length == 0)
+                {
+                    offset++;
+                    continue;
+                }
+
+                int copyLength = 1;
+                while (copyLength < length && copyLength + z[copyLength] < length)
+                {
+                    z[offset + copyLength] = z[copyLength];
+                    copyLength++;
+                }
+                offset += copyLength;
+                length -= copyLength;
+            }
+
+            return z;
+        }
+    }
+
     public static class AlgorithmHelpers
     {
         public static void UpdateWhenSmall<T>(ref T value, T other) where T : IComparable<T>
