@@ -9,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Reflection.Metadata.Ecma335;
-using System.Collections;
 
 namespace AtCoderTemplateForNetCore
 {
@@ -779,7 +778,7 @@ namespace AtCoderTemplateForNetCore.Collections
             }
         }
 
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
 
         public long this[T key]
         {
