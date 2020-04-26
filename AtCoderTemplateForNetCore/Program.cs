@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Reflection.Metadata.Ecma335;
+using System.Collections;
 
 namespace AtCoderTemplateForNetCore
 {
@@ -758,6 +760,46 @@ namespace AtCoderTemplateForNetCore.Collections
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
+    public class Counter<T> : IEnumerable<(T key, long count)> where T : IEquatable<T>
+    {
+        private Dictionary<T, long> _innerDictionary;
+
+        public Counter()
+        {
+            _innerDictionary = new Dictionary<T, long>();
+        }
+
+        public IEnumerator<(T key, long count)> GetEnumerator()
+        {
+            foreach (var pair in _innerDictionary)
+            {
+                yield return (key: pair.Key, count: pair.Value);
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public long this[T key]
+        {
+            get
+            {
+                _innerDictionary.TryGetValue(key, out var count);
+                return count;
+            }
+            set
+            {
+                if (_innerDictionary.ContainsKey(key))
+                {
+                    _innerDictionary[key] = value;
+                }
+                else
+                {
+                    _innerDictionary.Add(key, value);
+                }
+            }
+        }
     }
 
     public static class SearchExtensions
