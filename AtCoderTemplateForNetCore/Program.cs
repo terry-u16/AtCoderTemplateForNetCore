@@ -689,6 +689,10 @@ namespace AtCoderTemplateForNetCore.Collections
             get => Data[index];
             set
             {
+                if (index < 0 || index >= Length)
+                {
+                    throw new IndexOutOfRangeException($"{nameof(index)}がデータの範囲外です。");
+                }
                 index += _leafOffset;
                 _data[index] = value;
                 while (index > 0)
@@ -703,10 +707,29 @@ namespace AtCoderTemplateForNetCore.Collections
         public T Query(Range range)
         {
             var (offset, length) = range.GetOffsetAndLength(Length);
+            if (length <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(range), $"{nameof(range)}の長さは0より大きくなければなりません。");
+            }
             return Query(offset, offset + length);
         }
 
-        public T Query(int begin, int end) => Query(begin, end, 0, 0, _leafLength);
+        public T Query(int begin, int end)
+        {
+            if (begin < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(begin), $"{nameof(begin)}は0以上の数でなければなりません。");
+            }
+            if (end > Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(end), $"{nameof(end)}は{nameof(Length)}以下でなければなりません。");
+            }
+            if (begin >= end)
+            {
+                throw new ArgumentException($"{nameof(begin)},{nameof(end)}", $"{nameof(end)}は{nameof(begin)}より大きい数でなければなりません。");
+            }
+            return Query(begin, end, 0, 0, _leafLength);
+        }
 
         private T Query(int begin, int end, int index, int left, int right)
         {
