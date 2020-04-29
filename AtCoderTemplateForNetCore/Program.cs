@@ -430,7 +430,7 @@ namespace AtCoderTemplateForNetCore.Algorithms
         public static Modular Permutation(int n, int r, int mod = _defaultMod)
         {
             CheckNR(n, r);
-            return Factorial(n) / Factorial(n - r);
+            return Factorial(n, mod) / Factorial(n - r, mod);
         }
 
         public static Modular Combination(int n, int r, int mod = _defaultMod)
