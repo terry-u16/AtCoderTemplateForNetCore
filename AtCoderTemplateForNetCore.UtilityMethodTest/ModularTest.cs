@@ -136,6 +136,22 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
             Assert.Equal(expected, fact.Value);
         }
 
+        [Theory]
+        [InlineData(2, 0, 1)]
+        [InlineData(2, 1, 2)]
+        [InlineData(2, 2, 3)]
+        [InlineData(6, 3, 56)]
+        [InlineData(12, 5, 4368)]
+        [InlineData(20, 10, 20030010)]
+        [InlineData(30, 18, 648093714)]
+        [InlineData(50, 14, 265331116)]
+        public void CombinationWithRepititionTest(int n, int r, int expected)
+        {
+            var fact = Modular.CombinationWithRepetition(n, r);
+            Assert.Equal(expected, fact.Value);
+        }
+
+
         [Fact]
         public void CreateArrayTest()
         {

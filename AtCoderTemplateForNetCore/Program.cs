@@ -439,6 +439,8 @@ namespace AtCoderTemplateForNetCore.Algorithms
             return n == r ? new Modular(1, mod) : Factorial(n, mod) / (Factorial(r, mod) * Factorial(n - r, mod));   // n!まで計算済みなので nCr = n! / (n-r)!r! = nPr / n!とするより速い
         }
 
+        public static Modular CombinationWithRepetition(int n, int r, int mod = _defaultMod) => Combination(n + r - 1, r, mod);
+
         public static Modular[] CreateArray(int length, int mod = _defaultMod) => Enumerable.Repeat(new Modular(0, mod), length).ToArray();
 
         private static void CheckModEquals(in Modular a, in Modular b)
