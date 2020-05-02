@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Reflection.Metadata.Ecma335;
 
 namespace AtCoderTemplateForNetCore
 {
@@ -869,13 +868,15 @@ namespace AtCoderTemplateForNetCore.Collections
         }
     }
 
-    public static class TupleExtensions
+    public static class EnumerableExtensions
     {
         public static IEnumerable<(T1 v1, T2 v2)> Zip<T1, T2>(this (IEnumerable<T1> First, IEnumerable<T2> Second) t) 
             => t.First.Zip(t.Second, (v1, v2) => (v1, v2));
 
         public static IEnumerable<(T1 v1, T2 v2, T3 v3)> Zip<T1, T2, T3>(this (IEnumerable<T1> First, IEnumerable<T2> Second, IEnumerable<T3> Third) t) 
             => (t.First, t.Second).Zip().Zip(t.Third, (v12, v3) => (v12.v1, v12.v2, v3));
+
+        public static IEnumerable<(T item, int index)> WithIndex<T>(this IEnumerable<T> source) => source.Select((item, index) => (item, index));
     }
 
     public static class ArrayExtensions
