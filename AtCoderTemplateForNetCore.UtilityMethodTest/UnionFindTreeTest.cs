@@ -28,7 +28,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
             var nq = input[0].Split(' ').Select(int.Parse).ToArray();
             var n = nq[0];
             var q = nq[1];
-            var tree = Enumerable.Range(0, n).Select(i => new UnionFindNode<int>(i)).ToArray();
+            var tree = new UnionFindTree(n);
             var output = new List<string>();
 
             for (int i = 0; i < q; i++)
@@ -40,18 +40,20 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
 
                 if (p == 0)
                 {
-                    tree[a].Unite(tree[b]);
+                    tree.Unite(a, b);
                 }
                 else
                 {
-                    output.Add(tree[a].IsInSameGroup(tree[b]) ? "Yes" : "No");
+                    output.Add(tree.IsInSameGroup(a, b) ? "Yes" : "No");
                 }
             }
 
             Assert.Equal(new[] { "Yes", "No", "Yes", "Yes" }, output);
 
-            var sizes = tree.Select(n => n.GetGroupSize());
+            var sizes = Enumerable.Range(0, n).Select(i => tree.GetGroupSizeOf(i));
             Assert.Equal(new[] { 1, 4, 4, 4, 4, 1, 1, 1 }, sizes);
+
+            Assert.Equal(5, tree.GetGroupCount());
         }
     }
 }

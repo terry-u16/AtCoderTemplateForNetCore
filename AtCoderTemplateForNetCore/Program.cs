@@ -489,61 +489,81 @@ namespace AtCoderTemplateForNetCore.Algorithms
 namespace AtCoderTemplateForNetCore.Collections
 {
     // See https://kumikomiya.com/competitive-programming-with-c-sharp/
-    public class UnionFindNode<T>
+    public class UnionFindTree
     {
-        private int _height;        // rootのときのみ有効
-        private int _groupSize;     // 同上
-        private UnionFindNode<T> _parent;
-        public T Item { get; }
+        private UnionFindNode[] _nodes;
+        public int Count => _nodes.Length;
 
-        public UnionFindNode(T item)
+        public UnionFindTree(int count) => _nodes = Enumerable.Range(0, count).Select(i => new UnionFindNode(i)).ToArray();
+        public void Unite(int index1, int index2) => _nodes[index1].Unite(_nodes[index2]);
+        public bool IsInSameGroup(int index1, int index2) => _nodes[index1].IsInSameGroup(_nodes[index2]);
+        public int GetGroupSizeOf(int index) => _nodes[index].GetGroupSize();
+        public int GetGroupCount()
         {
-            _height = 0;
-            _groupSize = 1;
-            _parent = this;
-            Item = item;
+            var hashSet = new HashSet<int>();
+            foreach (var node in _nodes)
+            {
+                hashSet.Add(node.FindRoot().ID);
+            }
+            return hashSet.Count;
         }
 
-        public UnionFindNode<T> FindRoot()
+        private class UnionFindNode
         {
-            if (_parent != this) // not ref equals
+            private int _height;        // rootのときのみ有効
+            private int _groupSize;     // 同上
+            private UnionFindNode _parent;
+            public int ID { get; }
+
+            public UnionFindNode(int id)
             {
-                var root = _parent.FindRoot();
-                _parent = root;
+                _height = 0;
+                _groupSize = 1;
+                _parent = this;
+                ID = id;
             }
 
-            return _parent;
+            public UnionFindNode FindRoot()
+            {
+                if (_parent != this) // not ref equals
+                {
+                    var root = _parent.FindRoot();
+                    _parent = root;
+                }
+
+                return _parent;
+            }
+
+            public int GetGroupSize() => FindRoot()._groupSize;
+
+            public void Unite(UnionFindNode other)
+            {
+                var thisRoot = this.FindRoot();
+                var otherRoot = other.FindRoot();
+
+                if (thisRoot == otherRoot)
+                {
+                    return;
+                }
+
+                if (thisRoot._height < otherRoot._height)
+                {
+                    thisRoot._parent = otherRoot;
+                    otherRoot._groupSize += thisRoot._groupSize;
+                    otherRoot._height = Math.Max(thisRoot._height + 1, otherRoot._height);
+                }
+                else
+                {
+                    otherRoot._parent = thisRoot;
+                    thisRoot._groupSize += otherRoot._groupSize;
+                    thisRoot._height = Math.Max(otherRoot._height + 1, thisRoot._height);
+                }
+            }
+
+            public bool IsInSameGroup(UnionFindNode other) => this.FindRoot() == other.FindRoot();
+
+            public override string ToString() => $"{ID} root:{FindRoot().ID}";
         }
-
-        public int GetGroupSize() => FindRoot()._groupSize;
-
-        public void Unite(UnionFindNode<T> other)
-        {
-            var thisRoot = this.FindRoot();
-            var otherRoot = other.FindRoot();
-
-            if (thisRoot == otherRoot)
-            {
-                return;
-            }
-
-            if (thisRoot._height < otherRoot._height)
-            {
-                thisRoot._parent = otherRoot;
-                otherRoot._groupSize += thisRoot._groupSize;
-                otherRoot._height = Math.Max(thisRoot._height + 1, otherRoot._height);
-            }
-            else
-            {
-                otherRoot._parent = thisRoot;
-                thisRoot._groupSize += otherRoot._groupSize;
-                thisRoot._height = Math.Max(otherRoot._height + 1, thisRoot._height);
-            }
-        }
-
-        public bool IsInSameGroup(UnionFindNode<T> other) => this.FindRoot() == other.FindRoot();
-
-        public override string ToString() => $"{Item} root:{FindRoot().Item}";
     }
 
     public class PriorityQueue<T> : IEnumerable<T> where T : IComparable<T>
