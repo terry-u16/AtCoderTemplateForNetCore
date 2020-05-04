@@ -504,7 +504,7 @@ namespace AtCoderTemplateForNetCore.Collections
             Item = item;
         }
 
-        private UnionFindNode<T> FindRoot()
+        public UnionFindNode<T> FindRoot()
         {
             if (_parent != this) // not ref equals
             {
