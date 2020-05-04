@@ -573,13 +573,9 @@ namespace AtCoderTemplateForNetCore.Collections
         public int Count => _heap.Count;
         public bool IsDescending => _reverseFactor == 1;
 
-        public PriorityQueue() : this(null, true) { }
+        public PriorityQueue(bool descending) : this(descending, null) { }
 
-        public PriorityQueue(IEnumerable<T> collection) : this(collection, true) { }
-
-        public PriorityQueue(bool descending) : this(null, descending) { }
-
-        public PriorityQueue(IEnumerable<T> collection, bool descending)
+        public PriorityQueue(bool descending, IEnumerable<T> collection)
         {
             _reverseFactor = descending ? 1 : -1;
             _heap = new List<T>();

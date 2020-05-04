@@ -14,7 +14,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
         public void DescendingEnqueueDequeueTest()
         {
             var values = new[] { 4, 1, 3, 0, 2, 5, 8, 11, 10 };
-            var queue = new PriorityQueue<int>();
+            var queue = new PriorityQueue<int>(true);
 
             Assert.True(queue.IsDescending);
 
@@ -41,7 +41,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
         public void InitializeWithCollectionTest()
         {
             var values = new[] { 4, 1, 3, 0, 2, 5, 8, 11, 10 };
-            var queue = new PriorityQueue<int>(values);
+            var queue = new PriorityQueue<int>(true, values);
 
             Array.Sort(values);
             Array.Reverse(values);
@@ -56,7 +56,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
         [InlineData(2020, 100000)]
         public void DescendingEnqueueDequeueRandomTest(int seed, int length)
         {
-            var priorityQueue = new PriorityQueue<int>();
+            var priorityQueue = new PriorityQueue<int>(true);
             EnqueDequeRandomTest(seed, length, priorityQueue, true);
         }
 
@@ -102,7 +102,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
         public void EnumerableCancellTest()
         {
             var values = new[] { 4, 1, 3, 0, 2, 5, 8, 11, 10 };
-            var queue = new PriorityQueue<int>(values);
+            var queue = new PriorityQueue<int>(true, values);
 
             Array.Sort(values);
             Array.Reverse(values);
@@ -118,7 +118,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
         public void PeekTest()
         {
             var values = new[] { 4, 1, 3, 0, 2, 5, 8, 11, 10 };
-            var queue = new PriorityQueue<int>(values);
+            var queue = new PriorityQueue<int>(true, values);
 
             Assert.Equal(11, queue.Peek());
         }
