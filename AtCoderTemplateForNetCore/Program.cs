@@ -480,6 +480,23 @@ namespace AtCoderTemplateForNetCore.Algorithms
 
         public override int GetHashCode() => (Value, Mod).GetHashCode();
     }
+
+    public interface ISemigroup<TSet> where TSet : ISemigroup<TSet>
+    {
+        public TSet Multiply(TSet other);
+        public static TSet operator *(ISemigroup<TSet> a, TSet b) => a.Multiply(b);
+    }
+
+    public interface IMonoid<TSet> : ISemigroup<TSet> where TSet : IMonoid<TSet>, new()
+    {
+        public TSet Identity { get; }
+    }
+
+    public interface IGroup<TSet> : IMonoid<TSet> where TSet : IGroup<TSet>, new()
+    {
+        public TSet Invert();
+        public static TSet operator ~(IGroup<TSet> a) => a.Invert();
+    }
 }
 
 #endregion
@@ -676,32 +693,30 @@ namespace AtCoderTemplateForNetCore.Collections
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
-    public class SegmentTree<T> : IEnumerable<T>
+    public class SegmentTree<TMonoid> : IEnumerable<TMonoid> where TMonoid : IMonoid<TMonoid>, new()
     {
-        private readonly T[] _data;
-        private readonly T _identityElement;
-        private readonly Func<T, T, T> _queryOperation;
+        private readonly TMonoid[] _data;
+        private readonly TMonoid _identityElement;
 
         private readonly int _leafOffset;   // n - 1
         private readonly int _leafLength;   // n (= 2^k)
 
         public int Length { get; }          // 実データ長
-        public ReadOnlySpan<T> Data => _data[_leafOffset..(_leafOffset + Length)];
+        public ReadOnlySpan<TMonoid> Data => _data[_leafOffset..(_leafOffset + Length)];
 
-        public SegmentTree(ICollection<T> data, Func<T, T, T> queryOperation, T identityElement)
+        public SegmentTree(ICollection<TMonoid> data)
         {
             Length = data.Count;
             _leafLength = GetMinimumPow2(data.Count);
             _leafOffset = _leafLength - 1;
-            _data = new T[_leafOffset + _leafLength];
-            _queryOperation = queryOperation;
-            _identityElement = identityElement;
+            _data = new TMonoid[_leafOffset + _leafLength];
+            _identityElement = new TMonoid().Identity;
 
             data.CopyTo(_data, _leafOffset);
             BuildTree();
         }
 
-        public T this[int index]
+        public TMonoid this[int index]
         {
             get => Data[index];
             set
@@ -716,12 +731,12 @@ namespace AtCoderTemplateForNetCore.Collections
                 {
                     // 一つ上の親の更新
                     index = (index - 1) / 2;
-                    _data[index] = _queryOperation(_data[index * 2 + 1], _data[index * 2 + 2]);
+                    _data[index] = _data[index * 2 + 1] * _data[index * 2 + 2];
                 }
             }
         }
 
-        public T Query(Range range)
+        public TMonoid Query(Range range)
         {
             var (offset, length) = range.GetOffsetAndLength(Length);
             if (length <= 0)
@@ -731,7 +746,7 @@ namespace AtCoderTemplateForNetCore.Collections
             return Query(offset, offset + length);
         }
 
-        public T Query(int begin, int end)
+        public TMonoid Query(int begin, int end)
         {
             if (begin < 0)
             {
@@ -748,7 +763,7 @@ namespace AtCoderTemplateForNetCore.Collections
             return Query(begin, end, 0, 0, _leafLength);
         }
 
-        private T Query(int begin, int end, int index, int left, int right)
+        private TMonoid Query(int begin, int end, int index, int left, int right)
         {
             if (right <= begin || end <= left)      // 範囲外
             {
@@ -762,7 +777,7 @@ namespace AtCoderTemplateForNetCore.Collections
             {
                 var leftValue = Query(begin, end, index * 2 + 1, left, (left + right) / 2);     // 左の子
                 var rightValue = Query(begin, end, index * 2 + 2, (left + right) / 2, right);   // 右の子
-                return _queryOperation(leftValue, rightValue);
+                return leftValue * rightValue;
             }
         }
 
@@ -775,7 +790,7 @@ namespace AtCoderTemplateForNetCore.Collections
 
             for (int i = _leafLength - 2; i >= 0; i--)  // 葉の親から順番に一つずつ上がっていく
             {
-                _data[i] = _queryOperation(_data[2 * i + 1], _data[2 * i + 2]); // f(left, right)
+                _data[i] = _data[2 * i + 1] * _data[2 * i + 2]; // f(left, right)
             }
         }
 
@@ -789,7 +804,7 @@ namespace AtCoderTemplateForNetCore.Collections
             return p;
         }
 
-        public IEnumerator<T> GetEnumerator()
+        public IEnumerator<TMonoid> GetEnumerator()
         {
             var upperIndex = _leafOffset + Length;
             for (int i = _leafOffset; i < upperIndex; i++)

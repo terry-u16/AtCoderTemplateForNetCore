@@ -1,6 +1,7 @@
 ﻿using System;
 using Xunit;
 using AtCoderTemplateForNetCore.Questions;
+using AtCoderTemplateForNetCore.Algorithms;
 using AtCoderTemplateForNetCore.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -10,27 +11,43 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
 {
     public class SegmentTreeTest
     {
-        private readonly SegmentTree<int> _defaultSegmentTree;
+        struct MinInt : IMonoid<MinInt>
+        {
+            public int Value { get; }
+
+            public MinInt(int value)
+            {
+                Value = value;
+            }
+
+            public MinInt Identity => new MinInt(int.MaxValue);
+
+            public MinInt Multiply(MinInt other) => new MinInt(Math.Min(Value, other.Value));
+
+            public static implicit operator int(MinInt min) => min.Value;
+        }
+
+        private readonly SegmentTree<MinInt> _defaultSegmentTree;
 
         public SegmentTreeTest()
         {
-            var data = new int[] { 1, 2, 3, 4, 5 };
-            _defaultSegmentTree = new SegmentTree<int>(data, (a, b) => Math.Min(a, b), int.MaxValue);
+            var data = new int[] { 1, 2, 3, 4, 5 }.Select(i => new MinInt(i)).ToArray();
+            _defaultSegmentTree = new SegmentTree<MinInt>(data);
         }
 
         [Fact]
         public void MinimumSegmentTreeTest()
         {
-            var data = new int[] { 1, 2, 3, 4, 5 };
-            var segmentTree = new SegmentTree<int>(data, (a, b) => Math.Min(a, b), int.MaxValue);
+            var data = new int[] { 1, 2, 3, 4, 5 }.Select(i => new MinInt(i)).ToArray();
+            var segmentTree = new SegmentTree<MinInt>(data);
             Assert.Equal(1, segmentTree.Query(0..5));
             Assert.Equal(3, segmentTree.Query(2..5));
 
-            segmentTree[4] = 0;
+            segmentTree[4] = new MinInt(0);
             Assert.Equal(0, segmentTree.Query(0..5));
             Assert.Equal(1, segmentTree.Query(0..4));
 
-            segmentTree[^4] = -5;
+            segmentTree[^4] = new MinInt(-5);
             Assert.Equal(-5, segmentTree.Query(0..5));
             Assert.Equal(-5, segmentTree.Query(1..5));
             Assert.Equal(0, segmentTree.Query(2..5));
@@ -43,11 +60,11 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
                 Assert.Equal(expected[i], segmentTree[i]);
                 Assert.Equal(expected[i], segmentTree.Data[i]);
             }
-            Assert.Equal(expected, segmentTree);
+            Assert.Equal(expected, segmentTree.Select(m => m.Value));
 
             for (int i = 0; i < segmentTree.Length; i++)
             {
-                segmentTree[i] = 10000;
+                segmentTree[i] = new MinInt(10000);
             }
             Assert.Equal(10000, segmentTree.Query(0..segmentTree.Length));
         }
@@ -75,8 +92,8 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
         [Fact]
         public void SegmentTreeIndexerThrowsExceptionTest()
         {
-            Assert.ThrowsAny<IndexOutOfRangeException>(() => _defaultSegmentTree[-1] = 4);
-            Assert.ThrowsAny<IndexOutOfRangeException>(() => _defaultSegmentTree[5] = 4);
+            Assert.ThrowsAny<IndexOutOfRangeException>(() => _defaultSegmentTree[-1] = new MinInt(4));
+            Assert.ThrowsAny<IndexOutOfRangeException>(() => _defaultSegmentTree[5] = new MinInt(4));
 
             Assert.ThrowsAny<IndexOutOfRangeException>(() => _defaultSegmentTree[-1]);
             Assert.ThrowsAny<IndexOutOfRangeException>(() => _defaultSegmentTree[5]);
