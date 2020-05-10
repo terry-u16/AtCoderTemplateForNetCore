@@ -452,9 +452,9 @@ namespace AtCoderTemplateForNetCore.Algorithms
 
         private static void CheckNR(int n, int r)
         {
-            if (n <= 0)
+            if (n < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(n), $"{nameof(n)}は正の整数でなければなりません。");
+                throw new ArgumentOutOfRangeException(nameof(n), $"{nameof(n)}は0以上の整数でなければなりません。");
             }
             if (r < 0)
             {
@@ -496,6 +496,95 @@ namespace AtCoderTemplateForNetCore.Algorithms
     {
         public TSet Invert();
         public static TSet operator ~(IGroup<TSet> a) => a.Invert();
+    }
+
+    public interface ITreeDpState<TSet> : IMonoid<TSet> where TSet : ITreeDpState<TSet>, new()
+    {
+        public TSet AddRoot();
+    }
+
+    public class Rerooting<TTreeDpState> where TTreeDpState : ITreeDpState<TTreeDpState>, new()
+    {
+        readonly IReadOnlyList<int>[] _graph;
+        readonly TTreeDpState _identity;
+        readonly Dictionary<int, TTreeDpState>[] _dp;
+        readonly TTreeDpState[] _result;
+
+        public Rerooting(IReadOnlyList<int>[] graph)
+        {
+            _graph = graph;
+            _identity = new TTreeDpState().Identity;
+            _dp = new Dictionary<int, TTreeDpState>[_graph.Length];
+            _result = new TTreeDpState[_graph.Length];
+        }
+
+        public TTreeDpState[] Solve()
+        {
+            DepthFirstSearch();
+            Reroot();
+            return _result;
+        }
+
+        private TTreeDpState DepthFirstSearch() => DepthFirstSearch(0, -1);
+
+        private TTreeDpState DepthFirstSearch(int root, int parent)
+        {
+            var sum = _identity;
+            _dp[root] = new Dictionary<int, TTreeDpState>();
+
+            foreach (var child in _graph[root])
+            {
+                if (child == parent)
+                    continue;
+                _dp[root].Add(child, DepthFirstSearch(child, root));
+                sum *= _dp[root][child];
+            }
+            return sum.AddRoot();
+        }
+
+        private void Reroot() => Reroot(0, -1, _identity);
+
+        private void Reroot(int root, int parent, TTreeDpState toAdd)
+        {
+            var degree = _graph[root].Count;
+            for (int i = 0; i < _graph[root].Count; i++)
+            {
+                var child = _graph[root][i];
+                if (child == parent)
+                {
+                    _dp[root].Add(child, toAdd);
+                    break;
+                }
+            }
+
+            // 累積和
+            int sumSize = degree + 1;
+            var sumLeft = new TTreeDpState[sumSize];
+            sumLeft[0] = _identity;
+            for (int i = 0; i < degree; i++)
+            {
+                var child = _graph[root][i];
+                sumLeft[i + 1] = sumLeft[i] * _dp[root][child];
+            }
+
+            var sumRight = new TTreeDpState[sumSize];
+            sumRight[degree] = _identity;
+            for (int i = degree - 1; i >= 0; i--)
+            {
+                var child = _graph[root][i];
+                sumRight[i] = sumRight[i + 1] * _dp[root][child];
+            }
+            _result[root] = sumLeft[degree].AddRoot();
+
+            for (int i = 0; i < _graph[root].Count; i++)
+            {
+                var child = _graph[root][i];
+                if (child == parent)
+                    continue;
+                var dp = sumLeft[i] * sumRight[i + 1];
+                Reroot(child, root, dp.AddRoot());
+            }
+        }
     }
 }
 
