@@ -599,20 +599,25 @@ namespace AtCoderTemplateForNetCore.Collections
     {
         private UnionFindNode[] _nodes;
         public int Count => _nodes.Length;
+        public int Groups { get; private set; }
 
-        public UnionFindTree(int count) => _nodes = Enumerable.Range(0, count).Select(i => new UnionFindNode(i)).ToArray();
-        public void Unite(int index1, int index2) => _nodes[index1].Unite(_nodes[index2]);
+        public UnionFindTree(int count)
+        {
+            _nodes = Enumerable.Range(0, count).Select(i => new UnionFindNode(i)).ToArray();
+            Groups = _nodes.Length;
+        }
+
+        public void Unite(int index1, int index2)
+        {
+            var succeed = _nodes[index1].Unite(_nodes[index2]);
+            if (succeed)
+            {
+                Groups--;
+            }
+        }
+
         public bool IsInSameGroup(int index1, int index2) => _nodes[index1].IsInSameGroup(_nodes[index2]);
         public int GetGroupSizeOf(int index) => _nodes[index].GetGroupSize();
-        public int GetGroupCount()
-        {
-            var hashSet = new HashSet<int>();
-            foreach (var node in _nodes)
-            {
-                hashSet.Add(node.FindRoot().ID);
-            }
-            return hashSet.Count;
-        }
 
         private class UnionFindNode
         {
@@ -642,14 +647,14 @@ namespace AtCoderTemplateForNetCore.Collections
 
             public int GetGroupSize() => FindRoot()._groupSize;
 
-            public void Unite(UnionFindNode other)
+            public bool Unite(UnionFindNode other)
             {
                 var thisRoot = this.FindRoot();
                 var otherRoot = other.FindRoot();
 
                 if (thisRoot == otherRoot)
                 {
-                    return;
+                    return false;
                 }
 
                 if (thisRoot._height < otherRoot._height)
@@ -657,12 +662,14 @@ namespace AtCoderTemplateForNetCore.Collections
                     thisRoot._parent = otherRoot;
                     otherRoot._groupSize += thisRoot._groupSize;
                     otherRoot._height = Math.Max(thisRoot._height + 1, otherRoot._height);
+                    return true;
                 }
                 else
                 {
                     otherRoot._parent = thisRoot;
                     thisRoot._groupSize += otherRoot._groupSize;
                     thisRoot._height = Math.Max(otherRoot._height + 1, thisRoot._height);
+                    return true;
                 }
             }
 

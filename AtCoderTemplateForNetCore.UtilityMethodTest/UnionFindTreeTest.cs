@@ -53,7 +53,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
             var sizes = Enumerable.Range(0, n).Select(i => tree.GetGroupSizeOf(i));
             Assert.Equal(new[] { 1, 4, 4, 4, 4, 1, 1, 1 }, sizes);
 
-            Assert.Equal(5, tree.GetGroupCount());
+            Assert.Equal(5, tree.Groups);
         }
     }
 }
