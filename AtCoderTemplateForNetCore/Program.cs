@@ -401,6 +401,8 @@ namespace AtCoderTemplateForNetCore.Algorithms
 
         private static Dictionary<int, List<int>> _factorialCache;
         private static Dictionary<int, List<int>> FactorialCache => _factorialCache ??= new Dictionary<int, List<int>>();
+        private static Dictionary<int, int[]> FactorialInverseCache { get; } = new Dictionary<int, int[]>();
+        const int maxFactorial = 1000000;
 
         public static Modular Factorial(int n, int mod = _defaultMod)
         {
@@ -434,8 +436,27 @@ namespace AtCoderTemplateForNetCore.Algorithms
 
         public static Modular Combination(int n, int r, int mod = _defaultMod)
         {
+            if (!FactorialInverseCache.ContainsKey(mod))
+            {
+                InitializeCombinationTable(maxFactorial, mod);
+            }
             CheckNR(n, r);
-            return n == r ? new Modular(1, mod) : Factorial(n, mod) / (Factorial(r, mod) * Factorial(n - r, mod));   // n!まで計算済みなので nCr = n! / (n-r)!r! = nPr / n!とするより速い
+            r = Math.Min(r, n - r);
+            return new Modular(FactorialCache[mod][n], mod) * new Modular(FactorialInverseCache[mod][r], mod) * new Modular(FactorialInverseCache[mod][n - r], mod);
+        }
+
+        private static void InitializeCombinationTable(int max, int mod)
+        {
+            Factorial(max);
+            FactorialInverseCache.Add(mod, new int[max + 1]);
+
+            long fInv = (new Modular(1, mod) / Factorial(max, mod)).Value;
+            FactorialInverseCache[mod][max] = (int)fInv;
+            for (int i = max - 1; i >= 0; i--)
+            {
+                fInv = (fInv * (i + 1)) % mod;
+                FactorialInverseCache[mod][i] = (int)fInv;
+            }
         }
 
         public static Modular CombinationWithRepetition(int n, int r, int mod = _defaultMod) => Combination(n + r - 1, r, mod);

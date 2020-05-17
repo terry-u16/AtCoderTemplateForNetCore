@@ -8,6 +8,7 @@ using System.Linq;
 
 namespace AtCoderTemplateForNetCore.UtilityMethodTest
 {
+    [Collection("ModularCombination")]
     public class ModularTest
     {
         [Theory]
@@ -130,6 +131,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
         [InlineData(10, 10, 1)]
         [InlineData(15, 15, 1)]
         [InlineData(10000, 15, 21715928)]
+        [InlineData(0, 0, 1)]
         public void CombinationTest(int n, int r, int expected)
         {
             var fact = Modular.Combination(n, r);

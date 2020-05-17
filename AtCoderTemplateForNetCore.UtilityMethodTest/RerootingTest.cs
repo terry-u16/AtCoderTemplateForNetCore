@@ -7,6 +7,7 @@ using Xunit;
 
 namespace AtCoderTemplateForNetCore.UtilityMethodTest
 {
+    [Collection("ModularCombination")]
     public class RerootingTest
     {
         [Fact]
