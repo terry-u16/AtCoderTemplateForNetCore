@@ -4,7 +4,7 @@ using System.Text;
 using Xunit;
 using AtCoderTemplateForNetCore.Algorithms;
 
-namespace AtCoderTemplateForNetCore.UtilityMethodTest
+namespace AtCoderTemplateForNetCore.UtilityMethodTest.Algorithms
 {
     public class UpdateWhenLargeSmallTest
     {

@@ -1,12 +1,12 @@
 ﻿using System;
 using Xunit;
 using AtCoderTemplateForNetCore.Questions;
-using AtCoderTemplateForNetCore.Algorithms;
+using AtCoderTemplateForNetCore.Numerics;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace AtCoderTemplateForNetCore.UtilityMethodTest
+namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
 {
     [Collection("ModularCombination")]
     public class ModularTest

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using Xunit;
 
-namespace AtCoderTemplateForNetCore.UtilityMethodTest
+namespace AtCoderTemplateForNetCore.UtilityMethodTest.Algorithms
 {
     public class ShrinkedMapperTest
     {

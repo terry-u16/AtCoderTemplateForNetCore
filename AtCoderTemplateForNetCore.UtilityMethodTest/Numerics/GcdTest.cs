@@ -1,12 +1,12 @@
 ﻿using System;
 using Xunit;
 using AtCoderTemplateForNetCore.Questions;
-using AtCoderTemplateForNetCore.Algorithms;
+using AtCoderTemplateForNetCore.Numerics;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace AtCoderTemplateForNetCore.UtilityMethodTest
+namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
 {
     public class GcdTest
     {
@@ -19,7 +19,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
         [InlineData(12345678, 256803, 3)]
         public void GcdTest1(long a, long b, long gcd)
         {
-            Assert.Equal(gcd, BasicAlgorithm.Gcd(a, b));
+            Assert.Equal(gcd, NumericalAlgorithms.Gcd(a, b));
         }
 
         [Theory]
@@ -27,7 +27,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
         [InlineData(5, 0)]
         public void GcdThrowsExceptionTest(long a, long b)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => BasicAlgorithm.Gcd(a, b));
+            Assert.Throws<ArgumentOutOfRangeException>(() => NumericalAlgorithms.Gcd(a, b));
         }
     }
 }

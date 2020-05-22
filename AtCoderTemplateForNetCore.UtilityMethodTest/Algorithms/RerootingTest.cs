@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AtCoderTemplateForNetCore.Algorithms;
+using AtCoderTemplateForNetCore.Numerics;
 using Xunit;
 
-namespace AtCoderTemplateForNetCore.UtilityMethodTest
+namespace AtCoderTemplateForNetCore.UtilityMethodTest.Algorithms
 {
     [Collection("ModularCombination")]
     public class RerootingTest

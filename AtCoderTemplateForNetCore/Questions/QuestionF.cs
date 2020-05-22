@@ -1,12 +1,13 @@
-﻿using AtCoderTemplateForNetCore.Algorithms;
-using AtCoderTemplateForNetCore.Collections;
-using AtCoderTemplateForNetCore.Questions;
-using AtCoderTemplateForNetCore.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using AtCoderTemplateForNetCore.Algorithms;
+using AtCoderTemplateForNetCore.Collections;
+using AtCoderTemplateForNetCore.Extensions;
+using AtCoderTemplateForNetCore.Numerics;
+using AtCoderTemplateForNetCore.Questions;
 
 namespace AtCoderTemplateForNetCore.Questions
 {

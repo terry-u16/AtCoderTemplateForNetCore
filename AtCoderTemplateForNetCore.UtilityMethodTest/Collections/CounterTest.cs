@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using AtCoderTemplateForNetCore.Collections;
 
-namespace AtCoderTemplateForNetCore.UtilityMethodTest
+namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
 {
     public class CounterTest
     {

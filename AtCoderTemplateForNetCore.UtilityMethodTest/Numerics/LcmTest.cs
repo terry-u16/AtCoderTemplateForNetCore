@@ -1,12 +1,12 @@
 ﻿using System;
 using Xunit;
 using AtCoderTemplateForNetCore.Questions;
-using AtCoderTemplateForNetCore.Algorithms;
+using AtCoderTemplateForNetCore.Numerics;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace AtCoderTemplateForNetCore.UtilityMethodTest
+namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
 {
     public class LcmTest
     {
@@ -19,7 +19,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
         [InlineData(12345678, 256803, 1056802382478)]
         public void LcmTest1(long a, long b, long gcd)
         {
-            Assert.Equal(gcd, BasicAlgorithm.Lcm(a, b));
+            Assert.Equal(gcd, NumericalAlgorithms.Lcm(a, b));
         }
 
         [Theory]
@@ -27,7 +27,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
         [InlineData(5, 0)]
         public void LcmThrowsExceptionTest(long a, long b)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => BasicAlgorithm.Lcm(a, b));
+            Assert.Throws<ArgumentOutOfRangeException>(() => NumericalAlgorithms.Lcm(a, b));
         }
     }
 }

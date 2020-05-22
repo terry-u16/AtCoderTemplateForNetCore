@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace AtCoderTemplateForNetCore.UtilityMethodTest
+namespace AtCoderTemplateForNetCore.UtilityMethodTest.Algorithms
 {
     public class ZAlgorithmTest
     {
@@ -17,7 +17,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest
         [InlineData("momomohimomokusa", 16, 0, 4, 0, 2, 0, 0, 0, 4, 0, 2, 0, 0, 0, 0, 0)]
         public void ZAlgorithmSumomoTest(string input, params int[] expected)
         {
-            var z = StringAlgorithm.ZAlgorithm(input);
+            var z = StringAlgorithms.ZAlgorithm(input);
             Assert.Equal(expected, z);
         }
     }

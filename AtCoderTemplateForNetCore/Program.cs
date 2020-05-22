@@ -1,13 +1,14 @@
 ﻿// ここにQuestionクラスをコピペ
-using AtCoderTemplateForNetCore.Algorithms;
-using AtCoderTemplateForNetCore.Collections;
-using AtCoderTemplateForNetCore.Questions;
-using AtCoderTemplateForNetCore.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using AtCoderTemplateForNetCore.Algorithms;
+using AtCoderTemplateForNetCore.Collections;
+using AtCoderTemplateForNetCore.Extensions;
+using AtCoderTemplateForNetCore.Numerics;
+using AtCoderTemplateForNetCore.Questions;
 
 namespace AtCoderTemplateForNetCore
 {
@@ -15,7 +16,7 @@ namespace AtCoderTemplateForNetCore
     {
         static void Main(string[] args)
         {
-            IAtCoderQuestion question = new QuestionA();    // 問題に合わせて書き換え
+            IAtCoderQuestion question = new QuestionA();
             var answers = question.Solve(Console.In);
             
             var writer = new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = false };
@@ -58,9 +59,9 @@ namespace AtCoderTemplateForNetCore.Questions
 
 #region Algorithm
 
-namespace AtCoderTemplateForNetCore.Algorithms
+namespace AtCoderTemplateForNetCore.Numerics
 {
-    public static class BasicAlgorithm
+    public static class NumericalAlgorithms
     {
         public static long Gcd(long a, long b)
         {
@@ -96,62 +97,6 @@ namespace AtCoderTemplateForNetCore.Algorithms
             }
 
             return a / Gcd(a, b) * b;
-        }
-
-        public static IEnumerable<ReadOnlyMemory<T>> GetPermutations<T>(IEnumerable<T> collection) where T : IComparable<T> => GetPermutations(collection, false);
-
-        public static IEnumerable<ReadOnlyMemory<T>> GetPermutations<T>(IEnumerable<T> collection, bool isSorted) where T : IComparable<T>
-        {
-            var a = collection.ToArray();
-
-            if (!isSorted && a.Length > 1)
-            {
-                Array.Sort(a);
-            }
-
-            yield return a; // ソート済み初期配列
-
-            if (a.Length <= 2)
-            {
-                if (a.Length == 2 && a[0].CompareTo(a[1]) != 0)
-                {
-                    (a[0], a[1]) = (a[1], a[0]);
-                    yield return a;
-                    yield break;
-                }
-
-                yield break;
-            }
-
-            bool flag = true;
-            while (flag)
-            {
-                flag = false;
-                for (int i = a.Length - 2; i >= 0; i--)
-                {
-                    // iよりi+1の方が大きい（昇順）なら
-                    if (a[i].CompareTo(a[i + 1]) < 0)
-                    {
-                        // 後ろから見ていってi<jとなるところを探して
-                        int j;
-                        for (j = a.Length - 1; a[i].CompareTo(a[j]) >= 0; j--) { }
-
-                        // iとjを入れ替えて
-                        (a[i], a[j]) = (a[j], a[i]);
-
-                        // i+1以降を反転
-                        if (i < a.Length - 2)
-                        {
-                            var sliced = a.AsSpan().Slice(i + 1);
-                            sliced.Reverse();
-                        }
-
-                        flag = true;
-                        yield return a;
-                        break;
-                    }
-                }
-            }
         }
 
         public static long Factorial(int n)
@@ -247,96 +192,6 @@ namespace AtCoderTemplateForNetCore.Algorithms
         }
     }
 
-    public static class StringAlgorithm
-    {
-        public static int[] ZAlgorithm(string s) => ZAlgorithm(s.AsSpan());
-
-        public static int[] ZAlgorithm(ReadOnlySpan<char> s)
-        {
-            var z = new int[s.Length];
-            z[0] = s.Length;
-            var offset = 1;
-            var length = 0;
-
-            while (offset < s.Length)
-            {
-                while (offset + length < s.Length && s[length] == s[offset + length])
-                {
-                    length++;
-                }
-                z[offset] = length;
-
-                if (length == 0)
-                {
-                    offset++;
-                    continue;
-                }
-
-                int copyLength = 1;
-                while (copyLength < length && copyLength + z[copyLength] < length)
-                {
-                    z[offset + copyLength] = z[copyLength];
-                    copyLength++;
-                }
-                offset += copyLength;
-                length -= copyLength;
-            }
-
-            return z;
-        }
-    }
-
-    public static class AlgorithmHelpers
-    {
-        public static void UpdateWhenSmall<T>(ref T value, T other) where T : IComparable<T>
-        {
-            if (other.CompareTo(value) < 0)
-            {
-                value = other;
-            }
-        }
-
-        public static void UpdateWhenLarge<T>(ref T value, T other) where T : IComparable<T>
-        {
-            if (other.CompareTo(value) > 0)
-            {
-                value = other;
-            }
-        }
-    }
-
-    public class CoordinateShrinker<T> : IEnumerable<(int shrinkedIndex, T rawIndex)> where T : IComparable<T>, IEquatable<T>
-    {
-        Dictionary<T, int> _shrinkMapper;
-        T[] _expandMapper;
-        public int Count => _expandMapper.Length;
-
-        public CoordinateShrinker(IEnumerable<T> data)
-        {
-            _expandMapper = data.Distinct().ToArray();
-            Array.Sort(_expandMapper);
-
-            _shrinkMapper = new Dictionary<T, int>();
-            for (int i = 0; i < _expandMapper.Length; i++)
-            {
-                _shrinkMapper.Add(_expandMapper[i], i);
-            }
-        }
-
-        public int Shrink(T rawCoordinate) => _shrinkMapper[rawCoordinate];
-        public T Expand(int shrinkedCoordinate) => _expandMapper[shrinkedCoordinate];
-
-        public IEnumerator<(int shrinkedIndex, T rawIndex)> GetEnumerator()
-        {
-            for (int i = 0; i < _expandMapper.Length; i++)
-            {
-                yield return (i, _expandMapper[i]);
-            }
-        }
-
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
-    }
-
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
     public readonly struct Modular : IEquatable<Modular>, IComparable<Modular>
     {
@@ -350,7 +205,7 @@ namespace AtCoderTemplateForNetCore.Algorithms
             if (mod < 2 || mod > 1073741789)
             {
                 // 1073741789はint.MaxValue / 2 = 1073741823以下の最大の素数
-                throw new ArgumentOutOfRangeException(nameof(mod), $"{nameof(mod)}は2以上1073741789以下の素数でなければなりません。"); 
+                throw new ArgumentOutOfRangeException(nameof(mod), $"{nameof(mod)}は2以上1073741789以下の素数でなければなりません。");
             }
             _mod = mod;
 
@@ -549,6 +404,100 @@ namespace AtCoderTemplateForNetCore.Algorithms
     {
         public TSet Invert();
         public static TSet operator ~(IGroup<TSet> a) => a.Invert();
+    }
+
+}
+
+namespace AtCoderTemplateForNetCore.Algorithms
+{
+    public static class StringAlgorithms
+    {
+        public static int[] ZAlgorithm(string s) => ZAlgorithm(s.AsSpan());
+
+        public static int[] ZAlgorithm(ReadOnlySpan<char> s)
+        {
+            var z = new int[s.Length];
+            z[0] = s.Length;
+            var offset = 1;
+            var length = 0;
+
+            while (offset < s.Length)
+            {
+                while (offset + length < s.Length && s[length] == s[offset + length])
+                {
+                    length++;
+                }
+                z[offset] = length;
+
+                if (length == 0)
+                {
+                    offset++;
+                    continue;
+                }
+
+                int copyLength = 1;
+                while (copyLength < length && copyLength + z[copyLength] < length)
+                {
+                    z[offset + copyLength] = z[copyLength];
+                    copyLength++;
+                }
+                offset += copyLength;
+                length -= copyLength;
+            }
+
+            return z;
+        }
+    }
+
+    public static class AlgorithmHelpers
+    {
+        public static void UpdateWhenSmall<T>(ref T value, T other) where T : IComparable<T>
+        {
+            if (other.CompareTo(value) < 0)
+            {
+                value = other;
+            }
+        }
+
+        public static void UpdateWhenLarge<T>(ref T value, T other) where T : IComparable<T>
+        {
+            if (other.CompareTo(value) > 0)
+            {
+                value = other;
+            }
+        }
+    }
+
+    public class CoordinateShrinker<T> : IEnumerable<(int shrinkedIndex, T rawIndex)> where T : IComparable<T>, IEquatable<T>
+    {
+        Dictionary<T, int> _shrinkMapper;
+        T[] _expandMapper;
+        public int Count => _expandMapper.Length;
+
+        public CoordinateShrinker(IEnumerable<T> data)
+        {
+            _expandMapper = data.Distinct().ToArray();
+            Array.Sort(_expandMapper);
+
+            _shrinkMapper = new Dictionary<T, int>();
+            for (int i = 0; i < _expandMapper.Length; i++)
+            {
+                _shrinkMapper.Add(_expandMapper[i], i);
+            }
+        }
+
+        public int Shrink(T rawCoordinate) => _shrinkMapper[rawCoordinate];
+        public T Expand(int shrinkedCoordinate) => _expandMapper[shrinkedCoordinate];
+
+        public IEnumerator<(int shrinkedIndex, T rawIndex)> GetEnumerator()
+        {
+            for (int i = 0; i < _expandMapper.Length; i++)
+            {
+                yield return (i, _expandMapper[i]);
+            }
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
     public interface ITreeDpState<TSet> : IMonoid<TSet> where TSet : ITreeDpState<TSet>, new()
@@ -1147,6 +1096,65 @@ namespace AtCoderTemplateForNetCore.Collections
                 }
             }
             return ok;
+        }
+    }
+
+    public static class PermutationAlgorithms
+    {
+        public static IEnumerable<ReadOnlyMemory<T>> GetPermutations<T>(IEnumerable<T> collection) where T : IComparable<T> => GetPermutations(collection, false);
+
+        public static IEnumerable<ReadOnlyMemory<T>> GetPermutations<T>(IEnumerable<T> collection, bool isSorted) where T : IComparable<T>
+        {
+            var a = collection.ToArray();
+
+            if (!isSorted && a.Length > 1)
+            {
+                Array.Sort(a);
+            }
+
+            yield return a; // ソート済み初期配列
+
+            if (a.Length <= 2)
+            {
+                if (a.Length == 2 && a[0].CompareTo(a[1]) != 0)
+                {
+                    (a[0], a[1]) = (a[1], a[0]);
+                    yield return a;
+                    yield break;
+                }
+
+                yield break;
+            }
+
+            bool flag = true;
+            while (flag)
+            {
+                flag = false;
+                for (int i = a.Length - 2; i >= 0; i--)
+                {
+                    // iよりi+1の方が大きい（昇順）なら
+                    if (a[i].CompareTo(a[i + 1]) < 0)
+                    {
+                        // 後ろから見ていってi<jとなるところを探して
+                        int j;
+                        for (j = a.Length - 1; a[i].CompareTo(a[j]) >= 0; j--) { }
+
+                        // iとjを入れ替えて
+                        (a[i], a[j]) = (a[j], a[i]);
+
+                        // i+1以降を反転
+                        if (i < a.Length - 2)
+                        {
+                            var sliced = a.AsSpan().Slice(i + 1);
+                            sliced.Reverse();
+                        }
+
+                        flag = true;
+                        yield return a;
+                        break;
+                    }
+                }
+            }
         }
     }
 
