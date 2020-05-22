@@ -56,5 +56,39 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
             Assert.Equal(0, bit.Sum(4..5, 3..4));
             Assert.Equal(0, bit.Sum(4, 5, 3, 4));
         }
+
+        [Fact]
+        public void PlanetaryExplorationTest()
+        {
+            // JOI 2010 本戦
+            const int height = 4;
+            const int width = 7;
+            var s = new string[] { "JIOJOIJ", "IOJOIJO", "JOIJOOI", "OOJJIJO" };
+
+            var jBit = new BinaryIndexedTree2D(height, width);
+            var oBit = new BinaryIndexedTree2D(height, width);
+            var iBit = new BinaryIndexedTree2D(height, width);
+
+            for (int row = 0; row < s.Length; row++)
+            {
+                for (int column = 0; column < s[row].Length; column++)
+                {
+                    var bit = s[row][column] switch
+                    {
+                        'J' => jBit,
+                        'O' => oBit,
+                        'I' => iBit,
+                        _ => null
+                    };
+                    bit.AddAt(row, column, 1);
+                }
+            }
+
+            var rowRange = 1..3;
+            var columnRange = 1..6;
+            Assert.Equal(3, jBit.Sum(rowRange, columnRange));
+            Assert.Equal(5, oBit.Sum(rowRange, columnRange));
+            Assert.Equal(2, iBit.Sum(rowRange, columnRange));
+        }
     }
 }
