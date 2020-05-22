@@ -1064,13 +1064,13 @@ namespace AtCoderTemplateForNetCore.Collections
         /// BITの<c>index</c>番目の要素に<c>n</c>を加算します。
         /// </summary>
         /// <param name="index">加算するインデックス（0-indexed）</param>
-        /// <param name="n">加算する数</param>
-        public void AddAt(Index index, long n)
+        /// <param name="value">加算する数</param>
+        public void AddAt(Index index, long value)
         {
             var i = index.GetOffset(Length) + 1;  // 1-indexedにする
             while (i <= Length)
             {
-                _data[i] += n;
+                _data[i] += value;
                 i += i & -i;    // LSBの加算
             }
         }
@@ -1137,6 +1137,74 @@ namespace AtCoderTemplateForNetCore.Collections
                 return k;
             }
         }
+    }
+
+    public class BinaryIndexedTree2D
+    {
+        long[,] _data;
+        public int Height { get; }
+        public int Width { get; }
+
+        public BinaryIndexedTree2D(int height, int width)
+        {
+            Height = height;
+            Width = width;
+            _data = new long[height + 1, width + 1];
+        }
+
+        /// <summary>
+        /// 2次元BITの[<c>row</c>, <c>column</c>]に<c>value</c>を足します。
+        /// </summary>
+        /// <param name="row">加算する行（0-indexed）</param>
+        /// <param name="column">加算する列（0-indexed）</param>
+        /// <param name="value">加算する値</param>
+        public void AddAt(Index row, Index column, long value)
+        {
+            for (int i = row.GetOffset(Height) + 1; i <= Height; i += i & -i)
+            {
+                for (int j = column.GetOffset(Width) + 1; j <= Width; j += j & -j)
+                {
+                    _data[i, j] += value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 指定した半開区間の部分和を返します。
+        /// </summary>
+        /// <param name="row"></param>
+        /// <param name="column"></param>
+        /// <returns></returns>
+        public long Sum(Index row, Index column)
+        {
+            long sum = 0;
+            for (int i = row.GetOffset(Height); i > 0; i -= i & -i)
+            {
+                for (int j = column.GetOffset(Width); j > 0; j -= j & -j)
+                {
+                    sum += _data[i, j];
+                }
+            }
+            return sum;
+        }
+
+        /// <summary>
+        /// 指定した半開区間の部分和を返します。
+        /// </summary>
+        /// <param name="rows"></param>
+        /// <param name="columns"></param>
+        /// <returns></returns>
+        public long Sum(Range rows, Range columns) => Sum(rows.End, columns.End) - Sum(rows.Start, columns.End) - Sum(rows.End, columns.Start) + Sum(rows.Start, columns.Start);
+
+        /// <summary>
+        /// 指定した半開区間の部分和を返します。
+        /// </summary>
+        /// <param name="beginRow"></param>
+        /// <param name="endRow"></param>
+        /// <param name="beginColumn"></param>
+        /// <param name="endColumn"></param>
+        /// <returns></returns>
+        public long Sum(int beginRow, int endRow, int beginColumn, int endColumn) => Sum(beginRow..endRow, beginColumn..endColumn);
     }
 
     public class Counter<T> : IEnumerable<(T key, long count)> where T : IEquatable<T>
