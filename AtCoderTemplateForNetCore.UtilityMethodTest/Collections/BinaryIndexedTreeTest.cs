@@ -54,6 +54,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
             for (int i = 0; i < sum.Length; i++)
             {
                 Assert.Equal(sum[i], bit.Sum(i));
+                Assert.Equal(sum[i], bit.Sum(^(a.Length - i)));
             }
         }
 
@@ -89,6 +90,20 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
             Assert.Equal(2, bit.GetLowerBound(9));
             Assert.Equal(3, bit.GetLowerBound(18));
             Assert.Equal(5, bit.GetLowerBound(100));
+        }
+
+        [Fact]
+        public void OutOfRangeThrowsExceptionTest()
+        {
+            const int length = 5;
+            var bit = new BinaryIndexedTree(length);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => bit.AddAt(-1, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => bit.AddAt(^6, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => bit.AddAt(5, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => bit.Sum(-1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => bit.Sum(^6));
+            Assert.Throws<ArgumentOutOfRangeException>(() => bit.Sum(6));
         }
 
         private static long[] GetPrefixSum(long[] a)

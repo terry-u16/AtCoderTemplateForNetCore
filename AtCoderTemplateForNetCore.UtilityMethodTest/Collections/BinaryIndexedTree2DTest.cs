@@ -89,6 +89,30 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
             Assert.Equal(3, jBit.Sum(rowRange, columnRange));
             Assert.Equal(5, oBit.Sum(rowRange, columnRange));
             Assert.Equal(2, iBit.Sum(rowRange, columnRange));
+
+            rowRange = ^3..^1;
+            columnRange = ^6..^1;
+            Assert.Equal(3, jBit.Sum(rowRange, columnRange));
+            Assert.Equal(5, oBit.Sum(rowRange, columnRange));
+            Assert.Equal(2, iBit.Sum(rowRange, columnRange));
+        }
+
+        [Fact]
+        public void OutOfRangeThrowsException()
+        {
+            const int height = 5;
+            const int width = 7;
+            var bit = new BinaryIndexedTree2D(height, width);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => bit.AddAt(-1, 0, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => bit.AddAt(0, -1, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => bit.AddAt(5, 0, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => bit.AddAt(0, 7, 0));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => bit.Sum(7, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => bit.Sum(^6, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => bit.Sum(1, 9));
+            Assert.Throws<ArgumentOutOfRangeException>(() => bit.Sum(1, ^8));
         }
     }
 }

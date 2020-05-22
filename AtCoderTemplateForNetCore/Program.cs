@@ -1067,7 +1067,17 @@ namespace AtCoderTemplateForNetCore.Collections
         /// <param name="value">加算する数</param>
         public void AddAt(Index index, long value)
         {
-            var i = index.GetOffset(Length) + 1;  // 1-indexedにする
+            var i = index.GetOffset(Length);
+            unchecked
+            {
+                if ((uint)i >= (uint)Length)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                }
+            }
+
+            i++;  // 1-indexedにする
+
             while (i <= Length)
             {
                 _data[i] += value;
@@ -1083,6 +1093,14 @@ namespace AtCoderTemplateForNetCore.Collections
         public long Sum(Index end)
         {
             var i = end.GetOffset(Length);  // 0-indexedの半開区間＝1-indexedの閉区間なので+1は不要
+            unchecked
+            {
+                if ((uint)i >= (uint)_data.Length)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(end));
+                }
+            }
+
             long sum = 0;
             while (i > 0)
             {
@@ -1160,9 +1178,26 @@ namespace AtCoderTemplateForNetCore.Collections
         /// <param name="value">加算する値</param>
         public void AddAt(Index row, Index column, long value)
         {
-            for (int i = row.GetOffset(Height) + 1; i <= Height; i += i & -i)
+            var initI = row.GetOffset(Height);
+            var initJ = column.GetOffset(Width);
+            unchecked
             {
-                for (int j = column.GetOffset(Width) + 1; j <= Width; j += j & -j)
+                if ((ulong)initI >= (ulong)Height)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(row));
+                }
+                if ((ulong)initJ >= (ulong)Width)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(column));
+                }
+            }
+
+            initI++;    // 1-indexed
+            initJ++;    
+
+            for (int i = initI; i <= Height; i += i & -i)
+            {
+                for (int j = initJ; j <= Width; j += j & -j)
                 {
                     _data[i, j] += value;
                 }
@@ -1178,9 +1213,23 @@ namespace AtCoderTemplateForNetCore.Collections
         public long Sum(Index row, Index column)
         {
             long sum = 0;
-            for (int i = row.GetOffset(Height); i > 0; i -= i & -i)
+            var initI = row.GetOffset(Height);
+            var initJ = column.GetOffset(Width);
+            unchecked
             {
-                for (int j = column.GetOffset(Width); j > 0; j -= j & -j)
+                if ((ulong)initI >= (ulong)(Height + 1))
+                {
+                    throw new ArgumentOutOfRangeException(nameof(row));
+                }
+                if ((ulong)initJ >= (ulong)(Width + 1))
+                {
+                    throw new ArgumentOutOfRangeException(nameof(column));
+                }
+            }
+
+            for (int i = initI; i > 0; i -= i & -i)
+            {
+                for (int j = initJ; j > 0; j -= j & -j)
                 {
                     sum += _data[i, j];
                 }
