@@ -305,6 +305,38 @@ namespace AtCoderTemplateForNetCore.Algorithms
         }
     }
 
+    public class CoordinateShrinker<T> : IEnumerable<(int shrinkedIndex, T rawIndex)> where T : IComparable<T>, IEquatable<T>
+    {
+        Dictionary<T, int> _shrinkMapper;
+        T[] _expandMapper;
+        public int Count => _expandMapper.Length;
+
+        public CoordinateShrinker(IEnumerable<T> data)
+        {
+            _expandMapper = data.Distinct().ToArray();
+            Array.Sort(_expandMapper);
+
+            _shrinkMapper = new Dictionary<T, int>();
+            for (int i = 0; i < _expandMapper.Length; i++)
+            {
+                _shrinkMapper.Add(_expandMapper[i], i);
+            }
+        }
+
+        public int Shrink(T rawCoordinate) => _shrinkMapper[rawCoordinate];
+        public T Expand(int shrinkedCoordinate) => _expandMapper[shrinkedCoordinate];
+
+        public IEnumerator<(int shrinkedIndex, T rawIndex)> GetEnumerator()
+        {
+            for (int i = 0; i < _expandMapper.Length; i++)
+            {
+                yield return (i, _expandMapper[i]);
+            }
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
     public readonly struct Modular : IEquatable<Modular>, IComparable<Modular>
     {
