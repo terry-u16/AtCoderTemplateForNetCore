@@ -77,6 +77,29 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
         }
 
         [Fact]
+        public void BITIndexerTest()
+        {
+            var a = new long[] { 5, 3, 7, 9, 8 };
+
+            var bit = new BinaryIndexedTree(a);
+
+            for (int i = 0; i < bit.Length; i++)
+            {
+                Assert.Equal(a[i], bit[i]);
+            }
+
+            bit[3] += 4;
+            a[3] += 4;
+            for (int i = 0; i < bit.Length; i++)
+            {
+                Assert.Equal(a[i], bit[i]);
+            }
+
+            var sum = GetPrefixSum(a);
+            Assert.Equal(sum[^1], bit.Sum(^0));
+        }
+
+        [Fact]
         public void BITLowerBoundTest()
         {
             var a = new long[] { 5, 3, 7, 9, 8 };

@@ -1040,7 +1040,6 @@ namespace AtCoderTemplateForNetCore.Collections
     public class BinaryIndexedTree
     {
         long[] _data;
-        public ReadOnlySpan<long> Data => _data[1..];
         public int Length { get; }
 
         public BinaryIndexedTree(int length)
@@ -1059,6 +1058,19 @@ namespace AtCoderTemplateForNetCore.Collections
         }
 
         public BinaryIndexedTree(ICollection<long> collection) : this(collection, collection.Count) { }
+
+        public long this[Index index]
+        {
+            get => Sum(index..(index.GetOffset(Length) + 1));
+            set 
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), $"{nameof(value)}は0以上の値である必要があります。");
+                }
+                AddAt(index, value - this[index]);
+            }
+        }
 
         /// <summary>
         /// BITの<c>index</c>番目の要素に<c>n</c>を加算します。
@@ -1168,6 +1180,19 @@ namespace AtCoderTemplateForNetCore.Collections
             Height = height;
             Width = width;
             _data = new long[height + 1, width + 1];
+        }
+
+        public long this[Index row, Index column]
+        {
+            get => Sum(row..(row.GetOffset(Height) + 1), column..(column.GetOffset(Width) + 1));
+            set 
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), $"{nameof(value)}は0以上の値である必要があります。");
+                }
+                AddAt(row, column, value - this[row, column]);
+            }
         }
 
         /// <summary>

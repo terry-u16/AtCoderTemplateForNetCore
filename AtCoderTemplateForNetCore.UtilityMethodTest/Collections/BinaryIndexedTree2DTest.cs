@@ -58,6 +58,30 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
         }
 
         [Fact]
+        public void BIT2DIndexerTest()
+        {
+            const int height = 5;
+            const int width = 7;
+            var bit = new BinaryIndexedTree2D(height, width);
+
+            var addQueries = new (int row, int column, int value)[] { (3, 2, 8), (1, 5, 4), (0, 6, 3) };
+            foreach (var query in addQueries)
+            {
+                bit.AddAt(query.row, query.column, query.value);
+            }
+
+            Assert.Equal(8, bit[3, 2]);
+            Assert.Equal(4, bit[1, 5]);
+            Assert.Equal(3, bit[0, 6]);
+            Assert.Equal(0, bit[1, 1]);
+
+            bit[1, 1] = 5;
+            bit[3, 2] = 10;
+            bit[1, 5] -= 2;
+            Assert.Equal(20, bit.Sum(^0, ^0));
+        }
+
+        [Fact]
         public void PlanetaryExplorationTest()
         {
             // JOI 2010 本戦
