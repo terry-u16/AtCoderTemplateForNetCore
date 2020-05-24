@@ -1309,14 +1309,7 @@ namespace AtCoderTemplateForNetCore.Collections
             }
             set
             {
-                if (_innerDictionary.ContainsKey(key))
-                {
-                    _innerDictionary[key] = value;
-                }
-                else
-                {
-                    _innerDictionary.Add(key, value);
-                }
+                _innerDictionary[key] = value;
             }
         }
     }
