@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using AtCoderTemplateForNetCore.Algorithms;
 using AtCoderTemplateForNetCore.Collections;
 using AtCoderTemplateForNetCore.Extensions;
@@ -1585,7 +1586,7 @@ namespace AtCoderTemplateForNetCore.Graphs
 
     public interface IWeightedGraph<TNode, TEdge> : IGraph<TNode, TEdge> where TEdge : IWeightedEdge<TNode> where TNode : INode {  }
 
-    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
+    [StructLayout(LayoutKind.Auto)]
     public readonly struct BasicNode : INode, IEquatable<BasicNode>
     {
         public int Index { get; }
@@ -1604,7 +1605,7 @@ namespace AtCoderTemplateForNetCore.Graphs
         public static implicit operator BasicNode(int value) => new BasicNode(value);
     }
 
-    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
+    [StructLayout(LayoutKind.Auto)]
     public readonly struct BasicEdge : IEdge<BasicNode>
     {
         public BasicNode From { get; }
@@ -1619,7 +1620,7 @@ namespace AtCoderTemplateForNetCore.Graphs
         public override string ToString() => $"{From}-->{To}";
     }
 
-    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
+    [StructLayout(LayoutKind.Auto)]
     public readonly struct WeightedEdge : IWeightedEdge<BasicNode>
     {
         public BasicNode From { get; }
@@ -1638,7 +1639,7 @@ namespace AtCoderTemplateForNetCore.Graphs
         public override string ToString() => $"{From}--[{Weight}]-->{To}";
     }
 
-    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
+    [StructLayout(LayoutKind.Auto)]
     public readonly struct GridNode : INode, IEquatable<GridNode>
     {
         public int Row { get; }
@@ -1661,7 +1662,7 @@ namespace AtCoderTemplateForNetCore.Graphs
         public static bool operator !=(GridNode left, GridNode right) => !(left == right);
     }
 
-    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
+    [StructLayout(LayoutKind.Auto)]
     public readonly struct GridEdge : IEdge<GridNode>
     {
         public GridNode From { get; }
