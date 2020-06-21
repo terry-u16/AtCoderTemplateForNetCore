@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Runtime.CompilerServices;
 using AtCoderTemplateForNetCore.Algorithms;
 using AtCoderTemplateForNetCore.Collections;
 using AtCoderTemplateForNetCore.Extensions;
@@ -191,90 +192,79 @@ namespace AtCoderTemplateForNetCore.Numerics
         }
     }
 
-    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
     public readonly struct Modular : IEquatable<Modular>, IComparable<Modular>
     {
-        private const int _defaultMod = 1000000007;
+        private const int DefaultMod = 1000000007;
         public int Value { get; }
-        private readonly int? _mod;     // int?にすると遅くなるけど意図せずmod=0とかで初期化されて意味不明な計算結果になるよりはマシ
-        public int Mod => _mod ?? throw new InvalidOperationException($"{nameof(Mod)}がnullです。new {nameof(Modular)}(long value, int mod)で初期化してください。");
+        public static int Mod { get; set; } = DefaultMod;
 
-        public Modular(long value, int mod = _defaultMod)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Modular(long value)
         {
-            if (mod < 2 || mod > 1073741789)
-            {
-                // 1073741789はint.MaxValue / 2 = 1073741823以下の最大の素数
-                throw new ArgumentOutOfRangeException(nameof(mod), $"{nameof(mod)}は2以上1073741789以下の素数でなければなりません。");
-            }
-            _mod = mod;
-
-            if (value >= 0 && value < mod)
+            if (unchecked((ulong)value) < unchecked((ulong)Mod))
             {
                 Value = (int)value;
             }
             else
             {
-                Value = (int)(value % mod);
+                Value = (int)(value % Mod);
                 if (Value < 0)
                 {
-                    Value += mod;
+                    Value += Mod;
                 }
             }
         }
 
-        public static Modular operator +(in Modular a, in Modular b)
-        {
-            CheckModEquals(a, b);
+        private Modular(int value) => Value = value;
+        public static Modular Zero => new Modular(0);
+        public static Modular One => new Modular(1);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Modular operator +(Modular a, Modular b)
+        {
             var result = a.Value + b.Value;
-            if (result > a.Mod)
+            if (result > Mod)
             {
-                result -= a.Mod;    // 剰余演算を避ける
+                result -= Mod;    // 剰余演算を避ける
             }
-            return new Modular(result, a.Mod);
+            return new Modular(result);
         }
 
-        public static Modular operator -(in Modular a, in Modular b)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Modular operator -(Modular a, Modular b)
         {
-            CheckModEquals(a, b);
-
             var result = a.Value - b.Value;
             if (result < 0)
             {
-                result += a.Mod;    // 剰余演算を避ける
+                result += Mod;    // 剰余演算を避ける
             }
-            return new Modular(result, a.Mod);
+            return new Modular(result);
         }
 
-        public static Modular operator *(in Modular a, in Modular b)
-        {
-            CheckModEquals(a, b);
-            return new Modular((long)a.Value * b.Value, a.Mod);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Modular operator *(Modular a, Modular b) => new Modular((long)a.Value * b.Value);
 
-        public static Modular operator /(in Modular a, in Modular b)
-        {
-            CheckModEquals(a, b);
-            return a * Pow(b, a.Mod - 2);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Modular operator /(Modular a, Modular b) => a * Pow(b, Mod - 2);
 
         // 需要は不明だけど一応
-        public static bool operator ==(in Modular left, in Modular right) => left.Equals(right);
-        public static bool operator !=(in Modular left, in Modular right) => !(left == right);
-        public static bool operator <(in Modular left, in Modular right) => left.CompareTo(right) < 0;
-        public static bool operator <=(in Modular left, in Modular right) => left.CompareTo(right) <= 0;
-        public static bool operator >(in Modular left, in Modular right) => left.CompareTo(right) > 0;
-        public static bool operator >=(in Modular left, in Modular right) => left.CompareTo(right) >= 0;
+        public static bool operator ==(Modular left, Modular right) => left.Equals(right);
+        public static bool operator !=(Modular left, Modular right) => !(left == right);
+        public static bool operator <(Modular left, Modular right) => left.CompareTo(right) < 0;
+        public static bool operator <=(Modular left, Modular right) => left.CompareTo(right) <= 0;
+        public static bool operator >(Modular left, Modular right) => left.CompareTo(right) > 0;
+        public static bool operator >=(Modular left, Modular right) => left.CompareTo(right) >= 0;
 
-        public static explicit operator int(in Modular a) => a.Value;
-        public static explicit operator long(in Modular a) => a.Value;
+        public static implicit operator Modular(long a) => new Modular(a);
+        public static explicit operator int(Modular a) => a.Value;
+        public static explicit operator long(Modular a) => a.Value;
 
-        public static Modular Pow(in Modular a, int n)
+        public static Modular Pow(Modular a, int n)
         {
             switch (n)
             {
                 case 0:
-                    return new Modular(1, a.Mod);
+                    return Modular.One;
                 case 1:
                     return a;
                 case int m when m >= 0: // ジャンプテーブル化はできなくなる
@@ -285,77 +275,60 @@ namespace AtCoderTemplateForNetCore.Numerics
             }
         }
 
-        private static Dictionary<int, List<int>> _factorialCache;
-        private static Dictionary<int, List<int>> FactorialCache => _factorialCache ??= new Dictionary<int, List<int>>();
-        private static Dictionary<int, int[]> FactorialInverseCache { get; } = new Dictionary<int, int[]>();
-        const int maxFactorial = 1000000;
+        private static List<int> _factorialCache;
+        private static List<int> FactorialCache => _factorialCache ??= new List<int>() { 1 };
+        private static int[] FactorialInverseCache { get; set; }
+        const int defaultMaxFactorial = 1000000;
 
-        public static Modular Factorial(int n, int mod = _defaultMod)
+        public static Modular Factorial(int n)
         {
-            if (n < 0)
+                        if (n < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(n), $"{nameof(n)}は0以上の整数でなければなりません。");
             }
-            if (mod < 2)
-            {
-                throw new ArgumentOutOfRangeException(nameof(mod), $"{nameof(mod)}は2以上の素数でなければなりません。");
-            }
 
-            if (!FactorialCache.ContainsKey(mod))
+            for (int i = FactorialCache.Count; i <= n; i++)  // Countが1（0!までキャッシュ済み）のとき1!～n!まで計算
             {
-                FactorialCache.Add(mod, new List<int>() { 1 });
+                FactorialCache.Add((int)((long)FactorialCache[i - 1] * i % Mod));
             }
-
-            var cache = FactorialCache[mod];
-            for (int i = cache.Count; i <= n; i++)  // Countが1（0!までキャッシュ済み）のとき1!～n!まで計算
-            {
-                cache.Add((int)((long)cache[i - 1] * i % mod));
-            }
-            return new Modular(cache[n], mod);
+            return new Modular(FactorialCache[n]);
         }
 
-        public static Modular Permutation(int n, int r, int mod = _defaultMod)
+        public static Modular Permutation(int n, int r)
         {
             CheckNR(n, r);
-            return Factorial(n, mod) / Factorial(n - r, mod);
+            return Factorial(n) / Factorial(n - r);
         }
 
-        public static Modular Combination(int n, int r, int mod = _defaultMod)
+        public static Modular Combination(int n, int r)
         {
-            if (!FactorialInverseCache.ContainsKey(mod))
+            try
             {
-                InitializeCombinationTable(maxFactorial, mod);
+                CheckNR(n, r);
+                r = Math.Min(r, n - r);
+                return new Modular(FactorialCache[n]) * new Modular(FactorialInverseCache[r]) * new Modular(FactorialInverseCache[n - r]);
             }
-            CheckNR(n, r);
-            r = Math.Min(r, n - r);
-            return new Modular(FactorialCache[mod][n], mod) * new Modular(FactorialInverseCache[mod][r], mod) * new Modular(FactorialInverseCache[mod][n - r], mod);
+            catch (NullReferenceException ex)
+            {
+                throw new InvalidOperationException($"{nameof(Combination)}を呼び出す前に{nameof(InitializeCombinationTable)}により前計算を行う必要があります。", ex);
+            }
         }
 
-        private static void InitializeCombinationTable(int max, int mod)
+        public static void InitializeCombinationTable(int max = defaultMaxFactorial)
         {
             Factorial(max);
-            FactorialInverseCache.Add(mod, new int[max + 1]);
+            FactorialInverseCache = new int[max + 1];
 
-            long fInv = (new Modular(1, mod) / Factorial(max, mod)).Value;
-            FactorialInverseCache[mod][max] = (int)fInv;
+            var fInv = (Modular.One / Factorial(max)).Value;
+            FactorialInverseCache[max] = fInv;
             for (int i = max - 1; i >= 0; i--)
             {
-                fInv = (fInv * (i + 1)) % mod;
-                FactorialInverseCache[mod][i] = (int)fInv;
+                fInv = (int)((long)fInv * (i + 1) % Mod);
+                FactorialInverseCache[i] = fInv;
             }
         }
 
-        public static Modular CombinationWithRepetition(int n, int r, int mod = _defaultMod) => Combination(n + r - 1, r, mod);
-
-        public static Modular[] CreateArray(int length, int mod = _defaultMod) => Enumerable.Repeat(new Modular(0, mod), length).ToArray();
-
-        private static void CheckModEquals(in Modular a, in Modular b)
-        {
-            if (a.Mod != b.Mod)
-            {
-                throw new ArgumentException($"{nameof(a)}, {nameof(b)}", $"両者の法{nameof(Mod)}は等しくなければなりません。");
-            }
-        }
+        public static Modular CombinationWithRepetition(int n, int r) => Combination(n + r - 1, r);
 
         private static void CheckNR(int n, int r)
         {
@@ -374,18 +347,10 @@ namespace AtCoderTemplateForNetCore.Numerics
         }
 
         public override string ToString() => $"{Value} (mod {Mod})";
-
         public override bool Equals(object obj) => obj is Modular m ? Equals(m) : false;
-
-        public bool Equals([System.Diagnostics.CodeAnalysis.AllowNull] Modular other) => Value == other.Value && Mod == other.Mod;
-
-        public int CompareTo([System.Diagnostics.CodeAnalysis.AllowNull] Modular other)
-        {
-            CheckModEquals(this, other);
-            return Value.CompareTo(other.Value);
-        }
-
-        public override int GetHashCode() => (Value, Mod).GetHashCode();
+        public bool Equals([System.Diagnostics.CodeAnalysis.AllowNull] Modular other) => Value == other.Value;
+        public int CompareTo([System.Diagnostics.CodeAnalysis.AllowNull] Modular other) => Value.CompareTo(other.Value);
+        public override int GetHashCode() => Value.GetHashCode();
     }
 
     public readonly struct Fraction : IEquatable<Fraction>, IComparable<Fraction>

@@ -11,6 +11,11 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Algorithms
     [Collection("ModularCombination")]
     public class RerootingTest
     {
+        public RerootingTest()
+        {
+            Modular.InitializeCombinationTable();
+        }
+
         [Fact]
         public void RerootingTestABC160ExampleF()
         {

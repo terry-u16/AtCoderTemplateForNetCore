@@ -11,6 +11,11 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
     [Collection("ModularCombination")]
     public class ModularTest
     {
+        public ModularTest()
+        {
+            Modular.InitializeCombinationTable();
+        }
+
         [Theory]
         [InlineData(1, 3, 1)]
         [InlineData(1000000010, 1000000007, 3)]
@@ -18,12 +23,14 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
         [InlineData(2147483662032385532, 1000000007, 3)]
         public void InitializationTest(long value, int mod, int expected)
         {
-            var m = new Modular(value, mod);
-            Assert.Equal(mod, m.Mod);
+            Modular.Mod = mod;
+            var m = new Modular(value);
+            Assert.Equal(mod, Modular.Mod);
             Assert.Equal(expected, m.Value);
             Assert.Equal(expected, (int)m);
             Assert.Equal(expected, (long)m);
-            Assert.Equal($"{m.Value} (mod {m.Mod})", m.ToString());
+            Assert.Equal($"{m.Value} (mod {Modular.Mod})", m.ToString());
+            Modular.Mod = 1000000007;
         }
 
         [Theory]
@@ -151,16 +158,6 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
         {
             var fact = Modular.CombinationWithRepetition(n, r);
             Assert.Equal(expected, fact.Value);
-        }
-
-
-        [Fact]
-        public void CreateArrayTest()
-        {
-            var modulars = Modular.CreateArray(5);
-            modulars[0] = new Modular(1);
-
-            Assert.Equal(new[] { 1, 0, 0, 0, 0 }.Select(i => new Modular(i)), modulars);
         }
     }
 }
