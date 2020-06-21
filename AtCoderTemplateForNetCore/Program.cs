@@ -246,7 +246,7 @@ namespace AtCoderTemplateForNetCore.Numerics
         public static Modular operator *(Modular a, Modular b) => new Modular((long)a.Value * b.Value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Modular operator /(Modular a, Modular b) => a * Pow(b, Mod - 2);
+        public static Modular operator /(Modular a, Modular b) => a * Pow(b.Value, Mod - 2);
 
         // 需要は不明だけど一応
         public static bool operator ==(Modular left, Modular right) => left.Equals(right);
@@ -260,7 +260,7 @@ namespace AtCoderTemplateForNetCore.Numerics
         public static explicit operator int(Modular a) => a.Value;
         public static explicit operator long(Modular a) => a.Value;
 
-        public static Modular Pow(Modular a, int n)
+        public static Modular Pow(int a, int n)
         {
             switch (n)
             {
@@ -283,7 +283,7 @@ namespace AtCoderTemplateForNetCore.Numerics
 
         public static Modular Factorial(int n)
         {
-                        if (n < 0)
+            if (n < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(n), $"{nameof(n)}は0以上の整数でなければなりません。");
             }
@@ -303,13 +303,13 @@ namespace AtCoderTemplateForNetCore.Numerics
 
         public static Modular Combination(int n, int r)
         {
+            CheckNR(n, r);
+            r = Math.Min(r, n - r);
             try
             {
-                CheckNR(n, r);
-                r = Math.Min(r, n - r);
                 return new Modular(FactorialCache[n]) * new Modular(FactorialInverseCache[r]) * new Modular(FactorialInverseCache[n - r]);
             }
-            catch (NullReferenceException ex)
+            catch (Exception ex) when (ex is NullReferenceException || ex is ArgumentOutOfRangeException)
             {
                 throw new InvalidOperationException($"{nameof(Combination)}を呼び出す前に{nameof(InitializeCombinationTable)}により前計算を行う必要があります。", ex);
             }

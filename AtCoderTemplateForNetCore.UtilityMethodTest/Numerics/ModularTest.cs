@@ -101,10 +101,9 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
         [Theory]
         [InlineData(2, 3, 8)]
         [InlineData(10, 10, 999999937)]
-        public void PowTest(long a, int n, int expected)
+        public void PowTest(int a, int n, int expected)
         {
-            var modA = new Modular(a);
-            var pow = Modular.Pow(modA, n);
+            var pow = Modular.Pow(a, n);
             Assert.Equal(expected, pow.Value);
         }
 
