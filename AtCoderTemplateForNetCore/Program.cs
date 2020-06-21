@@ -1573,7 +1573,7 @@ namespace AtCoderTemplateForNetCore.Graphs
 
     public interface IWeightedEdge<TNode> : IEdge<TNode> where TNode : INode
     {
-        int Weight { get; }
+        long Weight { get; }
     }
 
     public interface IGraph<TNode, TEdge> where TEdge : IEdge<TNode> where TNode : INode
@@ -1625,11 +1625,11 @@ namespace AtCoderTemplateForNetCore.Graphs
     {
         public BasicNode From { get; }
         public BasicNode To { get; }
-        public int Weight { get; }
+        public long Weight { get; }
 
         public WeightedEdge(int from, int to) : this(from, to, 1) { }
 
-        public WeightedEdge(int from, int to, int weight)
+        public WeightedEdge(int from, int to, long weight)
         {
             From = from;
             To = to;
