@@ -500,9 +500,9 @@ namespace AtCoderTemplateForNetCore.Algorithms
 {
     public static class ZAlgorithm
     {
-        public static int[] Search(string s) => Search(s.AsSpan());
+        public static int[] SearchAll(string s) => SearchAll(s.AsSpan());
 
-        public static int[] Search<T>(ReadOnlySpan<T> s) where T : IEquatable<T>
+        public static int[] SearchAll<T>(ReadOnlySpan<T> s) where T : IEquatable<T>
         {
             var z = new int[s.Length];
             z[0] = s.Length;
