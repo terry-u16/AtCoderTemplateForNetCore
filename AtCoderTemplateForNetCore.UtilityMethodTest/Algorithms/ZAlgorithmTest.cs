@@ -17,7 +17,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Algorithms
         [InlineData("momomohimomokusa", 16, 0, 4, 0, 2, 0, 0, 0, 4, 0, 2, 0, 0, 0, 0, 0)]
         public void ZAlgorithmSumomoTest(string input, params int[] expected)
         {
-            var z = StringAlgorithms.ZAlgorithm(input);
+            var z = ZAlgorithm.Search(input);
             Assert.Equal(expected, z);
         }
     }

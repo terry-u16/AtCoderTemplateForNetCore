@@ -498,11 +498,11 @@ namespace AtCoderTemplateForNetCore.Numerics
 
 namespace AtCoderTemplateForNetCore.Algorithms
 {
-    public static class StringAlgorithms
+    public static class ZAlgorithm
     {
-        public static int[] ZAlgorithm(string s) => ZAlgorithm(s.AsSpan());
+        public static int[] Search(string s) => Search(s.AsSpan());
 
-        public static int[] ZAlgorithm<T>(ReadOnlySpan<T> s) where T : IEquatable<T>
+        public static int[] Search<T>(ReadOnlySpan<T> s) where T : IEquatable<T>
         {
             var z = new int[s.Length];
             z[0] = s.Length;
