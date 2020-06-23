@@ -502,7 +502,7 @@ namespace AtCoderTemplateForNetCore.Algorithms
     {
         public static int[] ZAlgorithm(string s) => ZAlgorithm(s.AsSpan());
 
-        public static int[] ZAlgorithm(ReadOnlySpan<char> s)
+        public static int[] ZAlgorithm<T>(ReadOnlySpan<T> s) where T : IEquatable<T>
         {
             var z = new int[s.Length];
             z[0] = s.Length;
@@ -511,7 +511,7 @@ namespace AtCoderTemplateForNetCore.Algorithms
 
             while (offset < s.Length)
             {
-                while (offset + length < s.Length && s[length] == s[offset + length])
+                while (offset + length < s.Length && s[length].Equals(s[offset + length]))
                 {
                     length++;
                 }
