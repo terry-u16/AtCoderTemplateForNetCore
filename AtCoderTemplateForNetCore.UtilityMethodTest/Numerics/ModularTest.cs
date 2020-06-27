@@ -36,6 +36,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
         [Theory]
         [InlineData(1, 1, 2)]
         [InlineData(1000000000, 10, 3)]
+        [InlineData(1000000006, 1, 0)]
         public void AddTest(long a, long b, int expected)
         {
             var result = new Modular(a) + new Modular(b);

@@ -224,7 +224,7 @@ namespace AtCoderTemplateForNetCore.Numerics
         public static Modular operator +(Modular a, Modular b)
         {
             var result = a.Value + b.Value;
-            if (result > Mod)
+            if (result >= Mod)
             {
                 result -= Mod;    // 剰余演算を避ける
             }
