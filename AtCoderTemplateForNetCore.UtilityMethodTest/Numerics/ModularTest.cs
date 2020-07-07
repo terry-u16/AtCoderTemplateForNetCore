@@ -29,7 +29,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
             Assert.Equal(expected, m.Value);
             Assert.Equal(expected, (int)m);
             Assert.Equal(expected, (long)m);
-            Assert.Equal($"{m.Value} (mod {Modular.Mod})", m.ToString());
+            Assert.Equal($"{m.Value}", m.ToString());
             Modular.Mod = 1000000007;
         }
 

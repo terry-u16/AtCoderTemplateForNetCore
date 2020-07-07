@@ -347,7 +347,7 @@ namespace AtCoderTemplateForNetCore.Numerics
             }
         }
 
-        public override string ToString() => $"{Value} (mod {Mod})";
+        public override string ToString() => Value.ToString();
         public override bool Equals(object obj) => obj is Modular m ? Equals(m) : false;
         public bool Equals([System.Diagnostics.CodeAnalysis.AllowNull] Modular other) => Value == other.Value;
         public int CompareTo([System.Diagnostics.CodeAnalysis.AllowNull] Modular other) => Value.CompareTo(other.Value);
