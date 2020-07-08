@@ -10,6 +10,7 @@ using AtCoderTemplateForNetCore.Collections;
 using AtCoderTemplateForNetCore.Extensions;
 using AtCoderTemplateForNetCore.Numerics;
 using AtCoderTemplateForNetCore.Questions;
+using System.Threading.Tasks.Dataflow;
 
 namespace AtCoderTemplateForNetCore
 {
@@ -2161,6 +2162,13 @@ namespace AtCoderTemplateForNetCore.Graphs
 
 namespace AtCoderTemplateForNetCore.Extensions
 {
+    public static class StringExtensions
+    {
+        public static string Join<T>(this IEnumerable<T> source) => string.Concat(source);
+        public static string Join<T>(this IEnumerable<T> source, char separator) => string.Join(separator, source);
+        public static string Join<T>(this IEnumerable<T> source, string separator) => string.Join(separator, source);
+    }
+
     public static class TextReaderExtensions
     {
         public static int ReadInt(this TextReader reader) => int.Parse(ReadString(reader));
