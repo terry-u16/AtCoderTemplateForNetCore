@@ -23,8 +23,16 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
         }
 
         [Theory]
+        [InlineData(2, 0, 0)]
+        [InlineData(0, 1000000007, 0)]
+        public void LcmWithZeroTest(long a, long b, long gcd)
+        {
+            Assert.Equal(gcd, NumericalAlgorithms.Lcm(a, b));
+        }
+
+        [Theory]
         [InlineData(-1, 3)]
-        [InlineData(5, 0)]
+        [InlineData(5, -10)]
         public void LcmThrowsExceptionTest(long a, long b)
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => NumericalAlgorithms.Lcm(a, b));

@@ -23,8 +23,17 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
         }
 
         [Theory]
+        [InlineData(2, 0, 2)]
+        [InlineData(0, 1000000007, 1000000007)]
+        [InlineData(0, 0, 0)]
+        public void GcdWithZeroTest(long a, long b, long gcd)
+        {
+            Assert.Equal(gcd, NumericalAlgorithms.Gcd(a, b));
+        }
+
+        [Theory]
         [InlineData(-1, 3)]
-        [InlineData(5, 0)]
+        [InlineData(5, -10)]
         public void GcdThrowsExceptionTest(long a, long b)
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => NumericalAlgorithms.Gcd(a, b));

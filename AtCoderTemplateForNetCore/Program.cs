@@ -67,35 +67,26 @@ namespace AtCoderTemplateForNetCore.Numerics
     {
         public static long Gcd(long a, long b)
         {
-            if (a <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(a), $"{nameof(b)}は正の整数である必要があります。");
-            }
-            if (b <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(b), $"{nameof(b)}は正の整数である必要があります。");
-            }
             if (a < b)
             {
                 (a, b) = (b, a);
             }
 
-            while (b != 0)
+            var result = b switch
             {
-                (a, b) = (b, a % b);
-            }
-            return a;
+                0 => a,
+                long n when n > 0 => Gcd(b, a % b),
+                _ => throw new ArgumentOutOfRangeException($"{nameof(a)}, {nameof(b)}は0以上の整数である必要があります。")
+            };
+
+            return result;
         }
 
         public static long Lcm(long a, long b)
         {
-            if (a <= 0)
+            if (a < 0 || b < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(a), $"{nameof(b)}は正の整数である必要があります。");
-            }
-            if (b <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(b), $"{nameof(b)}は正の整数である必要があります。");
+                throw new ArgumentOutOfRangeException($"{nameof(a)}, {nameof(b)}は0以上の整数である必要があります。");
             }
 
             return a / Gcd(a, b) * b;
