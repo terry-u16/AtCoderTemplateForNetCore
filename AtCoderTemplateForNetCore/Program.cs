@@ -346,6 +346,258 @@ namespace AtCoderTemplateForNetCore.Numerics
         public override int GetHashCode() => Value.GetHashCode();
     }
 
+    public class ModMatrix
+    {
+        readonly Modular[] _values;
+        public int Height { get; }
+        public int Width { get; }
+
+        public Span<Modular> this[int row]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _values.AsSpan(row * Width, Width);
+        }
+
+        public Modular this[int row, int column]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                if (unchecked((uint)row) >= Height)
+                    ThrowsArgumentOutOfRangeException(nameof(row));
+                else if (unchecked((uint)column) >= Width)
+                    ThrowsArgumentOutOfRangeException(nameof(column));
+                return _values[row * Width + column];
+            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set
+            {
+                if (unchecked((uint)row) >= Height)
+                    ThrowsArgumentOutOfRangeException(nameof(row));
+                else if (unchecked((uint)column) >= Width)
+                    ThrowsArgumentOutOfRangeException(nameof(column));
+                _values[row * Width + column] = value;
+            }
+        }
+
+        public ModMatrix(int n) : this(n, n) { }
+
+        public ModMatrix(int height, int width)
+        {
+            if (height <= 0)
+                throw new ArgumentOutOfRangeException(nameof(height));
+            if (width <= 0)
+                throw new ArgumentOutOfRangeException(nameof(width));
+            Height = height;
+            Width = width;
+            _values = new Modular[height * width];
+        }
+
+        public ModMatrix(Modular[][] values) : this(values.Length, values[0].Length)
+        {
+            for (int row = 0; row < Height; row++)
+            {
+                if (Width != values[row].Length)
+                    throw new ArgumentException($"{nameof(values)}の列数は揃っている必要があります。");
+                var span = _values.AsSpan(row * Width, Width);
+                values[row].AsSpan().CopyTo(span);
+            }
+        }
+
+        public ModMatrix(Modular[,] values) : this(values.GetLength(0), values.GetLength(1))
+        {
+            for (int row = 0; row < Height; row++)
+            {
+                var span = _values.AsSpan(row * Width, Width);
+                for (int column = 0; column < span.Length; column++)
+                {
+                    span[column] = values[row, column];
+                }
+            }
+        }
+
+        public ModMatrix(ModMatrix matrix)
+        {
+            Height = matrix.Height;
+            Width = matrix.Width;
+            _values = new Modular[matrix._values.Length];
+            matrix._values.AsSpan().CopyTo(_values);
+        }
+
+        public static ModMatrix GetIdentity(int dimension)
+        {
+            var result = new ModMatrix(dimension);
+            for (int i = 0; i < dimension; i++)
+            {
+                result._values[i * result.Width + i] = 1;
+            }
+            return result;
+        }
+
+        public static ModMatrix operator +(ModMatrix a, ModMatrix b)
+        {
+            CheckSameShape(a, b);
+
+            var result = new ModMatrix(a.Height, a.Width);
+            for (int i = 0; i < result._values.Length; i++)
+            {
+                result._values[i] = a._values[i] + b._values[i];
+            }
+            return result;
+        }
+
+        public static ModMatrix operator -(ModMatrix a, ModMatrix b)
+        {
+            CheckSameShape(a, b);
+
+            var result = new ModMatrix(a.Height, a.Width);
+            for (int i = 0; i < result._values.Length; i++)
+            {
+                result._values[i] = a._values[i] - b._values[i];
+            }
+            return result;
+        }
+
+        public static ModMatrix operator *(ModMatrix a, ModMatrix b)
+        {
+            if (a.Width != b.Height)
+                throw new ArgumentException($"{nameof(a)}の列数と{nameof(b)}の行数は等しくなければなりません。");
+
+            var result = new ModMatrix(a.Height, b.Width);
+            for (int i = 0; i < result.Height; i++)
+            {
+                var aSpan = a._values.AsSpan(i * a.Width, a.Width);
+                var resultSpan = result._values.AsSpan(i * result.Width, result.Width);
+                for (int k = 0; k < aSpan.Length; k++)
+                {
+                    var bSpan = b._values.AsSpan(k * b.Width, b.Width);
+                    for (int j = 0; j < resultSpan.Length; j++)
+                    {
+                        resultSpan[j] += aSpan[k] * bSpan[j];
+                    }
+                }
+            }
+            return result;
+        }
+
+        public static ModVector operator *(ModMatrix matrix, ModVector vector)
+        {
+            if (matrix.Width != vector.Length)
+                throw new ArgumentException($"{nameof(matrix)}の列数と{nameof(vector)}の行数は等しくなければなりません。");
+
+            var result = new ModVector(vector.Length);
+            for (int i = 0; i < result.Length; i++)
+            {
+                var matrixSpan = matrix[i];
+                for (int k = 0; k < matrixSpan.Length; k++)
+                {
+                    result[i] += matrixSpan[k] * vector[k];
+                }
+            }
+            return result;
+        }
+
+        public ModMatrix Pow(long pow)
+        {
+            if (Height != Width)
+                throw new ArgumentException("累乗を行う行列は正方行列である必要があります。");
+            if (pow < 0)
+                throw new ArgumentException($"{nameof(pow)}は0以上の整数である必要があります。");
+
+            var powMatrix = new ModMatrix(this);
+            var result = GetIdentity(Height);
+            while (pow > 0)
+            {
+                if ((pow & 1) > 0)
+                {
+                    result *= powMatrix;
+                }
+                powMatrix *= powMatrix;
+                pow >>= 1;
+            }
+            return result;
+        }
+
+        private static void CheckSameShape(ModMatrix a, ModMatrix b)
+        {
+            if (a.Height != b.Height)
+                throw new ArgumentException($"{nameof(a)}の行数と{nameof(b)}の行数は等しくなければなりません。");
+            else if (a.Width != b.Width)
+                throw new ArgumentException($"{nameof(a)}の列数と{nameof(b)}の列数は等しくなければなりません。");
+        }
+
+        private void ThrowsArgumentOutOfRangeException(string paramName) => throw new ArgumentOutOfRangeException(paramName);
+        public override string ToString() => $"({Height}x{Width})matrix";
+    }
+
+    public class ModVector
+    {
+        readonly Modular[] _values;
+        public int Length => _values.Length;
+
+        public ModVector(int length)
+        {
+            if (length <= 0)
+                throw new ArgumentOutOfRangeException(nameof(length));
+            _values = new Modular[length];
+        }
+
+        public ModVector(ReadOnlySpan<Modular> vector)
+        {
+            _values = new Modular[vector.Length];
+            vector.CopyTo(_values);
+        }
+
+        public ModVector(ModVector vector) : this(vector._values) { }
+
+        public Modular this[int index]
+        {
+            get => _values[index];
+            set => _values[index] = value;
+        }
+
+        public static ModVector operator +(ModVector a, ModVector b)
+        {
+            if (a.Length != b.Length)
+                throw new ArgumentException($"{nameof(a)}と{nameof(b)}の次元は等しくなければなりません。");
+
+            var result = new ModVector(a.Length);
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = a[i] + b[i];
+            }
+            return result;
+        }
+
+        public static ModVector operator -(ModVector a, ModVector b)
+        {
+            if (a.Length != b.Length)
+                throw new ArgumentException($"{nameof(a)}と{nameof(b)}の次元は等しくなければなりません。");
+
+            var result = new ModVector(a.Length);
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = a[i] - b[i];
+            }
+            return result;
+        }
+
+        public static Modular operator *(ModVector a, ModVector b)
+        {
+            if (a.Length != b.Length)
+                throw new ArgumentException($"{nameof(a)}と{nameof(b)}の次元は等しくなければなりません。");
+
+            var result = Modular.Zero;
+            for (int i = 0; i < a.Length; i++)
+            {
+                result += a[i] * b[i];
+            }
+            return result;
+        }
+
+        public override string ToString() => $"({Length})vector";
+    }
+
     public readonly struct Fraction : IEquatable<Fraction>, IComparable<Fraction>
     {
         /// <summary>分子</summary>
