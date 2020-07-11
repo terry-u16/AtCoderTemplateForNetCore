@@ -888,95 +888,6 @@ namespace AtCoderTemplateForNetCore.Algorithms
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
     }
-
-    public interface ITreeDpState<TSet> : IMonoid<TSet> where TSet : ITreeDpState<TSet>, new()
-    {
-        public TSet AddRoot();
-    }
-
-    public class Rerooting<TTreeDpState> where TTreeDpState : ITreeDpState<TTreeDpState>, new()
-    {
-        readonly IReadOnlyList<int>[] _graph;
-        readonly TTreeDpState _identity;
-        readonly Dictionary<int, TTreeDpState>[] _dp;
-        readonly TTreeDpState[] _result;
-
-        public Rerooting(IReadOnlyList<int>[] graph)
-        {
-            _graph = graph;
-            _identity = new TTreeDpState().Identity;
-            _dp = new Dictionary<int, TTreeDpState>[_graph.Length];
-            _result = new TTreeDpState[_graph.Length];
-        }
-
-        public TTreeDpState[] Solve()
-        {
-            DepthFirstSearch();
-            Reroot();
-            return _result;
-        }
-
-        private TTreeDpState DepthFirstSearch() => DepthFirstSearch(0, -1);
-
-        private TTreeDpState DepthFirstSearch(int root, int parent)
-        {
-            var sum = _identity;
-            _dp[root] = new Dictionary<int, TTreeDpState>();
-
-            foreach (var child in _graph[root])
-            {
-                if (child == parent)
-                    continue;
-                _dp[root].Add(child, DepthFirstSearch(child, root));
-                sum *= _dp[root][child];
-            }
-            return sum.AddRoot();
-        }
-
-        private void Reroot() => Reroot(0, -1, _identity);
-
-        private void Reroot(int root, int parent, TTreeDpState toAdd)
-        {
-            var degree = _graph[root].Count;
-            for (int i = 0; i < _graph[root].Count; i++)
-            {
-                var child = _graph[root][i];
-                if (child == parent)
-                {
-                    _dp[root].Add(child, toAdd);
-                    break;
-                }
-            }
-
-            // 累積和
-            int sumSize = degree + 1;
-            var sumLeft = new TTreeDpState[sumSize];
-            sumLeft[0] = _identity;
-            for (int i = 0; i < degree; i++)
-            {
-                var child = _graph[root][i];
-                sumLeft[i + 1] = sumLeft[i] * _dp[root][child];
-            }
-
-            var sumRight = new TTreeDpState[sumSize];
-            sumRight[degree] = _identity;
-            for (int i = degree - 1; i >= 0; i--)
-            {
-                var child = _graph[root][i];
-                sumRight[i] = sumRight[i + 1] * _dp[root][child];
-            }
-            _result[root] = sumLeft[degree].AddRoot();
-
-            for (int i = 0; i < _graph[root].Count; i++)
-            {
-                var child = _graph[root][i];
-                if (child == parent)
-                    continue;
-                var dp = sumLeft[i] * sumRight[i + 1];
-                Reroot(child, root, dp.AddRoot());
-            }
-        }
-    }
 }
 
 #endregion
@@ -2394,6 +2305,105 @@ namespace AtCoderTemplateForNetCore.Graphs
                 }
 
                 return (distances, isNegativeCycle);
+            }
+        }
+
+        public interface ITreeDpState<TSet> : IMonoid<TSet> where TSet : ITreeDpState<TSet>, new()
+        {
+            public TSet AddRoot();
+        }
+
+        public class Rerooting<TNode, TEdge, TTreeDpState> where TEdge : IEdge<TNode> where TNode : struct, INode where TTreeDpState : ITreeDpState<TTreeDpState>, new()
+        {
+            readonly IGraph<TNode, TEdge> _graph;
+            readonly TTreeDpState _identity;
+            readonly Dictionary<int, TTreeDpState>[] _dp;
+            readonly TTreeDpState[] _result;
+
+            public Rerooting(IGraph<TNode, TEdge> graph)
+            {
+                _graph = graph;
+                _identity = new TTreeDpState().Identity;
+                _dp = new Dictionary<int, TTreeDpState>[_graph.NodeCount];
+                _result = new TTreeDpState[_graph.NodeCount];
+            }
+
+            public TTreeDpState[] Solve()
+            {
+                DepthFirstSearch(_graph.Nodes.First(), null);
+                Reroot(_graph.Nodes.First(), null, _identity);
+                return _result;
+            }
+
+            private TTreeDpState DepthFirstSearch(TNode root, TNode? parent)
+            {
+                var sum = _identity;
+                _dp[root.Index] = new Dictionary<int, TTreeDpState>();
+
+                foreach (var edge in _graph[root])
+                {
+                    if (edge.To.Index == parent?.Index)
+                        continue;
+                    _dp[root.Index].Add(edge.To.Index, DepthFirstSearch(edge.To, root));
+                    sum *= _dp[root.Index][edge.To.Index];
+                }
+                return sum.AddRoot();
+            }
+
+            private void Reroot(TNode root, TNode? parent, TTreeDpState toAdd)
+            {
+                var edges = _graph[root].ToArray();
+
+                foreach (var edge in edges)
+                {
+                    if (edge.To.Index == parent?.Index)
+                    {
+                        _dp[root.Index].Add(edge.To.Index, toAdd);
+                        break;
+                    }
+                }
+
+                var dp = GetPrefixSum(root, edges);
+
+                for (int i = 0; i < edges.Length; i++)
+                {
+                    var child = edges[i].To;
+                    if (child.Index == parent?.Index)
+                        continue;
+                    Reroot(child, root, dp[i].AddRoot());
+                }
+            }
+
+            private TTreeDpState[] GetPrefixSum(TNode root, TEdge[] edges)
+            {
+                // 左右からの累積和
+                int sumSize = edges.Length + 1;
+                var sumLeft = new TTreeDpState[sumSize];
+                sumLeft[0] = _identity;
+                for (int i = 0; i < edges.Length; i++)
+                {
+                    var child = edges[i].To;
+                    sumLeft[i + 1] = sumLeft[i] * _dp[root.Index][child.Index];
+                }
+
+                var sumRight = new TTreeDpState[sumSize];
+                sumRight[^1] = _identity;
+                for (int i = edges.Length - 1; i >= 0; i--)
+                {
+                    var child = edges[i].To;
+                    sumRight[i] = sumRight[i + 1] * _dp[root.Index][child.Index];
+                }
+
+                _result[root.Index] = sumLeft[^1].AddRoot();
+
+                // 頂点iを除いた累積
+                var dp = new TTreeDpState[edges.Length];
+                for (int i = 0; i < dp.Length; i++)
+                {
+                    dp[i] = sumLeft[i] * sumRight[i + 1];
+                }
+
+                return dp;
             }
         }
     }

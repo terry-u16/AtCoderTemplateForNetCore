@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using AtCoderTemplateForNetCore.Algorithms;
 using AtCoderTemplateForNetCore.Numerics;
+using AtCoderTemplateForNetCore.Graphs;
+using AtCoderTemplateForNetCore.Graphs.Algorithms;
 using Xunit;
 
-namespace AtCoderTemplateForNetCore.UtilityMethodTest.Algorithms
+namespace AtCoderTemplateForNetCore.UtilityMethodTest.Graphs
 {
     [Collection("ModularCombination")]
     public class RerootingTest
@@ -28,15 +30,16 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Algorithms
 6 7
 6 8".Split(Environment.NewLine);
 
+            Modular.InitializeCombinationTable();
             var n = int.Parse(inputs[0]);
-            var graph = Enumerable.Repeat(0, n).Select(_ => new List<int>()).ToArray();
+            var graph = new BasicGraph(n);
             foreach (var input in inputs.Skip(1).Select(s => s.Split(' ').Select(s => int.Parse(s) - 1).ToArray()))
             {
-                graph[input[0]].Add(input[1]);
-                graph[input[1]].Add(input[0]);
+                graph.AddEdge(new BasicEdge(input[0], input[1]));
+                graph.AddEdge(new BasicEdge(input[1], input[0]));
             }
 
-            var rerooting = new Rerooting<DPState>(graph);
+            var rerooting = new Rerooting<BasicNode, BasicEdge, DPState>(graph);
             var result = rerooting.Solve().Select(r => r.Count.Value);
 
             var expected = new int[] { 40, 280, 840, 120, 120, 504, 72, 72 };
