@@ -1023,6 +1023,10 @@ namespace AtCoderTemplateForNetCore.Collections
             get
             {
                 var offset = index.GetOffset(Count);
+                if (unchecked((uint)offset) >= Count)
+                {
+                    ThrowArgumentOutOfRangeException(nameof(index), $"{nameof(index)}がコレクションの範囲外です。");
+                }
                 return _data[(_first + offset) & _mask];
             }
         }
@@ -1080,6 +1084,28 @@ namespace AtCoderTemplateForNetCore.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T PeekFirst()
+        {
+            if (Count == 0)
+            {
+                ThrowInvalidOperationException("Queueが空です。");
+            }
+
+            return _data[_first];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T PeekLast()
+        {
+            if (Count == 0)
+            {
+                ThrowInvalidOperationException("Queueが空です。");
+            }
+
+            return _data[(_first + Count - 1) & _mask];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Resize()
         {
             var newArray = new T[_data.Length << 1];
@@ -1093,6 +1119,7 @@ namespace AtCoderTemplateForNetCore.Collections
             _mask = _data.Length - 1;
         }
 
+        private void ThrowArgumentOutOfRangeException(string paramName, string message) => throw new ArgumentOutOfRangeException(paramName, message);
         private void ThrowInvalidOperationException(string message) => throw new InvalidOperationException(message);
 
         private int GetPow2Over(int n)
@@ -1111,7 +1138,8 @@ namespace AtCoderTemplateForNetCore.Collections
         {
             for (int i = 0; i < Count; i++)
             {
-                yield return this[i];
+                var offset = (_first + i) & _mask;
+                yield return _data[offset];
             }
         }
 

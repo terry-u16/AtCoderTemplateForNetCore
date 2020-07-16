@@ -100,6 +100,32 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
         }
 
         [Fact]
+        public void PeekFirstTest()
+        {
+            var deque = new Deque<int>();
+            deque.EnqueueLast(1);
+            Assert.Equal(1, deque.PeekFirst());
+        }
+
+        [Fact]
+        public void PeekLastTest()
+        {
+            var deque = new Deque<int>();
+            deque.EnqueueLast(1);
+            Assert.Equal(1, deque.PeekLast());
+        }
+
+        [Fact]
+        public void DequeueAndPeekThrowsExceptionWhenEmptyTest()
+        {
+            var deque = new Deque<int>();
+            Assert.Throws<InvalidOperationException>(() => deque.DequeueFirst());
+            Assert.Throws<InvalidOperationException>(() => deque.DequeueLast());
+            Assert.Throws<InvalidOperationException>(() => deque.PeekFirst());
+            Assert.Throws<InvalidOperationException>(() => deque.PeekLast());
+        }
+
+        [Fact]
         public void IndexerTest()
         {
             const int N = 7;
@@ -118,6 +144,17 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
             {
                 Assert.Equal(N - 1 - i, deque[^(i + 1)]);
             }
+        }
+
+        [Fact]
+        public void IndexerThrowsExceptionTest()
+        {
+            var deque = new Deque<int>();
+            Assert.Throws<ArgumentOutOfRangeException>(() => deque[0]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => deque[^1]);
+            deque.EnqueueFirst(1);
+            Assert.Throws<ArgumentOutOfRangeException>(() => deque[1]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => deque[^0]);
         }
 
         [Fact]
