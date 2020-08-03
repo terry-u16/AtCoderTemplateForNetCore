@@ -1265,7 +1265,7 @@ namespace AtCoderTemplateForNetCore.Collections
         private readonly int _leafLength;   // n (= 2^k)
 
         public int Length { get; }          // 実データ長
-        public ReadOnlySpan<TMonoid> Data => _data[_leafOffset..(_leafOffset + Length)];
+        public ReadOnlySpan<TMonoid> Data => _data.AsSpan(_leafOffset, Length);
 
         public SegmentTree(ICollection<TMonoid> data)
         {
