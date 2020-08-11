@@ -864,12 +864,12 @@ namespace AtCoderTemplateForNetCore.Algorithms
 
         ulong[] hash1;
         ulong[] hash2;
-        public string RowString { get; }
-        public int Length => RowString.Length;
+        public string RawString { get; }
+        public int Length => RawString.Length;
 
         public RollingHash(string s)
         {
-            RowString = s;
+            RawString = s;
             hash1 = new ulong[s.Length + 1];
             hash2 = new ulong[s.Length + 1];
 
@@ -934,7 +934,7 @@ namespace AtCoderTemplateForNetCore.Algorithms
             return value;
         }
 
-        public override string ToString() => RowString;
+        public override string ToString() => RawString;
     }
 
     public static class AlgorithmHelpers
