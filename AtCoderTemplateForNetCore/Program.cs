@@ -72,14 +72,18 @@ namespace AtCoderTemplateForNetCore.Numerics
                 (a, b) = (b, a);
             }
 
-            var result = b switch
+            if (b > 0)
             {
-                0 => a,
-                long n when n > 0 => Gcd(b, a % b),
-                _ => throw new ArgumentOutOfRangeException($"{nameof(a)}, {nameof(b)}は0以上の整数である必要があります。")
-            };
-
-            return result;
+                return Gcd(b, a % b);
+            }
+            else if (b == 0)
+            {
+                return a;
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException($"{nameof(a)}, {nameof(b)}は0以上の整数である必要があります。");
+            }
         }
 
         public static long Lcm(long a, long b)
