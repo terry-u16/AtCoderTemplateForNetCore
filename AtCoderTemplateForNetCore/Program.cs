@@ -10,7 +10,6 @@ using AtCoderTemplateForNetCore.Collections;
 using AtCoderTemplateForNetCore.Extensions;
 using AtCoderTemplateForNetCore.Numerics;
 using AtCoderTemplateForNetCore.Questions;
-using System.Threading.Tasks.Dataflow;
 
 namespace AtCoderTemplateForNetCore
 {
@@ -258,17 +257,22 @@ namespace AtCoderTemplateForNetCore.Numerics
 
         public static Modular Pow(int a, int n)
         {
-            switch (n)
+            if (n == 0)
             {
-                case 0:
-                    return Modular.One;
-                case 1:
-                    return a;
-                case int m when m >= 0: // ジャンプテーブル化はできなくなる
-                    var p = Pow(a, m >> 1);             // m / 2
-                    return p * p * Pow(a, m & 0x01);    // m % 2
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(n), $"べき指数{nameof(n)}は0以上の整数でなければなりません。");
+                return Modular.One;
+            }
+            else if (n == 1)
+            {
+                return a;
+            }
+            else if (n > 0)
+            {
+                var p = Pow(a, n >> 1);             // m / 2
+                return p * p * Pow(a, n & 0x01);    // m % 2
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException(nameof(n), $"べき指数{nameof(n)}は0以上の整数でなければなりません。");
             }
         }
 
