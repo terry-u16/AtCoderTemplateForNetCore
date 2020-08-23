@@ -76,10 +76,14 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
                 stack.Push(value);
             }
 
+            Assert.Equal(10000, deque.Count);
+
             foreach (var value in stack)
             {
                 Assert.Equal(value, deque.DequeueFirst());
             }
+
+            Assert.Empty(deque);
         }
 
         [Fact]
@@ -93,10 +97,14 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
                 stack.Push(value);
             }
 
+            Assert.Equal(10000, deque.Count);
+
             foreach (var value in stack)
             {
                 Assert.Equal(value, deque.DequeueLast());
             }
+
+            Assert.Empty(deque);
         }
 
         [Fact]

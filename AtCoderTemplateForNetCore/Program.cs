@@ -1218,6 +1218,7 @@ namespace AtCoderTemplateForNetCore.Collections
             var value = _data[_first];
             _data[_first++] = default;
             _first &= _mask;
+            Count--;
             return value;
         }
 
