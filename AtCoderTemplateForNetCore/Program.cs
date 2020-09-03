@@ -740,12 +740,18 @@ namespace AtCoderTemplateForNetCore.Numerics
         public TSet Identity { get; }
     }
 
+    public interface IMonoidWithAct<TMonoid, TOperator> : IMonoid<TOperator>
+        where TMonoid : IMonoid<TMonoid>, new()
+        where TOperator : IMonoid<TOperator>, new()
+    {
+        public TMonoid Act(TMonoid monoid);
+    }
+
     public interface IGroup<TSet> : IMonoid<TSet> where TSet : IGroup<TSet>, new()
     {
         public TSet Invert();
         public static TSet operator ~(IGroup<TSet> a) => a.Invert();
     }
-
 }
 
 namespace AtCoderTemplateForNetCore.Algorithms
@@ -1530,6 +1536,152 @@ namespace AtCoderTemplateForNetCore.Collections
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
+    public class LazySegmentTree<TMonoid, TOperator>
+        where TMonoid : IMonoid<TMonoid>, new()
+        where TOperator : IMonoidWithAct<TMonoid, TOperator>, IEquatable<TOperator>, new()
+    {
+        private readonly TMonoid[] _data;
+        private readonly TOperator[] _lazy;
+        private readonly TMonoid _monoidIdenty;
+        private readonly TOperator _operatorIdentity;
+
+        private readonly int _leafOffset;  // n - 1
+        private readonly int _leafLength;  // n (= 2^k)
+
+        public int Length { get; }
+
+        public LazySegmentTree(ICollection<TMonoid> data)
+        {
+            Length = data.Count;
+            _leafLength = GetMinimumPow2(data.Count);
+            _leafOffset = _leafLength - 1;
+            _data = new TMonoid[_leafOffset + _leafLength];
+            _monoidIdenty = new TMonoid().Identity;
+            _operatorIdentity = new TOperator().Identity;
+
+            data.CopyTo(_data, _leafOffset);
+            BuildTree();
+            _lazy = Enumerable.Repeat(_operatorIdentity, _data.Length).ToArray();
+        }
+
+        private void LazyEvaluate(int index)
+        {
+            if (_lazy[index].Equals(_operatorIdentity))
+            {
+                return;
+            }
+            else if (index < _leafOffset) // 葉でない場合は子に伝播
+            {
+                var left = (index << 1) + 1;
+                var right = left + 1;
+                _lazy[left] = _lazy[index].Multiply(_lazy[left]);
+                _lazy[right] = _lazy[index].Multiply(_lazy[right]);
+            }
+
+            // 自身を更新
+            _data[index] = _lazy[index].Act(_data[index]);
+            _lazy[index] = _operatorIdentity;
+        }
+
+        public void Update(int begin, int end, TOperator op)
+        {
+            if (begin < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(begin));
+            }
+            if (end > Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(end));
+            }
+            if (begin >= end)
+            {
+                throw new ArgumentException($"{nameof(end)} must be grater than {nameof(begin)}");
+            }
+            Update(begin, end, op, 0, 0, _leafLength);
+        }
+
+        private void Update(int begin, int end, TOperator op, int index, int left, int right)
+        {
+            LazyEvaluate(index);
+            if (begin <= left && right <= end) // 全部含まれる
+            {
+                _lazy[index] = _lazy[index].Multiply(op);
+                LazyEvaluate(index);
+            }
+            else if (begin < right && left < end) // 一部だけ含まれる
+            {
+                var l = (index << 1) + 1;
+                var r = l + 1;
+                Update(begin, end, op, l, left, (left + right) / 2);
+                Update(begin, end, op, r, (left + right) / 2, right);
+                _data[index] = _data[l].Multiply(_data[r]);
+            }
+        }
+
+        public TMonoid Query(int begin, int end)
+        {
+            if (begin < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(begin));
+            }
+            if (end > Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(end));
+            }
+            if (begin >= end)
+            {
+                throw new ArgumentException($"{nameof(end)} must be grater than {nameof(begin)}");
+            }
+            return Query(begin, end, 0, 0, _leafLength);
+        }
+
+        private TMonoid Query(int begin, int end, int index, int left, int right)
+        {
+            LazyEvaluate(index);
+            if (right <= begin || end <= left)      // 範囲外
+            {
+                return _monoidIdenty;
+            }
+            else if (begin <= left && right <= end) // 全部含まれる
+            {
+                return _data[index];
+            }
+            else    // 一部だけ含まれる
+            {
+                var l = (index << 1) + 1;
+                var r = l + 1;
+                var leftValue = Query(begin, end, l, left, (left + right) / 2);     // 左の子
+                var rightValue = Query(begin, end, r, (left + right) / 2, right);   // 右の子
+                return leftValue.Multiply(rightValue);
+            }
+        }
+
+        private void BuildTree()
+        {
+            foreach (ref var unusedLeaf in _data.AsSpan()[(_leafOffset + Length)..])
+            {
+                unusedLeaf = _monoidIdenty;  // 単位元埋め
+            }
+
+            for (int i = _leafLength - 2; i >= 0; i--)  // 葉の親から順番に一つずつ上がっていく
+            {
+                var left = (i << 1) + 1;
+                var right = left + 1;
+                _data[i] = _data[left].Multiply(_data[right]); // f(left, right)
+            }
+        }
+
+        private int GetMinimumPow2(int n)
+        {
+            var p = 1;
+            while (p < n)
+            {
+                p <<= 1;
+            }
+            return p;
+        }
     }
 
     public class BinaryIndexedTree
