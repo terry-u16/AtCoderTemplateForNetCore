@@ -606,6 +606,72 @@ namespace AtCoderTemplateForNetCore.Numerics
         public override string ToString() => $"({Length})vector";
     }
 
+    public class Eratosthenes
+    {
+        /// <summary>
+        /// Smallest Prime Factorを保存した配列
+        /// </summary>
+        readonly int[] _spf;
+
+        public Eratosthenes(int max)
+        {
+            _spf = Enumerable.Range(0, max + 1).ToArray();
+            for (int i = 2; i * i <= max; i++)
+            {
+                if (_spf[i] == i)
+                {
+                    for (int mul = i << 1; mul <= max; mul += i)
+                    {
+                        if (_spf[mul] == mul)
+                        {
+                            _spf[mul] = i;
+                        }
+                    }
+                }
+            }
+        }
+
+        bool IsPrime(int n) => n >= 2 && _spf[n] == n;
+
+        public IEnumerable<PrimeAndCount> PrimeFactorize(int n)
+        {
+            var last = _spf[n];
+            var streak = 0;
+            while (n > 1)
+            {
+                if (_spf[n] == last)
+                {
+                    streak++;
+                }
+                else
+                {
+                    yield return new PrimeAndCount(last, streak);
+                    last = _spf[n];
+                    streak = 1;
+                }
+
+                n /= last;
+            }
+            yield return new PrimeAndCount(last, streak);
+        }
+    }
+
+    [StructLayout(LayoutKind.Auto)]
+    public readonly struct PrimeAndCount
+    {
+        public int Prime { get; }
+        public int Count { get; }
+
+        public PrimeAndCount(int prime, int count)
+        {
+            Prime = prime;
+            Count = count;
+        }
+
+        public void Deconstruct(out int prime, out int count) => (prime, count) = (Prime, Count);
+        public override string ToString() => $"{nameof(Prime)}: {Prime}, {nameof(Count)}: {Count}";
+    }
+
     public readonly struct Fraction : IEquatable<Fraction>, IComparable<Fraction>
     {
         /// <summary>分子</summary>
@@ -998,6 +1064,7 @@ namespace AtCoderTemplateForNetCore.Algorithms
 
     public static class AlgorithmHelpers
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void UpdateWhenSmall<T>(ref T value, T other) where T : IComparable<T>
         {
             if (other.CompareTo(value) < 0)
@@ -1006,6 +1073,7 @@ namespace AtCoderTemplateForNetCore.Algorithms
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void UpdateWhenLarge<T>(ref T value, T other) where T : IComparable<T>
         {
             if (other.CompareTo(value) > 0)
