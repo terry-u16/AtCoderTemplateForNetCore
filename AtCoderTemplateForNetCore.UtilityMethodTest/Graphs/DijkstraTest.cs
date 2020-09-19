@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using AtCoderTemplateForNetCore.Extensions;
 using AtCoderTemplateForNetCore.Graphs;
 using AtCoderTemplateForNetCore.Graphs.Algorithms;
+using AtCoderTemplateForNetCore.Questions;
 using Xunit;
 
 namespace AtCoderTemplateForNetCore.UtilityMethodTest.Graphs
@@ -19,18 +19,19 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Graphs
         public void ABC051Test(string testCaseName)
         {
             const string basePath = @"..\..\..\TestCases\Graphs\DijkstraTest\ABC051D";
-            var inputReader = new StreamReader(Path.Join(basePath, "in", testCaseName));
+            var io = new IOManager(new FileStream(Path.Join(basePath, "in", testCaseName), FileMode.Open, FileAccess.Read), new MemoryStream());
             var outputReader = new StreamReader(Path.Join(basePath, "out", testCaseName));
 
-            var (nodesCount, edgesCount) = inputReader.ReadValue<int, int>();
+            var nodesCount = io.ReadInt();
+            var edgesCount = io.ReadInt();
             var graph = new WeightedGraph(nodesCount);
             var edges = new WeightedEdge[edgesCount];
 
             for (int i = 0; i < edgesCount; i++)
             {
-                var (a, b, cost) = inputReader.ReadValue<int, int, int>();
-                a--;
-                b--;
+                var a = io.ReadInt() - 1;
+                var b = io.ReadInt() - 1;
+                var cost = io.ReadInt();
                 graph.AddEdge(new WeightedEdge(a, b, cost));
                 graph.AddEdge(new WeightedEdge(b, a, cost));
                 edges[i] = new WeightedEdge(a, b, cost);

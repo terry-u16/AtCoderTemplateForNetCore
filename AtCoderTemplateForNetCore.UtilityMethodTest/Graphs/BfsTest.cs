@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using AtCoderTemplateForNetCore.Extensions;
 using AtCoderTemplateForNetCore.Graphs;
 using AtCoderTemplateForNetCore.Graphs.Algorithms;
+using AtCoderTemplateForNetCore.Questions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -26,16 +26,17 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Graphs
         {
             // https://atcoder.jp/contests/abc168/submissions/13756313
             const string basePath = @"..\..\..\TestCases\Graphs\BfsTest\ABC168D";
-            var inputReader = new StreamReader(Path.Join(basePath, "in", testCaseName));
+            var io = new IOManager(new FileStream(Path.Join(basePath, "in", testCaseName), FileMode.Open, FileAccess.Read), new MemoryStream());
             var outputReader = new StreamReader(Path.Join(basePath, "out", testCaseName));
 
-            var (rooms, paths) = inputReader.ReadValue<int, int>();
+            var rooms = io.ReadInt();
+            var paths = io.ReadInt();
+
             var dungeon = new BasicGraph(rooms);
             for (int i = 0; i < paths; i++)
             {
-                var (a, b) = inputReader.ReadValue<int, int>();
-                a--;
-                b--;
+                var a = io.ReadInt() - 1;
+                var b = io.ReadInt() - 1;
                 dungeon.AddEdge(new BasicEdge(a, b));
                 dungeon.AddEdge(new BasicEdge(b, a));
             }

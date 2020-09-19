@@ -7,7 +7,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using AtCoderTemplateForNetCore.Algorithms;
 using AtCoderTemplateForNetCore.Collections;
-using AtCoderTemplateForNetCore.Extensions;
 using AtCoderTemplateForNetCore.Numerics;
 using AtCoderTemplateForNetCore.Questions;
 
@@ -15,7 +14,7 @@ namespace AtCoderTemplateForNetCore.Questions
 {
     public class QuestionB : AtCoderQuestionBase
     {
-        public override IEnumerable<object> Solve(TextReader inputStream)
+        public override void Solve(IOManager io)
         {
             throw new NotImplementedException();
         }

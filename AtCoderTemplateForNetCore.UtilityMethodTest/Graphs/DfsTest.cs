@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml.Schema;
-using AtCoderTemplateForNetCore.Extensions;
 using AtCoderTemplateForNetCore.Graphs;
 using AtCoderTemplateForNetCore.Graphs.Algorithms;
+using AtCoderTemplateForNetCore.Questions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -30,14 +30,15 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Graphs
         public void ATP001ATest(string testCaseName)
         {
             const string basePath = @"..\..\..\TestCases\Graphs\DfsTest\ATP001A";
-            var inputReader = new StreamReader(Path.Join(basePath, "in", testCaseName));
+            var io = new IOManager(new FileStream(Path.Join(basePath, "in", testCaseName), FileMode.Open, FileAccess.Read), new MemoryStream());
             var outputReader = new StreamReader(Path.Join(basePath, "out", testCaseName));
 
-            var (height, width) = inputReader.ReadValue<int, int>();
+            var height = io.ReadInt();
+            var width = io.ReadInt();
             var map = new char[height][];
             for (int i = 0; i < height; i++)
             {
-                map[i] = inputReader.ReadLine().ToCharArray();
+                map[i] = io.ReadLine().ToCharArray();
             }
 
             var maze = new Maze(height, width, map);

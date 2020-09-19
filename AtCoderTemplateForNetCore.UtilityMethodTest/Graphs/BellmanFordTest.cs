@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using AtCoderTemplateForNetCore.Extensions;
 using AtCoderTemplateForNetCore.Graphs;
 using AtCoderTemplateForNetCore.Graphs.Algorithms;
+using AtCoderTemplateForNetCore.Questions;
 using Xunit;
 
 namespace AtCoderTemplateForNetCore.UtilityMethodTest.Graphs
@@ -15,11 +15,11 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Graphs
         [InlineData("after_contest_59")]
         public void ABC137Test_FromGraph(string testCaseName)
         {
-            ABC137Test_Core(testCaseName, (nodesCount, edgesCount, penalty, inputReader) =>
+            ABC137Test_Core(testCaseName, (nodesCount, edgesCount, penalty, io) =>
             {
                 var graph = new WeightedGraph(nodesCount, Enumerable.Repeat(0, edgesCount).Select(_ =>
                 {
-                    var abc = inputReader.ReadIntArray();
+                    var abc = io.ReadIntArray(3);
                     var a = abc[0] - 1;
                     var b = abc[1] - 1;
                     var c = abc[2];
@@ -36,12 +36,12 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Graphs
         [InlineData("after_contest_59")]
         public void ABC137Test_FromEdges(string testCaseName)
         {
-            ABC137Test_Core(testCaseName, (nodesCount, edgesCount, penalty, inputReader) => 
+            ABC137Test_Core(testCaseName, (nodesCount, edgesCount, penalty, io) => 
                 new BellmanFord<BasicNode, WeightedEdge>(
                     Enumerable.Repeat(0, edgesCount)
                             .Select(_ =>
                             {
-                                var input = inputReader.ReadIntArray();
+                                var input = io.ReadIntArray(3);
                                 var a = input[0] - 1;
                                 var b = input[1] - 1;
                                 var c = input[2];
@@ -49,14 +49,17 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Graphs
                             }), nodesCount));
         }
 
-        private void ABC137Test_Core(string testCaseName, Func<int, int, int, TextReader, BellmanFord<BasicNode, WeightedEdge>> buildBellmanFord)
+        private void ABC137Test_Core(string testCaseName, Func<int, int, int, IOManager, BellmanFord<BasicNode, WeightedEdge>> buildBellmanFord)
         {
             const string basePath = @"..\..\..\TestCases\Graphs\BellmanFordTest\ABC137E";
-            var inputReader = new StreamReader(Path.Join(basePath, "in", testCaseName));
+            var io = new IOManager(new FileStream(Path.Join(basePath, "in", testCaseName), FileMode.Open, FileAccess.Read), new MemoryStream());
             var outputReader = new StreamReader(Path.Join(basePath, "out", testCaseName));
-            var (nodesCount, edgesCount, penalty) = inputReader.ReadValue<int, int, int>();
+            
+            var nodesCount = io.ReadInt();
+            var edgesCount = io.ReadInt();
+            var penalty = io.ReadInt();
 
-            var bellmanFord = buildBellmanFord(nodesCount, edgesCount, penalty, inputReader);
+            var bellmanFord = buildBellmanFord(nodesCount, edgesCount, penalty, io);
 
             var result = bellmanFord.GetDistancesFrom(new BasicNode(0));
             var distances = result.Item1;

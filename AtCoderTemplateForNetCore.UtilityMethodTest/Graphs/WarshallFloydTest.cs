@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using AtCoderTemplateForNetCore.Extensions;
 using AtCoderTemplateForNetCore.Graphs;
 using AtCoderTemplateForNetCore.Graphs.Algorithms;
+using AtCoderTemplateForNetCore.Questions;
 using Xunit;
 
 namespace AtCoderTemplateForNetCore.UtilityMethodTest.Graphs
@@ -19,16 +19,21 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Graphs
         public void ABC143ETest(string testCaseName)
         {
             const string basePath = @"..\..\..\TestCases\Graphs\WarshallFloydTest\ABC143E";
-            var inputReader = new StreamReader(Path.Join(basePath, "in", testCaseName));
-            var outputReader = new StreamReader(Path.Join(basePath, "out", testCaseName));
+            var inputStream = new FileStream(Path.Join(basePath, "in", testCaseName), FileMode.Open, FileAccess.Read);
+            var answerReader = new StreamReader(Path.Join(basePath, "out", testCaseName));
 
-            var (citiesCount, roadsCount, tankCapacity) = inputReader.ReadValue<int, int, int>();
+            var io = new IOManager(inputStream, new MemoryStream());
+
+            var citiesCount = io.ReadInt();
+            var roadsCount = io.ReadInt();
+            var tankCapacity = io.ReadInt();
+            
             var roadGraph = new WeightedGraph(citiesCount);
             for (int i = 0; i < roadsCount; i++)
             {
-                var (a, b, fuel) = inputReader.ReadValue<int, int, int>();
-                a--;
-                b--;
+                var a = io.ReadInt() - 1;
+                var b = io.ReadInt() - 1;
+                var fuel = io.ReadInt();
                 roadGraph.AddEdge(new WeightedEdge(a, b, fuel));
                 roadGraph.AddEdge(new WeightedEdge(b, a, fuel));
             }
@@ -46,15 +51,14 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Graphs
             var refuelWarshallFloyd = new WarshallFloyd<BasicNode, WeightedEdge>(refuelGraph);
             var refuelCounts = refuelWarshallFloyd.GetDistances();
 
-            var queries = inputReader.ReadInt();
+            var queries = io.ReadInt();
             for (int q = 0; q < queries; q++)
             {
-                var (from, to) = inputReader.ReadValue<int, int>();
-                from--;
-                to--;
+                var from = io.ReadInt() - 1;
+                var to = io.ReadInt() - 1;
                 var refuelCount = refuelCounts[from, to];
                 var output = refuelCount < long.MaxValue ? (refuelCount - 1).ToString() : (-1).ToString();
-                Assert.Equal(outputReader.ReadLine(), output);
+                Assert.Equal(answerReader.ReadLine(), output);
             }
         }
     }
