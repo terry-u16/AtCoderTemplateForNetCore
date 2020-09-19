@@ -17,7 +17,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
             public readonly long Value;
 
             public MinInt(long value) => Value = value;
-            public MinInt Multiply(MinInt other) => Value < other.Value ? this : other;
+            public MinInt Merge(MinInt other) => Value < other.Value ? this : other;
         }
 
         struct Updater : IMonoidWithAct<MinInt, Updater>, IEquatable<Updater>
@@ -34,7 +34,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
             }
 
             public MinInt Act(MinInt monoid) => new MinInt(Value);
-            public Updater Multiply(Updater other) => Generation > other.Generation ? this : other;
+            public Updater Merge(Updater other) => Generation > other.Generation ? this : other;
             public bool Equals(Updater other) => Value == other.Value;
         }
 

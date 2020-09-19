@@ -708,6 +708,30 @@ namespace AtCoderTemplateForNetCore.Numerics
         }
     }
 
+    public static class Divisiors
+    {
+        public static IEnumerable<long> GetDivisiors(long n)
+        {
+            var lastHalf = new Stack<long>();
+            for (long i = 1; i * i <= n; i++)
+            {
+                if (n % i == 0)
+                {
+                    yield return i;
+                    if (i * i != n)
+                    {
+                        lastHalf.Push(n / i);
+                    }
+                }
+            }
+
+            while (lastHalf.Count > 0)
+            {
+                yield return lastHalf.Pop();
+            }
+        }
+    }
+
     [StructLayout(LayoutKind.Auto)]
     public readonly struct PrimeAndCount
     {
@@ -849,8 +873,7 @@ namespace AtCoderTemplateForNetCore.Numerics
 
     public interface ISemigroup<TSet> where TSet : ISemigroup<TSet>
     {
-        public TSet Multiply(TSet other);
-        public static TSet operator *(ISemigroup<TSet> a, TSet b) => a.Multiply(b);
+        public TSet Merge(TSet other);
     }
 
     public interface IMonoid<TSet> : ISemigroup<TSet> where TSet : IMonoid<TSet>, new()
@@ -1573,7 +1596,7 @@ namespace AtCoderTemplateForNetCore.Collections
                 {
                     // 一つ上の親の更新
                     index = (index - 1) / 2;
-                    _data[index] = _data[index * 2 + 1] * _data[index * 2 + 2];
+                    _data[index] = _data[index * 2 + 1].Merge(_data[index * 2 + 2]);
                 }
             }
         }
@@ -1619,7 +1642,7 @@ namespace AtCoderTemplateForNetCore.Collections
             {
                 var leftValue = Query(begin, end, index * 2 + 1, left, (left + right) / 2);     // 左の子
                 var rightValue = Query(begin, end, index * 2 + 2, (left + right) / 2, right);   // 右の子
-                return leftValue * rightValue;
+                return leftValue.Merge(rightValue);
             }
         }
 
@@ -1632,7 +1655,7 @@ namespace AtCoderTemplateForNetCore.Collections
 
             for (int i = _leafLength - 2; i >= 0; i--)  // 葉の親から順番に一つずつ上がっていく
             {
-                _data[i] = _data[2 * i + 1] * _data[2 * i + 2]; // f(left, right)
+                _data[i] = _data[2 * i + 1].Merge(_data[2 * i + 2]); // f(left, right)
             }
         }
 
@@ -1696,8 +1719,8 @@ namespace AtCoderTemplateForNetCore.Collections
             {
                 var left = (index << 1) + 1;
                 var right = left + 1;
-                _lazy[left] = _lazy[index].Multiply(_lazy[left]);
-                _lazy[right] = _lazy[index].Multiply(_lazy[right]);
+                _lazy[left] = _lazy[index].Merge(_lazy[left]);
+                _lazy[right] = _lazy[index].Merge(_lazy[right]);
             }
 
             // 自身を更新
@@ -1727,7 +1750,7 @@ namespace AtCoderTemplateForNetCore.Collections
             LazyEvaluate(index);
             if (begin <= left && right <= end) // 全部含まれる
             {
-                _lazy[index] = _lazy[index].Multiply(op);
+                _lazy[index] = _lazy[index].Merge(op);
                 LazyEvaluate(index);
             }
             else if (begin < right && left < end) // 一部だけ含まれる
@@ -1736,7 +1759,7 @@ namespace AtCoderTemplateForNetCore.Collections
                 var r = l + 1;
                 Update(begin, end, op, l, left, (left + right) / 2);
                 Update(begin, end, op, r, (left + right) / 2, right);
-                _data[index] = _data[l].Multiply(_data[r]);
+                _data[index] = _data[l].Merge(_data[r]);
             }
         }
 
@@ -1774,7 +1797,7 @@ namespace AtCoderTemplateForNetCore.Collections
                 var r = l + 1;
                 var leftValue = Query(begin, end, l, left, (left + right) / 2);     // 左の子
                 var rightValue = Query(begin, end, r, (left + right) / 2, right);   // 右の子
-                return leftValue.Multiply(rightValue);
+                return leftValue.Merge(rightValue);
             }
         }
 
@@ -1789,7 +1812,7 @@ namespace AtCoderTemplateForNetCore.Collections
             {
                 var left = (i << 1) + 1;
                 var right = left + 1;
-                _data[i] = _data[left].Multiply(_data[right]); // f(left, right)
+                _data[i] = _data[left].Merge(_data[right]); // f(left, right)
             }
         }
 
@@ -2935,7 +2958,7 @@ namespace AtCoderTemplateForNetCore.Graphs
                     if (edge.To.Index == parent?.Index)
                         continue;
                     _dp[root.Index].Add(edge.To.Index, DepthFirstSearch(edge.To, root));
-                    sum *= _dp[root.Index][edge.To.Index];
+                    sum = sum.Merge(_dp[root.Index][edge.To.Index]);
                 }
                 return sum.AddRoot();
             }
@@ -2973,7 +2996,7 @@ namespace AtCoderTemplateForNetCore.Graphs
                 for (int i = 0; i < edges.Length; i++)
                 {
                     var child = edges[i].To;
-                    sumLeft[i + 1] = sumLeft[i] * _dp[root.Index][child.Index];
+                    sumLeft[i + 1] = sumLeft[i].Merge(_dp[root.Index][child.Index]);
                 }
 
                 var sumRight = new TTreeDpState[sumSize];
@@ -2981,7 +3004,7 @@ namespace AtCoderTemplateForNetCore.Graphs
                 for (int i = edges.Length - 1; i >= 0; i--)
                 {
                     var child = edges[i].To;
-                    sumRight[i] = sumRight[i + 1] * _dp[root.Index][child.Index];
+                    sumRight[i] = sumRight[i + 1].Merge(_dp[root.Index][child.Index]);
                 }
 
                 _result[root.Index] = sumLeft[^1].AddRoot();
@@ -2990,7 +3013,7 @@ namespace AtCoderTemplateForNetCore.Graphs
                 var dp = new TTreeDpState[edges.Length];
                 for (int i = 0; i < dp.Length; i++)
                 {
-                    dp[i] = sumLeft[i] * sumRight[i + 1];
+                    dp[i] = sumLeft[i].Merge(sumRight[i + 1]);
                 }
 
                 return dp;

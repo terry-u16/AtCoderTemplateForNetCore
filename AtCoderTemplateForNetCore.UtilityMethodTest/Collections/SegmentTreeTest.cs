@@ -22,7 +22,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
 
             public MinInt Identity => new MinInt(int.MaxValue);
 
-            public MinInt Multiply(MinInt other) => new MinInt(Math.Min(Value, other.Value));
+            public MinInt Merge(MinInt other) => new MinInt(Math.Min(Value, other.Value));
 
             public static implicit operator int(MinInt min) => min.Value;
         }

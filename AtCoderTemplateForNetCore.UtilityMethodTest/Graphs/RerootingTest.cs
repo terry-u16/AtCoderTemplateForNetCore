@@ -62,7 +62,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Graphs
 
         public DPState AddRoot() => new DPState(Count, Size + 1);
 
-        public DPState Multiply(DPState other)
+        public DPState Merge(DPState other)
         {
             var size = Size + other.Size;
             var count = Modular.Combination(size, Size) * Count * other.Count;
