@@ -631,28 +631,80 @@ namespace AtCoderTemplateForNetCore.Numerics
             }
         }
 
-        bool IsPrime(int n) => n >= 2 && _spf[n] == n;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsPrime(int n) => n >= 2 && _spf[n] == n;
 
         public IEnumerable<PrimeAndCount> PrimeFactorize(int n)
         {
-            var last = _spf[n];
-            var streak = 0;
-            while (n > 1)
+            if (n <= 0 || _spf.Length <= n)
             {
-                if (_spf[n] == last)
+                throw new ArgumentOutOfRangeException(nameof(n), $"{nameof(n)}は[0, {_spf.Length})の間でなければなりません");
+            }
+            else if (n == 1)
+            {
+                yield break;
+            }
+            else
+            {
+                var last = _spf[n];
+                var streak = 0;
+                while (n > 1)
                 {
-                    streak++;
+                    if (_spf[n] == last)
+                    {
+                        streak++;
+                    }
+                    else
+                    {
+                        yield return new PrimeAndCount(last, streak);
+                        last = _spf[n];
+                        streak = 1;
+                    }
+
+                    n /= last;
                 }
-                else
+                yield return new PrimeAndCount(last, streak);
+            }
+        }
+
+        public IEnumerable<int> GetDivisiors(int n)
+        {
+            if (n <= 0 || _spf.Length <= n)
+            {
+                throw new ArgumentOutOfRangeException(nameof(n), $"{nameof(n)}は[0, {_spf.Length})の間でなければなりません");
+            }
+            else
+            {
+                var primes = PrimeFactorize(n).ToArray();
+                return GetDivisiors(primes, 0);
+            }
+        }
+
+        IEnumerable<int> GetDivisiors(PrimeAndCount[] primes, int depth)
+        {
+            if (depth == primes.Length)
+            {
+                yield return 1;
+            }
+            else
+            {
+                var current = 1;
+                var children = GetDivisiors(primes, depth + 1).ToArray();
+
+                foreach (var child in children)
                 {
-                    yield return new PrimeAndCount(last, streak);
-                    last = _spf[n];
-                    streak = 1;
+                    yield return child;
                 }
 
-                n /= last;
+                for (int i = 0; i < primes[depth].Count; i++)
+                {
+                    current *= primes[depth].Prime;
+                    foreach (var child in children)
+                    {
+                        yield return current * child;
+                    }
+                }
             }
-            yield return new PrimeAndCount(last, streak);
         }
     }
 
