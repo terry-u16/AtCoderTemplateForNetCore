@@ -12,24 +12,24 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
     public class ArraySetAllTest
     {
         [Fact]
-        public void ArraySetAll1Test()
+        public void ArrayFill1Test()
         {
             const int N = 10;
-            var array = new int[N].SetAll(i => i);
-            Assert.Equal(Enumerable.Range(0, 10), array);
+            var array = new int[N].Fill(10);
+            Assert.Equal(Enumerable.Repeat(10, N), array);
         }
 
         [Fact]
-        public void ArraySetAll2Test()
+        public void ArrayFill2Test()
         {
             const int N = 10;
-            var array = new int[N, N].SetAll((i, j) => i + j);
+            var array = new int[N, N].Fill(10);
 
             for (int i = 0; i < N; i++)
             {
                 for (int j = 0; j < N; j++)
                 {
-                    Assert.Equal(i + j, array[i, j]);
+                    Assert.Equal(10, array[i, j]);
                 }
             }
         }

@@ -2491,24 +2491,24 @@ namespace AtCoderTemplateForNetCore.Collections
 
     public static class ArrayExtensions
     {
-        public static T[] SetAll<T>(this T[] array, Func<int, T> func)
+        public static T[] Fill<T>(this T[] array, T value)
         {
             for (int i = 0; i < array.Length; i++)
-                array[i] = func(i);
+                array[i] = value;
             return array;
         }
 
-        public static T[,] SetAll<T>(this T[,] array, Func<int, int, T> func)
+        public static T[,] Fill<T>(this T[,] array, T value)
         {
             var length0 = array.GetLength(0);
             var length1 = array.GetLength(1);
             for (int i = 0; i < length0; i++)
                 for (int j = 0; j < length1; j++)
-                    array[i, j] = func(i, j);
+                    array[i, j] = value;
             return array;
         }
 
-        public static T[,,] SetAll<T>(this T[,,] array, Func<int, int, int, T> func)
+        public static T[,,] Fill<T>(this T[,,] array, T value)
         {
             var length0 = array.GetLength(0);
             var length1 = array.GetLength(1);
@@ -2516,11 +2516,11 @@ namespace AtCoderTemplateForNetCore.Collections
             for (int i = 0; i < length0; i++)
                 for (int j = 0; j < length1; j++)
                     for (int k = 0; k < length2; k++)
-                        array[i, j, k] = func(i, j, k);
+                        array[i, j, k] = value;
             return array;
         }
 
-        public static T[,,,] SetAll<T>(this T[,,,] array, Func<int, int, int, int, T> func)
+        public static T[,,,] Fill<T>(this T[,,,] array, T value)
         {
             var length0 = array.GetLength(0);
             var length1 = array.GetLength(1);
@@ -2530,7 +2530,7 @@ namespace AtCoderTemplateForNetCore.Collections
                 for (int j = 0; j < length1; j++)
                     for (int k = 0; k < length2; k++)
                         for (int l = 0; l < length3; l++)
-                            array[i, j, k, l] = func(i, j, k, l);
+                            array[i, j, k, l] = value;
             return array;
         }
     }

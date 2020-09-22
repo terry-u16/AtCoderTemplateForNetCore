@@ -38,7 +38,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Graphs
             var map = new char[height][];
             for (int i = 0; i < height; i++)
             {
-                map[i] = io.ReadLine().ToCharArray();
+                map[i] = io.ReadString().ToCharArray();
             }
 
             var maze = new Maze(height, width, map);
