@@ -187,6 +187,22 @@ namespace AtCoderTemplateForNetCore.Questions
             _writer.WriteLine();
         }
 
+        public void WriteLine<T>(ReadOnlySpan<T> values, char separator)
+        {
+            for (int i = 0; i < values.Length - 1; i++)
+            {
+                _writer.Write(values[i]);
+                _writer.Write(separator);
+            }
+
+            if (values.Length > 0)
+            {
+                _writer.Write(values[^1]);
+            }
+
+            _writer.WriteLine();
+        }
+
         public void Flush() => _writer.Flush();
 
         private static bool IsValidChar(char c) => ValidFirstChar <= c && c <= ValidLastChar;
