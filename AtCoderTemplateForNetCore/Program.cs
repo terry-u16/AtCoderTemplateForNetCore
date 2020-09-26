@@ -2795,7 +2795,7 @@ namespace AtCoderTemplateForNetCore.Graphs
             {
                 const long Inf = long.MaxValue >> 1;
                 var distances = new long[_nodeCount];
-                distances.Fill(Inf);
+                distances.AsSpan().Fill(Inf);
                 var isNegativeCycle = new bool[_nodeCount];
                 distances[startNode] = 0;
 

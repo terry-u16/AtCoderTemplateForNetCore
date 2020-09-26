@@ -12,14 +12,6 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
     public class ArraySetAllTest
     {
         [Fact]
-        public void ArrayFill1Test()
-        {
-            const int N = 10;
-            var array = new int[N].Fill(10);
-            Assert.Equal(Enumerable.Repeat(10, N), array);
-        }
-
-        [Fact]
         public void ArrayFill2Test()
         {
             const int N = 10;
