@@ -2576,13 +2576,6 @@ namespace AtCoderTemplateForNetCore.Collections
 
     public static class ArrayExtensions
     {
-        public static T[] Fill<T>(this T[] array, T value)
-        {
-            for (int i = 0; i < array.Length; i++)
-                array[i] = value;
-            return array;
-        }
-
         public static T[,] Fill<T>(this T[,] array, T value)
         {
             var length0 = array.GetLength(0);
