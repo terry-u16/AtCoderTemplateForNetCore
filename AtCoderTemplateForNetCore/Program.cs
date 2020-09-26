@@ -56,77 +56,117 @@ namespace AtCoderTemplateForNetCore.Questions
 
     public class IOManager : IDisposable
     {
-        private readonly StreamReader _reader;
+        private readonly BinaryReader _reader;
         private readonly StreamWriter _writer;
         private bool _disposedValue;
-        private Queue<ReadOnlyMemory<char>> _stringQueue;
+        private byte[] _buffer = new byte[1024];
+        private int _length;
+        private int _cursor;
+        private bool _eof;
 
         const char ValidFirstChar = '!';
         const char ValidLastChar = '~';
 
         public IOManager(Stream input, Stream output)
         {
-            _reader = new StreamReader(input);
+            _reader = new BinaryReader(input);
             _writer = new StreamWriter(output) { AutoFlush = false };
-            _stringQueue = new Queue<ReadOnlyMemory<char>>();
         }
 
-        public ReadOnlySpan<char> ReadCharSpan()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private char ReadAscii()
         {
-            while (_stringQueue.Count == 0)
+            if (_cursor == _length)
             {
-                var line = _reader.ReadLine().AsMemory().Trim();
-                var s = line.Span;
+                _cursor = 0;
+                _length = _reader.Read(_buffer);
 
-                if (s.Length > 0)
+                if (_length == 0)
                 {
-                    var begin = 0;
-                    for (int i = 0; i < s.Length; i++)
+                    if (!_eof)
                     {
-                        if (begin < 0 && IsValidChar(s[i]))
-                        {
-                            begin = i;
-                        }
-                        else if (!IsValidChar(s[i]))
-                        {
-                            _stringQueue.Enqueue(line[begin..i]);
-                            begin = -1;
-                        }
+                        _eof = true;
+                        return char.MinValue;
                     }
-                    _stringQueue.Enqueue(line[begin..line.Length]);
+                    else
+                    {
+                        ThrowEndOfStreamException();
+                    }
                 }
             }
 
-            return _stringQueue.Dequeue().Span;
+            return (char)_buffer[_cursor++];
         }
 
-        public string ReadString() => ReadCharSpan().ToString();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public char ReadChar()
+        {
+            char c;
+            while (!IsValidChar(c = ReadAscii())) { }
+            return c;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ReadString()
+        {
+            var builder = new StringBuilder();
+            char c;
+            while (!IsValidChar(c = ReadAscii())) { }
+
+            do
+            {
+                builder.Append(c);
+            } while (IsValidChar(c = ReadAscii()));
+
+            return builder.ToString();
+        }
 
         public int ReadInt() => (int)ReadLong();
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public long ReadLong()
         {
             long result = 0;
             bool isPositive = true;
+            char c;
 
-            int i = 0;
-            var s = ReadCharSpan();
-            if (s[i] == '-')
+            while (!IsNumericChar(c = ReadAscii())) { }
+
+            if (c == '-')
             {
                 isPositive = false;
-                i++;
+                c = ReadAscii();
             }
 
-            while (i < s.Length)
+            do
             {
-                result = result * 10 + (s[i++] - '0');
-            }
+                result *= 10;
+                result += c - '0';
+            } while (IsNumericChar(c = ReadAscii()));
 
             return isPositive ? result : -result;
         }
 
-        public double ReadDouble() => double.Parse(ReadCharSpan());
-        public decimal ReadDecimal() => decimal.Parse(ReadCharSpan());
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private Span<char> ReadChunk(Span<char> span)
+        {
+            var i = 0;
+            char c;
+            while (!IsValidChar(c = ReadAscii())) { }
+
+            do
+            {
+                span[i++] = c;
+            } while (IsValidChar(c = ReadAscii()));
+
+            return span.Slice(0, i);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public double ReadDouble() => double.Parse(ReadChunk(stackalloc char[32]));
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public decimal ReadDecimal() => decimal.Parse(ReadChunk(stackalloc char[32]));
 
         public int[] ReadIntArray(int n)
         {
@@ -168,6 +208,7 @@ namespace AtCoderTemplateForNetCore.Questions
             return a;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteLine<T>(T value) => _writer.WriteLine(value.ToString());
 
         public void WriteLine<T>(IEnumerable<T> values, char separator)
@@ -187,6 +228,8 @@ namespace AtCoderTemplateForNetCore.Questions
             _writer.WriteLine();
         }
 
+        public void WriteLine<T>(Span<T> values, char separator) => WriteLine((ReadOnlySpan<T>)values, separator);
+
         public void WriteLine<T>(ReadOnlySpan<T> values, char separator)
         {
             for (int i = 0; i < values.Length - 1; i++)
@@ -205,7 +248,13 @@ namespace AtCoderTemplateForNetCore.Questions
 
         public void Flush() => _writer.Flush();
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsValidChar(char c) => ValidFirstChar <= c && c <= ValidLastChar;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsNumericChar(char c) => ('0' <= c && c <= '9') || c == '-';
+
+        private void ThrowEndOfStreamException() => throw new EndOfStreamException();
 
         protected virtual void Dispose(bool disposing)
         {
