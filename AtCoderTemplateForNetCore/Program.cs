@@ -2332,6 +2332,91 @@ namespace AtCoderTemplateForNetCore.Collections
         public override int GetHashCode() => _value.GetHashCode();
     }
 
+    public class ExpandableArray<T>
+    {
+        const int DefaultCapacity = 4;
+        private T[] _data;
+        public Span<T> Span => _data.AsSpan(0, Count);
+
+        public int Count { get; private set; }
+
+        public ExpandableArray() => Allocate(DefaultCapacity);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ExpandableArray(int capacity)
+        {
+            capacity = Math.Max(capacity, DefaultCapacity);
+            Allocate(capacity);
+        }
+
+        public ExpandableArray(IEnumerable<T> collection)
+        {
+            if (collection is ICollection<T> c)
+            {
+                Allocate(c.Count);
+                c.CopyTo(_data, 0);
+                Count = c.Count;
+            }
+            else
+            {
+                Allocate(DefaultCapacity);
+                foreach (var item in collection)
+                {
+                    Add(item);
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void Allocate(int minCapacity)
+        {
+            var length = 1 << System.Numerics.BitOperations.Log2((uint)(minCapacity - 1)) + 1;
+            _data = new T[length];
+        }
+
+        public T this[Index index]
+        {
+            get => Span[index];
+            set => Span[index] = value;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Add(T item)
+        {
+            if (Count == _data.Length)
+            {
+                Expand();
+            }
+
+            _data[Count++] = item;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void RemoveLast()
+        {
+            if (Count == 0)
+            {
+                ThrowInvalidOperationException("要素が空です。");
+            }
+
+            _data[Count--] = default;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void Expand()
+        {
+            var length = _data.Length << 1;
+            var newData = new T[length];
+            Span.CopyTo(newData);
+            _data = newData;
+        }
+
+        private static void ThrowInvalidOperationException(string message) => throw new InvalidOperationException(message);
+        public override string ToString() => $"{nameof(T)}[{Count}]";
+        public static implicit operator Span<T>(ExpandableArray<T> array) => array.Span;
+        public static implicit operator ReadOnlySpan<T>(ExpandableArray<T> array) => array.Span;
+    }
+
     public static class SearchExtensions
     {
         class LowerBoundComparer<T> : IComparer<T> where T : IComparable<T>
@@ -2542,380 +2627,117 @@ namespace AtCoderTemplateForNetCore.Collections
 
 namespace AtCoderTemplateForNetCore.Graphs
 {
-    public interface INode
+    public interface IEdge
     {
-        public int Index { get; }
+        int To { get; }
     }
 
-    public interface IEdge<TNode> where TNode : INode
-    {
-        TNode From { get; }
-        TNode To { get; }
-    }
-
-    public interface IWeightedEdge<TNode> : IEdge<TNode> where TNode : INode
+    public interface IWeightedEdge : IEdge
     {
         long Weight { get; }
     }
 
-    public interface IGraph<TNode, TEdge> where TEdge : IEdge<TNode> where TNode : INode
+    public interface IGraph<TEdge> where TEdge : IEdge
     {
-        IEnumerable<TEdge> this[TNode node] { get; }
-        IEnumerable<TEdge> Edges { get; }
-        IEnumerable<TNode> Nodes { get; }
+        ReadOnlySpan<TEdge> this[int node] { get; }
         int NodeCount { get; }
     }
 
-    public interface IWeightedGraph<TNode, TEdge> : IGraph<TNode, TEdge> where TEdge : IWeightedEdge<TNode> where TNode : INode {  }
+    public interface IWeightedGraph<TEdge> : IGraph<TEdge> where TEdge : IWeightedEdge {  }
 
-    [StructLayout(LayoutKind.Auto)]
-    public readonly struct BasicNode : INode, IEquatable<BasicNode>
+    public readonly struct BasicEdge : IEdge
     {
-        public int Index { get; }
+        public int To { get; }
 
-        public BasicNode(int index)
+        public BasicEdge(int to)
         {
-            Index = index;
-        }
-
-        public override string ToString() => Index.ToString();
-        public override bool Equals(object obj) => obj is BasicNode node && Equals(node);
-        public bool Equals(BasicNode other) => Index == other.Index;
-        public override int GetHashCode() => HashCode.Combine(Index);
-        public static bool operator ==(BasicNode left, BasicNode right) => left.Equals(right);
-        public static bool operator !=(BasicNode left, BasicNode right) => !(left == right);
-        public static implicit operator BasicNode(int value) => new BasicNode(value);
-    }
-
-    [StructLayout(LayoutKind.Auto)]
-    public readonly struct BasicEdge : IEdge<BasicNode>
-    {
-        public BasicNode From { get; }
-        public BasicNode To { get; }
-
-        public BasicEdge(int from, int to)
-        {
-            From = from;
             To = to;
         }
 
-        public override string ToString() => $"{From}-->{To}";
+        public override string ToString() => To.ToString();
+        public static implicit operator BasicEdge(int edge) => new BasicEdge(edge);
+        public static implicit operator int(BasicEdge edge) => edge.To;
     }
 
     [StructLayout(LayoutKind.Auto)]
-    public readonly struct WeightedEdge : IWeightedEdge<BasicNode>
+    public readonly struct WeightedEdge : IWeightedEdge
     {
-        public BasicNode From { get; }
-        public BasicNode To { get; }
+        public int To { get; }
         public long Weight { get; }
 
-        public WeightedEdge(int from, int to) : this(from, to, 1) { }
+        public WeightedEdge(int to) : this(to, 1) { }
 
-        public WeightedEdge(int from, int to, long weight)
+        public WeightedEdge(int to, long weight)
         {
-            From = from;
             To = to;
             Weight = weight;
         }
 
-        public override string ToString() => $"{From}--[{Weight}]-->{To}";
+        public override string ToString() => $"[{Weight}]-->{To}";
+        public void Deconstruct(out int to, out long weight) => (to, weight) = (To, Weight);
     }
 
-    [StructLayout(LayoutKind.Auto)]
-    public readonly struct GridNode : INode, IEquatable<GridNode>
+    public class BasicGraph : IGraph<BasicEdge>
     {
-        public int Row { get; }
-        public int Column { get; }
-        public int Index { get; }
+        private readonly ExpandableArray<ExpandableArray<BasicEdge>> _edges;
+        public ReadOnlySpan<BasicEdge> this[int node] => _edges[node].Span;
+        public int NodeCount => _edges.Count;
 
-        public GridNode(int row, int column, int width)
+        public BasicGraph(int nodeCount)
         {
-            Row = row;
-            Column = column;
-            Index = row * width + column;
+            _edges = new ExpandableArray<ExpandableArray<BasicEdge>>(nodeCount);
+            for (int i = 0; i < nodeCount; i++)
+            {
+                _edges.Add(new ExpandableArray<BasicEdge>());
+            }
         }
 
-        public override string ToString() => $"({Row}, {Column})";
-        public override int GetHashCode() => HashCode.Combine(Row, Column, Index);
-        public override bool Equals(object obj) => obj is GridNode node && Equals(node);
-        public bool Equals(GridNode other) => Row == other.Row && Column == other.Column && Index == other.Index;
-        public void Deconstruct(out int row, out int column) { row = Row; column = Column; }
-        public static bool operator ==(GridNode left, GridNode right) => left.Equals(right);
-        public static bool operator !=(GridNode left, GridNode right) => !(left == right);
+        public void AddEdge(int from, int to) => _edges[from].Add(to);
+        public void AddNode() => _edges.Add(new ExpandableArray<BasicEdge>());
     }
 
-    [StructLayout(LayoutKind.Auto)]
-    public readonly struct GridEdge : IEdge<GridNode>
+    public class WeightedGraph : IGraph<WeightedEdge>
     {
-        public GridNode From { get; }
-        public GridNode To { get; }
+        private readonly ExpandableArray<ExpandableArray<WeightedEdge>> _edges;
+        public ReadOnlySpan<WeightedEdge> this[int node] => _edges[node].Span;
+        public int NodeCount => _edges.Count;
 
-        public GridEdge(GridNode from, GridNode to)
+        public WeightedGraph(int nodeCount)
         {
-            From = from;
-            To = to;
-        }
-
-        public override string ToString() => $"({From.Row}, {From.Column})-->({To.Row}, {To.Column})";
-    }
-
-    public class BasicGraph : IGraph<BasicNode, BasicEdge>
-    {
-        private readonly List<BasicEdge>[] _edges;
-        public IEnumerable<BasicEdge> this[BasicNode node] => _edges[node.Index];
-        public IEnumerable<BasicEdge> Edges => Nodes.SelectMany(node => this[node]);
-        public IEnumerable<BasicNode> Nodes => Enumerable.Range(0, NodeCount).Select(i => new BasicNode(i));
-        public int NodeCount { get; }
-
-        public BasicGraph(int nodeCount) : this(nodeCount, Enumerable.Empty<BasicEdge>()) { }
-
-        public BasicGraph(int nodeCount, IEnumerable<BasicEdge> edges)
-        {
-            _edges = Enumerable.Repeat(0, nodeCount).Select(_ => new List<BasicEdge>()).ToArray();
-            NodeCount = nodeCount;
-            foreach (var edge in edges)
+            _edges = new ExpandableArray<ExpandableArray<WeightedEdge>>(nodeCount);
+            for (int i = 0; i < nodeCount; i++)
             {
-                AddEdge(edge);
+                _edges.Add(new ExpandableArray<WeightedEdge>());
             }
         }
 
-        public BasicGraph(int nodeCount, IEnumerable<IEnumerable<int>> distances)
-        {
-            _edges = new List<BasicEdge>[nodeCount];
-
-            int i = 0;
-            foreach (var row in distances)
-            {
-                _edges[i] = new List<BasicEdge>(nodeCount);
-                int j = 0;
-                foreach (var distance in row)
-                {
-                    if (distance == 1)
-                    {
-                        _edges[i].Add(new BasicEdge(i, j++));
-                    }
-                }
-                i++;
-            }
-        }
-
-        public void AddEdge(BasicEdge edge) => _edges[edge.From.Index].Add(edge);
-    }
-
-    public class WeightedGraph : IGraph<BasicNode, WeightedEdge>
-    {
-        private readonly List<WeightedEdge>[] _edges;
-        public IEnumerable<WeightedEdge> this[BasicNode node] => _edges[node.Index];
-        public IEnumerable<WeightedEdge> Edges => Nodes.SelectMany(node => this[node]);
-        public IEnumerable<BasicNode> Nodes => Enumerable.Range(0, NodeCount).Select(i => new BasicNode(i));
-        public int NodeCount { get; }
-
-        public WeightedGraph(int nodeCount) : this(nodeCount, Enumerable.Empty<WeightedEdge>()) { }
-
-        public WeightedGraph(int nodeCount, IEnumerable<WeightedEdge> edges)
-        {
-            _edges = Enumerable.Repeat(0, nodeCount).Select(_ => new List<WeightedEdge>()).ToArray();
-            NodeCount = nodeCount;
-            foreach (var edge in edges)
-            {
-                AddEdge(edge);
-            }
-        }
-
-        public WeightedGraph(int nodeCount, IEnumerable<IEnumerable<int>> distances)
-        {
-            _edges = new List<WeightedEdge>[nodeCount];
-
-            int i = 0;
-            foreach (var row in distances)
-            {
-                _edges[i] = new List<WeightedEdge>(nodeCount);
-                int j = 0;
-                foreach (var distance in row)
-                {
-                    _edges[i].Add(new WeightedEdge(i, j++, distance));
-                }
-                i++;
-            }
-        }
-
-        public void AddEdge(WeightedEdge edge) => _edges[edge.From.Index].Add(edge);
-    }
-
-    public class GridGraph : IGraph<GridNode, GridEdge>
-    {
-        private readonly IReadOnlyList<(int dx, int dy)> _adjacents;
-        public int Height { get; }
-        public int Width { get; }
-        public int NodeCount => Height * Width;
-
-        public IEnumerable<GridEdge> this[GridNode node]
-        {
-            get
-            {
-                foreach (var (dx, dy) in _adjacents)
-                {
-                    var next = new GridNode(node.Row + dx, node.Column + dy, Width);
-                    if (CanEnter(next))
-                    {
-                        yield return new GridEdge(node, next);
-                    }
-                }
-            }
-        }
-
-        public IEnumerable<GridEdge> Edges => Nodes.SelectMany(node => this[node]);
-        public IEnumerable<GridNode> Nodes => Enumerable.Range(0, Width).SelectMany(x => Enumerable.Range(0, Height).Select(y => new GridNode(x, y, Width)));
-
-        public GridGraph(int height, int width) : this(height, width, new (int dx, int dy)[] { (-1, 0), (1, 0), (0, -1), (0, 1) }) { }
-
-        public GridGraph(int height, int width, IEnumerable<(int dx, int dy)> adjacents)
-        {
-            Height = height;
-            Width = width;
-            _adjacents = adjacents.ToArray();
-        }
-
-        protected virtual bool CanEnter(GridNode node)
-        {
-            unchecked
-            {
-                return (uint)node.Row < Height && (uint)node.Column < Width;
-            }
-        }
+        public void AddEdge(int from, int to, long weight) => _edges[from].Add(new WeightedEdge(to, weight));
+        public void AddNode() => _edges.Add(new ExpandableArray<WeightedEdge>());
     }
 
     namespace Algorithms
     {
-        // TGraphは派生クラスでいじりたいことがあるのでジェネリクス。
-        // TNode, TEdgeはインターフェースで受け取っても動くが、構造体のDevirtualizationを行うため敢えてジェネリクスにしている（型引数長いのでなんとかしたい……）
-        public abstract class BfsBase<TGraph, TNode, TEdge, TResult> where TGraph : IGraph<TNode, TEdge> where TEdge : IEdge<TNode> where TNode : INode
+        public class Dijkstra
         {
-            protected readonly TGraph _graph;
-            protected bool _completed;
+            private readonly WeightedGraph _graph;
 
-            protected BfsBase(TGraph graph)
+            public Dijkstra(WeightedGraph graph)
             {
                 _graph = graph;
             }
 
-            public TResult Search(TNode startNode)
-            {
-                var todo = new Queue<TNode>();
-                var seen = new bool[_graph.NodeCount];
-                var cameFrom = new TNode[_graph.NodeCount];
-                _completed = false;
-                todo.Enqueue(startNode);
-                seen[startNode.Index] = true;
-                Initialize(startNode);
-
-                while (todo.Count > 0 && !_completed)
-                {
-                    var current = todo.Dequeue();
-                    var isFirstNode = current.Index == startNode.Index;
-                    OnPreordering(current, cameFrom[current.Index], isFirstNode);
-
-                    foreach (var edge in _graph[current])
-                    {
-                        if (seen[edge.To.Index])
-                        {
-                            continue;
-                        }
-                        seen[edge.To.Index] = true;
-                        cameFrom[edge.To.Index] = edge.From;
-                        todo.Enqueue(edge.To);
-                    }
-                }
-
-                return GetResult();
-            }
-
-            protected abstract void Initialize(TNode startNode);
-            protected abstract void OnPreordering(TNode current, TNode previous, bool isFirstNode);
-            protected abstract TResult GetResult();
-        }
-
-        public abstract class DfsBase<TGraph, TNode, TEdge, TResult> where TGraph : IGraph<TNode, TEdge> where TEdge : IEdge<TNode> where TNode : INode
-        {
-            protected readonly TGraph _graph;
-            protected bool _completed;
-
-            protected DfsBase(TGraph graph)
-            {
-                _graph = graph;
-            }
-
-            public TResult Search(TNode startNode)
-            {
-                var todo = new Stack<TNode>();
-                var seen = new bool[_graph.NodeCount];
-                var preorderCompleted = new bool[_graph.NodeCount];
-                var cameFrom = new TNode[_graph.NodeCount];
-                _completed = false;
-                todo.Push(startNode);
-                seen[startNode.Index] = true;
-                Initialize(startNode);
-
-                while (todo.Count > 0 && !_completed)
-                {
-                    var current = todo.Peek();
-                    var isFirstNode = current.Index == startNode.Index;
-
-                    if (!preorderCompleted[current.Index])
-                    {
-                        // 行きがけ
-                        OnPreordering(current, cameFrom[current.Index], isFirstNode);
-                        foreach (var edge in _graph[current])
-                        {
-                            if (seen[edge.To.Index])
-                            {
-                                continue;
-                            }
-                            seen[edge.To.Index] = true;
-                            cameFrom[edge.To.Index] = edge.From;
-                            todo.Push(edge.To);
-                        }
-                        preorderCompleted[current.Index] = true;
-                    }
-                    else
-                    {
-                        // 帰りがけ
-                        OnPostordering(current, cameFrom[current.Index], isFirstNode);
-                        _ = todo.Pop();
-                    }
-                }
-
-                return GetResult();
-            }
-
-            protected abstract void Initialize(TNode startNode);
-            protected abstract void OnPreordering(TNode current, TNode previous, bool isFirstNode);
-            protected abstract void OnPostordering(TNode current, TNode previous, bool isFirstNode);
-            protected abstract TResult GetResult();
-        }
-
-        // 最短経路問題やるだけの問題でIGraphを派生クラスでいじりたいことはほとんどないので普通にインターフェースで受け取る
-        public class Dijkstra<TNode, TEdge> where TEdge : IWeightedEdge<TNode> where TNode : INode
-        {
-            protected readonly IGraph<TNode, TEdge> _graph;
-
-            public Dijkstra(IGraph<TNode, TEdge> graph)
-            {
-                _graph = graph;
-            }
-
-            public long[] GetDistancesFrom(TNode startNode)
+            public long[] GetDistancesFrom(int startNode)
             {
                 const long Inf = 1L << 60;
                 var distances = Enumerable.Repeat(Inf, _graph.NodeCount).ToArray();
-                distances[startNode.Index] = 0;
+                distances[startNode] = 0;
                 var todo = new PriorityQueue<State>(false);
                 todo.Enqueue(new State(startNode, 0));
 
                 while (todo.Count > 0)
                 {
                     var current = todo.Dequeue();
-                    if (current.Distance > distances[current.Node.Index])
+                    if (current.Distance > distances[current.Node])
                     {
                         continue;
                     }
@@ -2923,9 +2745,9 @@ namespace AtCoderTemplateForNetCore.Graphs
                     foreach (var edge in _graph[current.Node])
                     {
                         var nextDistance = current.Distance + edge.Weight;
-                        if (distances[edge.To.Index] > nextDistance)
+                        if (distances[edge.To] > nextDistance)
                         {
-                            distances[edge.To.Index] = nextDistance;
+                            distances[edge.To] = nextDistance;
                             todo.Enqueue(new State(edge.To, nextDistance));
                         }
                     }
@@ -2936,126 +2758,77 @@ namespace AtCoderTemplateForNetCore.Graphs
 
             private readonly struct State : IComparable<State>
             {
-                public TNode Node { get; }
+                public int Node { get; }
                 public long Distance { get; }
 
-                public State(TNode node, long distance)
+                public State(int node, long distance)
                 {
                     Node = node;
                     Distance = distance;
                 }
 
                 public int CompareTo(State other) => Distance.CompareTo(other.Distance);
+                public void Deconstruct(out int node, out long distance) => (node, distance) = (Node, Distance);
             }
         }
 
-        public class WarshallFloyd<TNode, TEdge> where TEdge : IWeightedEdge<TNode> where TNode : INode
+        public class BellmanFord
         {
-            protected readonly IGraph<TNode, TEdge> _graph;
-            const long Inf = 1L << 60;
-
-            public WarshallFloyd(IGraph<TNode, TEdge> graph)
-            {
-                _graph = graph;
-            }
-
-            public long[,] GetDistances()
-            {
-                var distances = InitializeDistances();
-                for (int k = 0; k < _graph.NodeCount; k++)
-                {
-                    for (int i = 0; i < _graph.NodeCount; i++)
-                    {
-                        for (int j = 0; j < _graph.NodeCount; j++)
-                        {
-                            distances[i, j] = Math.Min(distances[i, j], distances[i, k] + distances[k, j]);
-                        }
-                    }
-                }
-
-                // 一応キレイにしておく
-                for (int i = 0; i < _graph.NodeCount; i++)
-                {
-                    for (int j = 0; j < _graph.NodeCount; j++)
-                    {
-                        if (distances[i, j] >= Inf)
-                        {
-                            distances[i, j] = long.MaxValue;
-                        }
-                    }
-                }
-
-                return distances;
-            }
-
-            private long[,] InitializeDistances()
-            {
-                var distances = new long[_graph.NodeCount, _graph.NodeCount];
-
-                for (int i = 0; i < _graph.NodeCount; i++)
-                {
-                    for (int j = 0; j < _graph.NodeCount; j++)
-                    {
-                        distances[i, j] = Inf;
-                    }
-                    distances[i, i] = 0;
-                }
-
-                foreach (var node in _graph.Nodes)
-                {
-                    foreach (var edge in _graph.Edges)
-                    {
-                        distances[edge.From.Index, edge.To.Index] = edge.Weight;
-                    }
-                }
-
-                return distances;
-            }
-        }
-
-        public class BellmanFord<TNode, TEdge> where TEdge : IWeightedEdge<TNode> where TNode : INode
-        {
-            protected readonly List<TEdge> _edges;
+            private readonly ExpandableArray<Edge> _edges = new ExpandableArray<Edge>();
             protected readonly int _nodeCount;
 
-            public BellmanFord(IGraph<TNode, TEdge> graph) : this(graph.Edges, graph.NodeCount) { }
-
-            public BellmanFord(IEnumerable<TEdge> edges, int nodeCount)
+            public BellmanFord(int nodeCount)
             {
-                _edges = edges.ToList();
                 _nodeCount = nodeCount;
             }
 
-            public (long[] distances, bool[] isNegativeCycle) GetDistancesFrom(TNode startNode)
+            public BellmanFord(WeightedGraph graph)
+            {
+                _nodeCount = graph.NodeCount;
+
+                for (int from = 0; from < graph.NodeCount; from++)
+                {
+                    foreach (var edge in graph[from])
+                    {
+                        AddEdge(from, edge.To, edge.Weight);
+                    }
+                }
+            }
+
+
+            public void AddEdge(int from, int to, long weight) => _edges.Add(new Edge(from, to, weight));
+
+            public (long[] distances, bool[] isNegativeCycle) GetDistancesFrom(int startNode)
             {
                 const long Inf = long.MaxValue >> 1;
-                var distances = Enumerable.Repeat(long.MaxValue, _nodeCount).ToArray();
+                var distances = new long[_nodeCount];
+                distances.Fill(Inf);
                 var isNegativeCycle = new bool[_nodeCount];
-                distances[startNode.Index] = 0;
+                distances[startNode] = 0;
 
                 for (int i = 1; i <= 2 * _nodeCount; i++)
                 {
-                    foreach (var edge in _edges)
+                    foreach (var edge in _edges.Span)
                     {
                         // そもそも出発点に未到達なら無視
-                        if (distances[edge.From.Index] < Inf)
+                        if (distances[edge.From] < Inf)
                         {
                             if (i <= _nodeCount)
                             {
-                                var newCost = distances[edge.From.Index] + edge.Weight;
-                                if (distances[edge.To.Index] > newCost)
+                                var newCost = distances[edge.From] + edge.Weight;
+                                if (distances[edge.To] > newCost)
                                 {
-                                    distances[edge.To.Index] = newCost;
+                                    distances[edge.To] = newCost;
                                     // N回目に更新されたやつにチェックを付けて、追加でN回伝播させる
                                     if (i == _nodeCount)
                                     {
-                                        isNegativeCycle[edge.To.Index] = true;
+                                        isNegativeCycle[edge.To] = true;
                                     }
                                 }
                             }
-                            else if (isNegativeCycle[edge.From.Index])
+                            else if (isNegativeCycle[edge.From])
                             {
-                                isNegativeCycle[edge.To.Index] = true;
+                                isNegativeCycle[edge.To] = true;
                             }
                         }
                     }
@@ -3076,6 +2849,24 @@ namespace AtCoderTemplateForNetCore.Graphs
 
                 return (distances, isNegativeCycle);
             }
+
+            [StructLayout(LayoutKind.Auto)]
+            readonly struct Edge
+            {
+                public int From { get; }
+                public int To { get; }
+                public long Weight { get; }
+
+                public Edge(int from, int to, long cost)
+                {
+                    From = from;
+                    To = to;
+                    Weight = cost;
+                }
+
+                public void Deconstruct(out int from, out int to, out long cost) => (from, to, cost) = (From, To, Weight);
+                public override string ToString() => $"{nameof(From)}: {From}, {nameof(To)}: {To}, {nameof(Weight)}: {Weight}";
+            }
         }
 
         public interface ITreeDpState<TSet> : IMonoid<TSet> where TSet : ITreeDpState<TSet>, new()
@@ -3083,91 +2874,97 @@ namespace AtCoderTemplateForNetCore.Graphs
             public TSet AddRoot();
         }
 
-        public class Rerooting<TNode, TEdge, TTreeDpState> where TEdge : IEdge<TNode> where TNode : struct, INode where TTreeDpState : ITreeDpState<TTreeDpState>, new()
+        public class Rerooting<TEdge, TDp> where TEdge : IEdge where TDp : unmanaged, ITreeDpState<TDp>
         {
-            readonly IGraph<TNode, TEdge> _graph;
-            readonly TTreeDpState _identity;
-            readonly Dictionary<int, TTreeDpState>[] _dp;
-            readonly TTreeDpState[] _result;
+            readonly IGraph<TEdge> _graph;
+            readonly TDp _identity;
+            readonly TDp[][] _dp;
+            readonly TDp[] _result;
 
-            public Rerooting(IGraph<TNode, TEdge> graph)
+            public Rerooting(IGraph<TEdge> graph)
             {
                 _graph = graph;
-                _identity = new TTreeDpState().Identity;
-                _dp = new Dictionary<int, TTreeDpState>[_graph.NodeCount];
-                _result = new TTreeDpState[_graph.NodeCount];
+                _identity = new TDp().Identity;
+                _dp = new TDp[graph.NodeCount][];
+                _result = new TDp[_graph.NodeCount];
+                _result.AsSpan().Fill(_identity);
             }
 
-            public TTreeDpState[] Solve()
+            public TDp[] Solve()
             {
-                DepthFirstSearch(_graph.Nodes.First(), null);
-                Reroot(_graph.Nodes.First(), null, _identity);
+                DepthFirstSearch(0, -1);
+                Reroot(0, -1, _identity);
                 return _result;
             }
 
-            private TTreeDpState DepthFirstSearch(TNode root, TNode? parent)
+            private TDp DepthFirstSearch(int current, int parent)
             {
                 var sum = _identity;
-                _dp[root.Index] = new Dictionary<int, TTreeDpState>();
+                _dp[current] = new TDp[_graph[current].Length];
 
-                foreach (var edge in _graph[root])
+                var edges = _graph[current];
+
+                for (int i = 0; i < edges.Length; i++)
                 {
-                    if (edge.To.Index == parent?.Index)
+                    var next = edges[i].To;
+                    if (next == parent)
                         continue;
-                    _dp[root.Index].Add(edge.To.Index, DepthFirstSearch(edge.To, root));
-                    sum = sum.Merge(_dp[root.Index][edge.To.Index]);
+                    _dp[current][i] = DepthFirstSearch(next, current);
+                    sum = sum.Merge(_dp[current][i]);
                 }
+
                 return sum.AddRoot();
             }
 
-            private void Reroot(TNode root, TNode? parent, TTreeDpState toAdd)
+            private void Reroot(int current, int parent, TDp toAdd)
             {
-                var edges = _graph[root].ToArray();
-
-                foreach (var edge in edges)
+                var edges = _graph[current];
+                for (int i = 0; i < edges.Length; i++)
                 {
-                    if (edge.To.Index == parent?.Index)
+                    if (edges[i].To == parent)
                     {
-                        _dp[root.Index].Add(edge.To.Index, toAdd);
+                        _dp[current][i] = toAdd;
                         break;
                     }
                 }
 
-                var dp = GetPrefixSum(root, edges);
+                var dp = GetPrefixSum(current, edges);
 
                 for (int i = 0; i < edges.Length; i++)
                 {
-                    var child = edges[i].To;
-                    if (child.Index == parent?.Index)
+                    var next = edges[i].To;
+                    if (next == parent)
                         continue;
-                    Reroot(child, root, dp[i].AddRoot());
+                    Reroot(next, current, dp[i].AddRoot());
                 }
             }
 
-            private TTreeDpState[] GetPrefixSum(TNode root, TEdge[] edges)
+            private TDp[] GetPrefixSum(int root, ReadOnlySpan<TEdge> edges)
             {
+                const int StackallocLimit = 512;
+                
                 // 左右からの累積和
                 int sumSize = edges.Length + 1;
-                var sumLeft = new TTreeDpState[sumSize];
+                Span<TDp> sumLeft = sumSize <= StackallocLimit ? stackalloc TDp[sumSize] : new TDp[sumSize];
+                Span<TDp> sumRight = sumSize <= StackallocLimit ? stackalloc TDp[sumSize] : new TDp[sumSize];
+
                 sumLeft[0] = _identity;
                 for (int i = 0; i < edges.Length; i++)
                 {
-                    var child = edges[i].To;
-                    sumLeft[i + 1] = sumLeft[i].Merge(_dp[root.Index][child.Index]);
+                    sumLeft[i + 1] = sumLeft[i].Merge(_dp[root][i]);
                 }
 
-                var sumRight = new TTreeDpState[sumSize];
                 sumRight[^1] = _identity;
                 for (int i = edges.Length - 1; i >= 0; i--)
                 {
-                    var child = edges[i].To;
-                    sumRight[i] = sumRight[i + 1].Merge(_dp[root.Index][child.Index]);
+                    sumRight[i] = sumRight[i + 1].Merge(_dp[root][i]);
                 }
 
-                _result[root.Index] = sumLeft[^1].AddRoot();
+                // 頂点vの答え
+                _result[root] = sumLeft[^1].AddRoot();
 
                 // 頂点iを除いた累積
-                var dp = new TTreeDpState[edges.Length];
+                var dp = new TDp[edges.Length];
                 for (int i = 0; i < dp.Length; i++)
                 {
                     dp[i] = sumLeft[i].Merge(sumRight[i + 1]);

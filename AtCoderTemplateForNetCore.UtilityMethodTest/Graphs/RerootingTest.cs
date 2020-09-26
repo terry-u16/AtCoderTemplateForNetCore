@@ -35,11 +35,11 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Graphs
             var graph = new BasicGraph(n);
             foreach (var input in inputs.Skip(1).Select(s => s.Split(' ').Select(s => int.Parse(s) - 1).ToArray()))
             {
-                graph.AddEdge(new BasicEdge(input[0], input[1]));
-                graph.AddEdge(new BasicEdge(input[1], input[0]));
+                graph.AddEdge(input[0], input[1]);
+                graph.AddEdge(input[1], input[0]);
             }
 
-            var rerooting = new Rerooting<BasicNode, BasicEdge, DPState>(graph);
+            var rerooting = new Rerooting<BasicEdge, DPState>(graph);
             var result = rerooting.Solve().Select(r => r.Count.Value);
 
             var expected = new int[] { 40, 280, 840, 120, 120, 504, 72, 72 };

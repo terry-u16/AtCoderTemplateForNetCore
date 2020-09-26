@@ -25,28 +25,28 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Graphs
             var nodesCount = io.ReadInt();
             var edgesCount = io.ReadInt();
             var graph = new WeightedGraph(nodesCount);
-            var edges = new WeightedEdge[edgesCount];
+            var edges = new (int from, int to, long cost)[edgesCount];
 
             for (int i = 0; i < edgesCount; i++)
             {
                 var a = io.ReadInt() - 1;
                 var b = io.ReadInt() - 1;
                 var cost = io.ReadInt();
-                graph.AddEdge(new WeightedEdge(a, b, cost));
-                graph.AddEdge(new WeightedEdge(b, a, cost));
-                edges[i] = new WeightedEdge(a, b, cost);
+                graph.AddEdge(a, b, cost);
+                graph.AddEdge(b, a, cost);
+                edges[i] = (a, b, cost);
             }
 
-            var dijkstra = new Dijkstra<BasicNode, WeightedEdge>(graph);
+            var dijkstra = new Dijkstra(graph);
 
             var used = new bool[edgesCount];
             for (int node = 0; node < nodesCount; node++)
             {
-                var distances = dijkstra.GetDistancesFrom(new BasicNode(node));
+                var distances = dijkstra.GetDistancesFrom(node);
                 for (int edgeIndex = 0; edgeIndex < edges.Length; edgeIndex++)
                 {
                     var edge = edges[edgeIndex];
-                    if (Math.Abs(distances[edge.From.Index] - distances[edge.To.Index]) == edge.Weight)
+                    if (Math.Abs(distances[edge.from] - distances[edge.to]) == edge.cost)
                     {
                         used[edgeIndex] = true;
                     }
