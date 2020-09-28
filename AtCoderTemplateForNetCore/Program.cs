@@ -28,7 +28,6 @@ namespace AtCoderTemplateForNetCore
 
 namespace AtCoderTemplateForNetCore.Questions
 {
-
     public interface IAtCoderQuestion
     {
         string Solve(string input);
@@ -53,7 +52,14 @@ namespace AtCoderTemplateForNetCore.Questions
 
         public abstract void Solve(IOManager io);
     }
+}
 
+#endregion
+
+#region Utils
+
+namespace AtCoderTemplateForNetCore
+{
     public class IOManager : IDisposable
     {
         private readonly BinaryReader _reader;
@@ -275,6 +281,25 @@ namespace AtCoderTemplateForNetCore.Questions
         {
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
+        }
+    }
+
+    public static class UtilExtensions
+    {
+        public static void ChangeMax<T>(ref this T a, T b) where T : struct, IComparable<T>
+        {
+            if (a.CompareTo(b) < 0)
+            {
+                a = b;
+            }
+        }
+
+        public static void ChangeMin<T>(ref this T a, T b) where T : struct, IComparable<T>
+        {
+            if (a.CompareTo(b) > 0)
+            {
+                a = b;
+            }
         }
     }
 }
