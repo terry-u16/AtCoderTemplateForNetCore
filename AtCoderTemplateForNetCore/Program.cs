@@ -286,20 +286,24 @@ namespace AtCoderTemplateForNetCore
 
     public static class UtilExtensions
     {
-        public static void ChangeMax<T>(ref this T a, T b) where T : struct, IComparable<T>
+        public static bool ChangeMax<T>(ref this T value, T other) where T : struct, IComparable<T>
         {
-            if (a.CompareTo(b) < 0)
+            if (value.CompareTo(other) < 0)
             {
-                a = b;
+                value = other;
+                return true;
             }
+            return false;
         }
 
-        public static void ChangeMin<T>(ref this T a, T b) where T : struct, IComparable<T>
+        public static bool ChangeMin<T>(ref this T value, T other) where T : struct, IComparable<T>
         {
-            if (a.CompareTo(b) > 0)
+            if (value.CompareTo(other) > 0)
             {
-                a = b;
+                value = other;
+                return true;
             }
+            return false;
         }
 
         public static void Sort<T>(this T[] array) where T : IComparable<T> => Array.Sort(array);
