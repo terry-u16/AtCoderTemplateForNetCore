@@ -301,6 +301,9 @@ namespace AtCoderTemplateForNetCore
                 a = b;
             }
         }
+
+        public static void Sort<T>(this T[] array) where T : IComparable<T> => Array.Sort(array);
+        public static void Sort<T>(this T[] array, Comparison<T> comparison) => Array.Sort(array, comparison);
     }
 }
 
