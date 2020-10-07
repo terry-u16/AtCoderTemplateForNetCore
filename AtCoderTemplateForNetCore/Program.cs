@@ -3196,12 +3196,12 @@ namespace AtCoderTemplateForNetCore.Collections
 
     public static class SearchExtensions
     {
-        class LowerBoundComparer<T> : IComparer<T> where T : IComparable<T>
+        struct LowerBoundComparer<T> : IComparer<T> where T : IComparable<T>
         {
             public int Compare(T x, T y) => 0 <= x.CompareTo(y) ? 1 : -1;
         }
 
-        class UpperBoundComparer<T> : IComparer<T> where T : IComparable<T>
+        struct UpperBoundComparer<T> : IComparer<T> where T : IComparable<T>
         {
             public int Compare(T x, T y) => 0 < x.CompareTo(y) ? 1 : -1;
         }
