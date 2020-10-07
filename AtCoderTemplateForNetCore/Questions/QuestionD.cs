@@ -15,6 +15,7 @@ namespace AtCoderTemplateForNetCore.Questions
 {
     public class QuestionD : AtCoderQuestionBase
     {
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public override void Solve(IOManager io)
         {
             throw new NotImplementedException();
