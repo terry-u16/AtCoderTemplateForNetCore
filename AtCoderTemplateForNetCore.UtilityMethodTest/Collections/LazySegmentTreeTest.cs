@@ -47,9 +47,9 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
             var n = 3;
             var segTree = new LazySegmentTree<MinInt, Updater>(Enumerable.Repeat((1L << 31) - 1, n).Select(i => new MinInt(i)).ToArray());
 
-            segTree.Update(0, 2, new Updater(1, 0));
-            segTree.Update(1, 3, new Updater(3, 1));
-            segTree.Update(2, 3, new Updater(2, 2));
+            segTree.Apply(0, 2, new Updater(1, 0));
+            segTree.Apply(1, 3, new Updater(3, 1));
+            segTree.Apply(2, 3, new Updater(2, 2));
             Assert.Equal(1, segTree.Query(0, 1).Value);
             Assert.Equal(3, segTree.Query(1, 2).Value);
             Assert.Equal(2, segTree.Query(2, 3).Value);

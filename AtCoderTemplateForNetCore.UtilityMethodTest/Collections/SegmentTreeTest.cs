@@ -58,9 +58,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
             for (int i = 0; i < expected.Length; i++)
             {
                 Assert.Equal(expected[i], segmentTree[i]);
-                Assert.Equal(expected[i], segmentTree.Data[i]);
             }
-            Assert.Equal(expected, segmentTree.Select(m => m.Value));
 
             for (int i = 0; i < segmentTree.Length; i++)
             {
@@ -76,17 +74,15 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
             Assert.ThrowsAny<ArgumentException>(() => _defaultSegmentTree.Query(0, -1));
             Assert.ThrowsAny<ArgumentException>(() => _defaultSegmentTree.Query(0, 6));
             Assert.ThrowsAny<ArgumentException>(() => _defaultSegmentTree.Query(5, 6));
-            Assert.ThrowsAny<ArgumentException>(() => _defaultSegmentTree.Query(2, 2));
             Assert.ThrowsAny<ArgumentException>(() => _defaultSegmentTree.Query(3, 2));
 
             Assert.ThrowsAny<ArgumentException>(() => _defaultSegmentTree.Query(-1..2));
             Assert.ThrowsAny<ArgumentException>(() => _defaultSegmentTree.Query(0..-1));
             Assert.ThrowsAny<ArgumentException>(() => _defaultSegmentTree.Query(0..6));
             Assert.ThrowsAny<ArgumentException>(() => _defaultSegmentTree.Query(5..6));
-            Assert.ThrowsAny<ArgumentException>(() => _defaultSegmentTree.Query(2..2));
             Assert.ThrowsAny<ArgumentException>(() => _defaultSegmentTree.Query(3..2));
-            Assert.ThrowsAny<ArgumentException>(() => _defaultSegmentTree.Query(3..^2));
-            Assert.ThrowsAny<ArgumentException>(() => _defaultSegmentTree.Query(^0..^0));
+            Assert.ThrowsAny<ArgumentException>(() => _defaultSegmentTree.Query(3..^3));
+            Assert.ThrowsAny<ArgumentException>(() => _defaultSegmentTree.Query(^0..^1));
         }
 
         [Fact]
