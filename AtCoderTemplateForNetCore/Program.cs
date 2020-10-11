@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -1453,89 +1454,99 @@ namespace AtCoderTemplateForNetCore.Algorithms
 
 namespace AtCoderTemplateForNetCore.Collections
 {
-    // See https://kumikomiya.com/competitive-programming-with-c-sharp/
-    public class UnionFindTree
+    public class UnionFind
     {
-        private UnionFindNode[] _nodes;
-        public int Count => _nodes.Length;
+        private int[] _parentsOrSizes;
+        public int Count => _parentsOrSizes.Length;
         public int Groups { get; private set; }
 
-        public UnionFindTree(int count)
+        public UnionFind(int count)
         {
-            _nodes = Enumerable.Range(0, count).Select(i => new UnionFindNode(i)).ToArray();
-            Groups = _nodes.Length;
+            _parentsOrSizes = new int[count];
+            _parentsOrSizes.AsSpan().Fill(-1);
+            Groups = _parentsOrSizes.Length;
         }
 
-        public void Unite(int index1, int index2)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Unite(int a, int b)
         {
-            var succeed = _nodes[index1].Unite(_nodes[index2]);
-            if (succeed)
+            var x = FindRoot(a);
+            var y = FindRoot(b);
+
+            if (x == y)
             {
+                return false;
+            }
+            else
+            {
+                if (-_parentsOrSizes[x] < _parentsOrSizes[y])
+                {
+                    (x, y) = (y, x);
+                }
+
+                _parentsOrSizes[x] += _parentsOrSizes[y];
+                _parentsOrSizes[y] = x;
                 Groups--;
+                return true;
             }
         }
 
-        public bool IsInSameGroup(int index1, int index2) => _nodes[index1].IsInSameGroup(_nodes[index2]);
-        public int GetGroupSizeOf(int index) => _nodes[index].GetGroupSize();
+        public bool IsInSameGroup(int a, int b) => FindRoot(a) == FindRoot(b);
 
-        private class UnionFindNode
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int FindRoot(int index)
         {
-            private int _height;        // rootのときのみ有効
-            private int _groupSize;     // 同上
-            private UnionFindNode _parent;
-            public int ID { get; }
-
-            public UnionFindNode(int id)
+            if (unchecked((uint)index >= (uint)_parentsOrSizes.Length))
             {
-                _height = 0;
-                _groupSize = 1;
-                _parent = this;
-                ID = id;
+                ThrowArgumentException();
             }
 
-            public UnionFindNode FindRoot()
+            return FindRecursive(index);
+
+            int FindRecursive(int index)
             {
-                if (_parent != this) // not ref equals
+                if (_parentsOrSizes[index] < 0)
                 {
-                    var root = _parent.FindRoot();
-                    _parent = root;
-                }
-
-                return _parent;
-            }
-
-            public int GetGroupSize() => FindRoot()._groupSize;
-
-            public bool Unite(UnionFindNode other)
-            {
-                var thisRoot = this.FindRoot();
-                var otherRoot = other.FindRoot();
-
-                if (thisRoot == otherRoot)
-                {
-                    return false;
-                }
-
-                if (thisRoot._height < otherRoot._height)
-                {
-                    thisRoot._parent = otherRoot;
-                    otherRoot._groupSize += thisRoot._groupSize;
-                    otherRoot._height = Math.Max(thisRoot._height + 1, otherRoot._height);
-                    return true;
+                    return index;
                 }
                 else
                 {
-                    otherRoot._parent = thisRoot;
-                    thisRoot._groupSize += otherRoot._groupSize;
-                    thisRoot._height = Math.Max(otherRoot._height + 1, thisRoot._height);
-                    return true;
+                    return _parentsOrSizes[index] = FindRecursive(_parentsOrSizes[index]);
+                }
+            }
+        }
+
+        public int GetGroupSizeOf(int index) => -_parentsOrSizes[FindRoot(index)];
+
+        public int[][] GetAllGroups()
+        {
+            var resultIndices = ArrayPool<int>.Shared.Rent(_parentsOrSizes.Length);
+            var index = 0;
+            var results = new int[Groups][];
+
+            for (int i = 0; i < _parentsOrSizes.Length; i++)
+            {
+                if (_parentsOrSizes[i] < 0)
+                {
+                    results[index] = new int[-_parentsOrSizes[i]];
+                    resultIndices[i] = index++;
                 }
             }
 
-            public bool IsInSameGroup(UnionFindNode other) => this.FindRoot() == other.FindRoot();
+            var counts = new int[results.Length];
 
-            public override string ToString() => $"{ID} root:{FindRoot().ID}";
+            for (int i = 0; i < _parentsOrSizes.Length; i++)
+            {
+                var group = resultIndices[FindRoot(i)];
+                results[group][counts[group]++] = i;
+            }
+
+            ArrayPool<int>.Shared.Return(resultIndices);
+
+            return results;
         }
+
+        private void ThrowArgumentException() => throw new ArgumentException();
     }
 
     public class Deque<T> : IReadOnlyCollection<T>
