@@ -308,6 +308,22 @@ namespace AtCoderTemplateForNetCore
             return false;
         }
 
+        public static void SwapIfLargerThan<T>(ref this T a, ref T b) where T : struct, IComparable<T>
+        {
+            if (a.CompareTo(b) > 0)
+            {
+                (a, b) = (b, a);
+            }
+        }
+
+        public static void SwapIfSmallerThan<T>(ref this T a, ref T b) where T : struct, IComparable<T>
+        {
+            if (a.CompareTo(b) < 0)
+            {
+                (a, b) = (b, a);
+            }
+        }
+
         public static void Sort<T>(this T[] array) where T : IComparable<T> => Array.Sort(array);
         public static void Sort<T>(this T[] array, Comparison<T> comparison) => Array.Sort(array, comparison);
     }
