@@ -327,6 +327,21 @@ namespace AtCoderTemplateForNetCore
         public static void Sort<T>(this T[] array) where T : IComparable<T> => Array.Sort(array);
         public static void Sort<T>(this T[] array, Comparison<T> comparison) => Array.Sort(array, comparison);
     }
+
+
+    public static class CollectionExtensions
+    {
+        private class ArrayWrapper<T>
+        {
+            public T[] Array;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Span<T> AsSpan<T>(this List<T> list)
+        {
+            return Unsafe.As<ArrayWrapper<T>>(list).Array.AsSpan(0, list.Count);
+        }
+    }
 }
 
 #endregion
@@ -3573,91 +3588,6 @@ namespace AtCoderTemplateForNetCore.Collections
         public override int GetHashCode() => _value.GetHashCode();
     }
 
-    public class ExpandableArray<T>
-    {
-        const int DefaultCapacity = 4;
-        private T[] _data;
-        public Span<T> Span => _data.AsSpan(0, Count);
-
-        public int Count { get; private set; }
-
-        public ExpandableArray() => Allocate(DefaultCapacity);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ExpandableArray(int capacity)
-        {
-            capacity = Math.Max(capacity, DefaultCapacity);
-            Allocate(capacity);
-        }
-
-        public ExpandableArray(IEnumerable<T> collection)
-        {
-            if (collection is ICollection<T> c)
-            {
-                Allocate(c.Count);
-                c.CopyTo(_data, 0);
-                Count = c.Count;
-            }
-            else
-            {
-                Allocate(DefaultCapacity);
-                foreach (var item in collection)
-                {
-                    Add(item);
-                }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void Allocate(int minCapacity)
-        {
-            var length = 1 << System.Numerics.BitOperations.Log2((uint)(minCapacity - 1)) + 1;
-            _data = new T[length];
-        }
-
-        public T this[Index index]
-        {
-            get => Span[index];
-            set => Span[index] = value;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Add(T item)
-        {
-            if (Count == _data.Length)
-            {
-                Expand();
-            }
-
-            _data[Count++] = item;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RemoveLast()
-        {
-            if (Count == 0)
-            {
-                ThrowInvalidOperationException("要素が空です。");
-            }
-
-            _data[Count--] = default;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void Expand()
-        {
-            var length = _data.Length << 1;
-            var newData = new T[length];
-            Span.CopyTo(newData);
-            _data = newData;
-        }
-
-        private static void ThrowInvalidOperationException(string message) => throw new InvalidOperationException(message);
-        public override string ToString() => $"{nameof(T)}[{Count}]";
-        public static implicit operator Span<T>(ExpandableArray<T> array) => array.Span;
-        public static implicit operator ReadOnlySpan<T>(ExpandableArray<T> array) => array.Span;
-    }
-
     public static class SearchExtensions
     {
         struct LowerBoundComparer<T> : IComparer<T> where T : IComparable<T>
@@ -3913,40 +3843,40 @@ namespace AtCoderTemplateForNetCore.Graphs
 
     public class BasicGraph : IGraph<BasicEdge>
     {
-        private readonly ExpandableArray<ExpandableArray<BasicEdge>> _edges;
-        public ReadOnlySpan<BasicEdge> this[int node] => _edges[node].Span;
+        private readonly List<List<BasicEdge>> _edges;
+        public ReadOnlySpan<BasicEdge> this[int node] => _edges[node].AsSpan();
         public int NodeCount => _edges.Count;
 
         public BasicGraph(int nodeCount)
         {
-            _edges = new ExpandableArray<ExpandableArray<BasicEdge>>(nodeCount);
+            _edges = new List<List<BasicEdge>>(nodeCount);
             for (int i = 0; i < nodeCount; i++)
             {
-                _edges.Add(new ExpandableArray<BasicEdge>());
+                _edges.Add(new List<BasicEdge>());
             }
         }
 
         public void AddEdge(int from, int to) => _edges[from].Add(to);
-        public void AddNode() => _edges.Add(new ExpandableArray<BasicEdge>());
+        public void AddNode() => _edges.Add(new List<BasicEdge>());
     }
 
     public class WeightedGraph : IGraph<WeightedEdge>
     {
-        private readonly ExpandableArray<ExpandableArray<WeightedEdge>> _edges;
-        public ReadOnlySpan<WeightedEdge> this[int node] => _edges[node].Span;
+        private readonly List<List<WeightedEdge>> _edges;
+        public ReadOnlySpan<WeightedEdge> this[int node] => _edges[node].AsSpan();
         public int NodeCount => _edges.Count;
 
         public WeightedGraph(int nodeCount)
         {
-            _edges = new ExpandableArray<ExpandableArray<WeightedEdge>>(nodeCount);
+            _edges = new List<List<WeightedEdge>>(nodeCount);
             for (int i = 0; i < nodeCount; i++)
             {
-                _edges.Add(new ExpandableArray<WeightedEdge>());
+                _edges.Add(new List<WeightedEdge>());
             }
         }
 
         public void AddEdge(int from, int to, long weight) => _edges[from].Add(new WeightedEdge(to, weight));
-        public void AddNode() => _edges.Add(new ExpandableArray<WeightedEdge>());
+        public void AddNode() => _edges.Add(new List<WeightedEdge>());
     }
 
     namespace Algorithms
@@ -4008,7 +3938,7 @@ namespace AtCoderTemplateForNetCore.Graphs
 
         public class BellmanFord
         {
-            private readonly ExpandableArray<Edge> _edges = new ExpandableArray<Edge>();
+            private readonly List<Edge> _edges = new List<Edge>();
             protected readonly int _nodeCount;
 
             public BellmanFord(int nodeCount)
@@ -4042,7 +3972,7 @@ namespace AtCoderTemplateForNetCore.Graphs
 
                 for (int i = 1; i <= 2 * _nodeCount; i++)
                 {
-                    foreach (var edge in _edges.Span)
+                    foreach (var edge in _edges.AsSpan())
                     {
                         // そもそも出発点に未到達なら無視
                         if (distances[edge.From] < Inf)
