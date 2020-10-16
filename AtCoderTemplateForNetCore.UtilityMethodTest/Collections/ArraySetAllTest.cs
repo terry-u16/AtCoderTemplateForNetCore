@@ -15,7 +15,8 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
         public void ArrayFill2Test()
         {
             const int N = 10;
-            var array = new int[N, N].Fill(10);
+            var array = new int[N, N];
+            array.Fill(10);
 
             for (int i = 0; i < N; i++)
             {

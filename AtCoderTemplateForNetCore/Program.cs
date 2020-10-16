@@ -3749,45 +3749,6 @@ namespace AtCoderTemplateForNetCore.Collections
 
         public static IEnumerable<(T item, int index)> WithIndex<T>(this IEnumerable<T> source) => source.Select((item, index) => (item, index));
     }
-
-    public static class ArrayExtensions
-    {
-        public static T[,] Fill<T>(this T[,] array, T value)
-        {
-            var length0 = array.GetLength(0);
-            var length1 = array.GetLength(1);
-            for (int i = 0; i < length0; i++)
-                for (int j = 0; j < length1; j++)
-                    array[i, j] = value;
-            return array;
-        }
-
-        public static T[,,] Fill<T>(this T[,,] array, T value)
-        {
-            var length0 = array.GetLength(0);
-            var length1 = array.GetLength(1);
-            var length2 = array.GetLength(2);
-            for (int i = 0; i < length0; i++)
-                for (int j = 0; j < length1; j++)
-                    for (int k = 0; k < length2; k++)
-                        array[i, j, k] = value;
-            return array;
-        }
-
-        public static T[,,,] Fill<T>(this T[,,,] array, T value)
-        {
-            var length0 = array.GetLength(0);
-            var length1 = array.GetLength(1);
-            var length2 = array.GetLength(2);
-            var length3 = array.GetLength(3);
-            for (int i = 0; i < length0; i++)
-                for (int j = 0; j < length1; j++)
-                    for (int k = 0; k < length2; k++)
-                        for (int l = 0; l < length3; l++)
-                            array[i, j, k, l] = value;
-            return array;
-        }
-    }
 }
 
 #endregion
