@@ -341,6 +341,11 @@ namespace AtCoderTemplateForNetCore
         {
             return Unsafe.As<ArrayWrapper<T>>(list).Array.AsSpan(0, list.Count);
         }
+
+        public static void Fill<T>(this T[] array, T value) => array.AsSpan().Fill(value);
+        public static void Fill<T>(this T[,] array, T value) => MemoryMarshal.CreateSpan(ref array[0, 0], array.Length).Fill(value);
+        public static void Fill<T>(this T[,,] array, T value) => MemoryMarshal.CreateSpan(ref array[0, 0, 0], array.Length).Fill(value);
+        public static void Fill<T>(this T[,,,] array, T value) => MemoryMarshal.CreateSpan(ref array[0, 0, 0, 0], array.Length).Fill(value);
     }
 }
 
