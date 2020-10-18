@@ -7,15 +7,17 @@ using AtCoderTemplateForNetCore.Numerics;
 using AtCoderTemplateForNetCore.Graphs;
 using AtCoderTemplateForNetCore.Graphs.Algorithms;
 using Xunit;
+using ModInt = AtCoderTemplateForNetCore.Numerics.StaticModInt<AtCoderTemplateForNetCore.Numerics.Mod1000000007>;
 
 namespace AtCoderTemplateForNetCore.UtilityMethodTest.Graphs
 {
-    [Collection("ModularCombination")]
     public class RerootingTest
     {
-        public RerootingTest()
+        public static ModCombination<Mod1000000007> Combination { get; private set; }
+
+        static RerootingTest()
         {
-            Modular.InitializeCombinationTable();
+            Combination = new ModCombination<Mod1000000007>();
         }
 
         [Fact]
@@ -30,7 +32,6 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Graphs
 6 7
 6 8".Split(Environment.NewLine);
 
-            Modular.InitializeCombinationTable();
             var n = int.Parse(inputs[0]);
             var graph = new BasicGraph(n);
             foreach (var input in inputs.Skip(1).Select(s => s.Split(' ').Select(s => int.Parse(s) - 1).ToArray()))
@@ -49,12 +50,12 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Graphs
 
     struct DPState : ITreeDpState<DPState>
     {
-        public Modular Count { get; }
+        public ModInt Count { get; }
         public int Size { get; }
 
-        public DPState Identity => new DPState(new Modular(1), 0);
+        public DPState Identity => new DPState(ModInt.One, 0);
 
-        public DPState(Modular count, int size)
+        public DPState(ModInt count, int size)
         {
             Count = count;
             Size = size;
@@ -65,7 +66,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Graphs
         public DPState Merge(DPState other)
         {
             var size = Size + other.Size;
-            var count = Modular.Combination(size, Size) * Count * other.Count;
+            var count = RerootingTest.Combination.Combination(size, Size) * Count * other.Count;
             return new DPState(count, size);
         }
     }

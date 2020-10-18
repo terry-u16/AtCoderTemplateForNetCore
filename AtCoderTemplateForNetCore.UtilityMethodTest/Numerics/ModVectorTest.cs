@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using AtCoderTemplateForNetCore.Numerics;
 using Xunit;
+using ModInt = AtCoderTemplateForNetCore.Numerics.StaticModInt<AtCoderTemplateForNetCore.Numerics.Mod1000000007>;
+using ModVector = AtCoderTemplateForNetCore.Numerics.ModVector<AtCoderTemplateForNetCore.Numerics.Mod1000000007>;
 
 namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
 {
@@ -22,7 +21,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
         [Fact]
         public void InitializeByArrayTest()
         {
-            var data = new Modular[] { 1, 2, 3, 4, 5 };
+            var data = new ModInt[] { 1, 2, 3, 4, 5 };
             var vector = new ModVector(data);
             for (int i = 0; i < vector.Length; i++)
                 Assert.Equal(data[i], vector[i]);
@@ -37,8 +36,8 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
         [Fact]
         public void AddTest()
         {
-            var data1 = new Modular[5];
-            var data2 = new Modular[5];
+            var data1 = new ModInt[5];
+            var data2 = new ModInt[5];
             for (int i = 0; i < data1.Length; i++)
             {
                 data1[i] = i * i;
@@ -55,8 +54,8 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
         [Fact]
         public void SubtractTest()
         {
-            var data1 = new Modular[5];
-            var data2 = new Modular[5];
+            var data1 = new ModInt[5];
+            var data2 = new ModInt[5];
             for (int i = 0; i < data1.Length; i++)
             {
                 data1[i] = i * i;
@@ -73,9 +72,9 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
         [Fact]
         public void MultiplyTest()
         {
-            var data1 = new Modular[5];
-            var data2 = new Modular[5];
-            var expected = Modular.Zero;
+            var data1 = new ModInt[5];
+            var data2 = new ModInt[5];
+            var expected = ModInt.Zero;
             for (int i = 0; i < data1.Length; i++)
             {
                 data1[i] = i * i;

@@ -8,6 +8,7 @@ using System.Numerics;
 using System.Text;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.X86;
 using AtCoderTemplateForNetCore.Algorithms;
 using AtCoderTemplateForNetCore.Collections;
 using AtCoderTemplateForNetCore.Numerics;

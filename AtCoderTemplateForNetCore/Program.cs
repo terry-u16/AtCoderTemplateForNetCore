@@ -8,6 +8,7 @@ using System.Numerics;
 using System.Text;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.X86;
 using AtCoderTemplateForNetCore.Algorithms;
 using AtCoderTemplateForNetCore.Collections;
 using AtCoderTemplateForNetCore.Numerics;
@@ -481,185 +482,578 @@ namespace AtCoderTemplateForNetCore.Numerics
         }
     }
 
-    public readonly struct Modular : IEquatable<Modular>, IComparable<Modular>
+    /// <summary>
+    /// コンパイル時に決定する mod を表します。
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// public readonly struct Mod1000000009 : IStaticMod
+    /// {
+    ///     public uint Mod => 1000000009;
+    ///     public bool IsPrime => true;
+    /// }
+    /// </code>
+    /// </example>
+    public interface IStaticMod
     {
-        private const int DefaultMod = 1000000007;
-        public int Value { get; }
-        public static int Mod { get; set; } = DefaultMod;
+        /// <summary>
+        /// mod を取得します。
+        /// </summary>
+        uint Mod { get; }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Modular(long value)
-        {
-            if (unchecked((ulong)value) < unchecked((ulong)Mod))
-            {
-                Value = (int)value;
-            }
-            else
-            {
-                Value = (int)(value % Mod);
-                if (Value < 0)
-                {
-                    Value += Mod;
-                }
-            }
-        }
-
-        private Modular(int value) => Value = value;
-        public static Modular Zero => new Modular(0);
-        public static Modular One => new Modular(1);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Modular operator +(Modular a, Modular b)
-        {
-            var result = a.Value + b.Value;
-            if (result >= Mod)
-            {
-                result -= Mod;    // 剰余演算を避ける
-            }
-            return new Modular(result);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Modular operator -(Modular a, Modular b)
-        {
-            var result = a.Value - b.Value;
-            if (result < 0)
-            {
-                result += Mod;    // 剰余演算を避ける
-            }
-            return new Modular(result);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Modular operator *(Modular a, Modular b) => new Modular((long)a.Value * b.Value);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Modular operator /(Modular a, Modular b) => a * Pow(b.Value, Mod - 2);
-
-        // 需要は不明だけど一応
-        public static bool operator ==(Modular left, Modular right) => left.Equals(right);
-        public static bool operator !=(Modular left, Modular right) => !(left == right);
-        public static bool operator <(Modular left, Modular right) => left.CompareTo(right) < 0;
-        public static bool operator <=(Modular left, Modular right) => left.CompareTo(right) <= 0;
-        public static bool operator >(Modular left, Modular right) => left.CompareTo(right) > 0;
-        public static bool operator >=(Modular left, Modular right) => left.CompareTo(right) >= 0;
-
-        public static implicit operator Modular(long a) => new Modular(a);
-        public static explicit operator int(Modular a) => a.Value;
-        public static explicit operator long(Modular a) => a.Value;
-
-        public static Modular Pow(int a, int n)
-        {
-            if (n == 0)
-            {
-                return Modular.One;
-            }
-            else if (n == 1)
-            {
-                return a;
-            }
-            else if (n > 0)
-            {
-                var p = Pow(a, n >> 1);             // m / 2
-                return p * p * Pow(a, n & 0x01);    // m % 2
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException(nameof(n), $"べき指数{nameof(n)}は0以上の整数でなければなりません。");
-            }
-        }
-
-        private static List<int> _factorialCache;
-        private static List<int> FactorialCache => _factorialCache ??= new List<int>() { 1 };
-        private static int[] FactorialInverseCache { get; set; }
-        const int defaultMaxFactorial = 1000000;
-
-        public static Modular Factorial(int n)
-        {
-            if (n < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(n), $"{nameof(n)}は0以上の整数でなければなりません。");
-            }
-
-            for (int i = FactorialCache.Count; i <= n; i++)  // Countが1（0!までキャッシュ済み）のとき1!～n!まで計算
-            {
-                FactorialCache.Add((int)((long)FactorialCache[i - 1] * i % Mod));
-            }
-            return new Modular(FactorialCache[n]);
-        }
-
-        public static Modular Permutation(int n, int r)
-        {
-            CheckNR(n, r);
-            return Factorial(n) / Factorial(n - r);
-        }
-
-        public static Modular Combination(int n, int r)
-        {
-            CheckNR(n, r);
-            r = Math.Min(r, n - r);
-            try
-            {
-                return new Modular(FactorialCache[n]) * new Modular(FactorialInverseCache[r]) * new Modular(FactorialInverseCache[n - r]);
-            }
-            catch (Exception ex) when (ex is NullReferenceException || ex is ArgumentOutOfRangeException)
-            {
-                throw new InvalidOperationException($"{nameof(Combination)}を呼び出す前に{nameof(InitializeCombinationTable)}により前計算を行う必要があります。", ex);
-            }
-        }
-
-        public static void InitializeCombinationTable(int max = defaultMaxFactorial)
-        {
-            Factorial(max);
-            FactorialInverseCache = new int[max + 1];
-
-            var fInv = (Modular.One / Factorial(max)).Value;
-            FactorialInverseCache[max] = fInv;
-            for (int i = max - 1; i >= 0; i--)
-            {
-                fInv = (int)((long)fInv * (i + 1) % Mod);
-                FactorialInverseCache[i] = fInv;
-            }
-        }
-
-        public static Modular CombinationWithRepetition(int n, int r) => Combination(n + r - 1, r);
-
-        private static void CheckNR(int n, int r)
-        {
-            if (n < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(n), $"{nameof(n)}は0以上の整数でなければなりません。");
-            }
-            if (r < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(r), $"{nameof(r)}は0以上の整数でなければなりません。");
-            }
-            if (n < r)
-            {
-                throw new ArgumentOutOfRangeException($"{nameof(n)},{nameof(r)}", $"{nameof(r)}は{nameof(n)}以下でなければなりません。");
-            }
-        }
-
-        public override string ToString() => Value.ToString();
-        public override bool Equals(object obj) => obj is Modular m ? Equals(m) : false;
-        public bool Equals([System.Diagnostics.CodeAnalysis.AllowNull] Modular other) => Value == other.Value;
-        public int CompareTo([System.Diagnostics.CodeAnalysis.AllowNull] Modular other) => Value.CompareTo(other.Value);
-        public override int GetHashCode() => Value.GetHashCode();
+        /// <summary>
+        /// mod が素数であるか識別します。
+        /// </summary>
+        bool IsPrime { get; }
     }
 
-    public class ModMatrix
+    public readonly struct Mod1000000007 : IStaticMod
     {
-        readonly Modular[] _values;
+        public uint Mod => 1000000007;
+        public bool IsPrime => true;
+    }
+
+    public readonly struct Mod998244353 : IStaticMod
+    {
+        public uint Mod => 998244353;
+        public bool IsPrime => true;
+    }
+
+    /// <summary>
+    /// 実行時に決定する mod の ID を表します。
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// public readonly struct ModID123 : IDynamicModID { }
+    /// </code>
+    /// </example>
+    public interface IDynamicModID { }
+
+    public readonly struct ModID0 : IDynamicModID { }
+    public readonly struct ModID1 : IDynamicModID { }
+    public readonly struct ModID2 : IDynamicModID { }
+
+    /// <summary>
+    /// 四則演算時に自動で mod を取る整数型。mod の値はコンパイル時に決定している必要があります。
+    /// </summary>
+    /// <typeparam name="T">定数 mod を表す構造体</typeparam>
+    /// <example>
+    /// <code>
+    /// using ModInt = AtCoder.StaticModInt&lt;AtCoder.Mod1000000007&gt;;
+    ///
+    /// void SomeMethod()
+    /// {
+    ///     var m = new ModInt(1);
+    ///     m -= 2;
+    ///     Console.WriteLine(m);   // 1000000006
+    /// }
+    /// </code>
+    /// </example>
+    public readonly struct StaticModInt<T> : IEquatable<StaticModInt<T>> where T : struct, IStaticMod
+    {
+        private readonly uint _v;
+
+        /// <summary>
+        /// 格納されている値を返します。
+        /// </summary>
+        public int Value => (int)_v;
+
+        /// <summary>
+        /// mod を返します。
+        /// </summary>
+        public static int Mod => (int)default(T).Mod;
+
+        public static StaticModInt<T> Zero => new StaticModInt<T>();
+        public static StaticModInt<T> One => new StaticModInt<T>(1u);
+
+        /// <summary>
+        /// <paramref name="v"/> に対して mod を取らずに StaticModInt&lt;<typeparamref name="T"/>&gt; 型のインスタンスを生成します。
+        /// </summary>
+        /// <remarks>
+        /// <para>定数倍高速化のための関数です。 <paramref name="v"/> に 0 未満または mod 以上の値を入れた場合の挙動は未定義です。</para>
+        /// <para>制約: 0≤|<paramref name="v"/>|&lt;mod</para>
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static StaticModInt<T> Raw(int v)
+        {
+            var u = unchecked((uint)v);
+            Debug.Assert(u < Mod);
+            return new StaticModInt<T>(u);
+        }
+
+        /// <summary>
+        /// StaticModInt&lt;<typeparamref name="T"/>&gt; 型のインスタンスを生成します。
+        /// </summary>
+        /// <remarks>
+        /// <paramref name="v"/>が 0 未満、もしくは mod 以上の場合、自動で mod を取ります。
+        /// </remarks>
+        public StaticModInt(long v) : this(Round(v)) { }
+
+        private StaticModInt(uint v) => _v = v;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static uint Round(long v)
+        {
+            var x = v % default(T).Mod;
+            if (x < 0)
+            {
+                x += default(T).Mod;
+            }
+            return (uint)x;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static StaticModInt<T> operator ++(StaticModInt<T> value)
+        {
+            var v = value._v + 1;
+            if (v == default(T).Mod)
+            {
+                v = 0;
+            }
+            return new StaticModInt<T>(v);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static StaticModInt<T> operator --(StaticModInt<T> value)
+        {
+            var v = value._v;
+            if (v == 0)
+            {
+                v = default(T).Mod;
+            }
+            return new StaticModInt<T>(v - 1);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static StaticModInt<T> operator +(StaticModInt<T> lhs, StaticModInt<T> rhs)
+        {
+            var v = lhs._v + rhs._v;
+            if (v >= default(T).Mod)
+            {
+                v -= default(T).Mod;
+            }
+            return new StaticModInt<T>(v);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static StaticModInt<T> operator -(StaticModInt<T> lhs, StaticModInt<T> rhs)
+        {
+            unchecked
+            {
+                var v = lhs._v - rhs._v;
+                if (v >= default(T).Mod)
+                {
+                    v += default(T).Mod;
+                }
+                return new StaticModInt<T>(v);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static StaticModInt<T> operator *(StaticModInt<T> lhs, StaticModInt<T> rhs)
+        {
+            return new StaticModInt<T>((uint)((ulong)lhs._v * rhs._v % default(T).Mod));
+        }
+
+        /// <summary>
+        /// 除算を行います。
+        /// </summary>
+        /// <remarks>
+        /// <para>- 制約: <paramref name="rhs"/> に乗法の逆元が存在する。（gcd(<paramref name="rhs"/>, mod) = 1）</para>
+        /// <para>- 計算量: O(log(mod))</para>
+        /// </remarks>
+        public static StaticModInt<T> operator /(StaticModInt<T> lhs, StaticModInt<T> rhs) => lhs * rhs.Inverse();
+
+        public static StaticModInt<T> operator +(StaticModInt<T> value) => value;
+        public static StaticModInt<T> operator -(StaticModInt<T> value) => new StaticModInt<T>() - value;
+        public static bool operator ==(StaticModInt<T> lhs, StaticModInt<T> rhs) => lhs._v == rhs._v;
+        public static bool operator !=(StaticModInt<T> lhs, StaticModInt<T> rhs) => lhs._v != rhs._v;
+        public static implicit operator StaticModInt<T>(int value) => new StaticModInt<T>(value);
+        public static implicit operator StaticModInt<T>(long value) => new StaticModInt<T>(value);
+
+        /// <summary>
+        /// 自身を x として、x^<paramref name="n"/> を返します。
+        /// </summary>
+        /// <remarks>
+        /// <para>制約: 0≤|<paramref name="n"/>|</para>
+        /// <para>計算量: O(log(<paramref name="n"/>))</para>
+        /// </remarks>
+        public StaticModInt<T> Pow(long n)
+        {
+            Debug.Assert(0 <= n);
+            var x = this;
+            var r = Raw(1);
+
+            while (n > 0)
+            {
+                if ((n & 1) > 0)
+                {
+                    r *= x;
+                }
+                x *= x;
+                n >>= 1;
+            }
+
+            return r;
+        }
+
+        /// <summary>
+        /// 自身を x として、 xy≡1 なる y を返します。
+        /// </summary>
+        /// <remarks>
+        /// <para>制約: gcd(x, mod) = 1</para>
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public StaticModInt<T> Inverse()
+        {
+            if (default(T).IsPrime)
+            {
+                Debug.Assert(_v > 0);
+                return Pow(default(T).Mod - 2);
+            }
+            else
+            {
+                var (g, x) = InternalMath.InvGCD(_v, default(T).Mod);
+                Debug.Assert(g == 1);
+                return new StaticModInt<T>(x);
+            }
+        }
+
+        public override string ToString() => _v.ToString();
+        public override bool Equals(object obj) => obj is StaticModInt<T> && Equals((StaticModInt<T>)obj);
+        public bool Equals(StaticModInt<T> other) => Value == other.Value;
+        public override int GetHashCode() => _v.GetHashCode();
+    }
+
+    /// <summary>
+    /// 四則演算時に自動で mod を取る整数型。実行時に mod が決まる場合でも使用可能です。
+    /// </summary>
+    /// <remarks>
+    /// 使用前に DynamicModInt&lt;<typeparamref name="T"/>&gt;.Mod に mod の値を設定する必要があります。
+    /// </remarks>
+    /// <typeparam name="T">mod の ID を表す構造体</typeparam>
+    /// <example>
+    /// <code>
+    /// using AtCoder.ModInt = AtCoder.DynamicModInt&lt;AtCoder.ModID0&gt;;
+    ///
+    /// void SomeMethod()
+    /// {
+    ///     ModInt.Mod = 1000000009;
+    ///     var m = new ModInt(1);
+    ///     m -= 2;
+    ///     Console.WriteLine(m);   // 1000000008
+    /// }
+    /// </code>
+    /// </example>
+    public readonly struct DynamicModInt<T> : IEquatable<DynamicModInt<T>> where T : struct, IDynamicModID
+    {
+        private readonly uint _v;
+        private static Barrett bt;
+
+        /// <summary>
+        /// 格納されている値を返します。
+        /// </summary>
+        public int Value => (int)_v;
+
+        /// <summary>
+        /// mod を返します。
+        /// </summary>
+        public static int Mod
+        {
+            get => (int)bt.Mod;
+            set
+            {
+                Debug.Assert(1 <= value);
+                bt = new Barrett((uint)value);
+            }
+        }
+
+        /// <summary>
+        /// <paramref name="v"/> に対して mod を取らずに DynamicModInt&lt;<typeparamref name="T"/>&gt; 型のインスタンスを生成します。
+        /// </summary>
+        /// <remarks>
+        /// <para>定数倍高速化のための関数です。 <paramref name="v"/> に 0 未満または mod 以上の値を入れた場合の挙動は未定義です。</para>
+        /// <para>制約: 0≤|<paramref name="v"/>|&lt;mod</para>
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static DynamicModInt<T> Raw(int v)
+        {
+            var u = unchecked((uint)v);
+            Debug.Assert(bt != null, $"使用前に {nameof(DynamicModInt<T>)}<{nameof(T)}>.{nameof(Mod)} プロパティに mod の値を設定してください。");
+            Debug.Assert(u < Mod);
+            return new DynamicModInt<T>(u);
+        }
+
+        /// <summary>
+        /// DynamicModInt&lt;<typeparamref name="T"/>&gt; 型のインスタンスを生成します。
+        /// </summary>
+        /// <remarks>
+        /// <para>- 使用前に DynamicModInt&lt;<typeparamref name="T"/>&gt;.Mod に mod の値を設定する必要があります。</para>
+        /// <para>- <paramref name="v"/> が 0 未満、もしくは mod 以上の場合、自動で mod を取ります。</para>
+        /// </remarks>
+        public DynamicModInt(long v) : this(Round(v)) { }
+
+        private DynamicModInt(uint v) => _v = v;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static uint Round(long v)
+        {
+            Debug.Assert(bt != null, $"使用前に {nameof(DynamicModInt<T>)}<{nameof(T)}>.{nameof(Mod)} プロパティに mod の値を設定してください。");
+            var x = v % bt.Mod;
+            if (x < 0)
+            {
+                x += bt.Mod;
+            }
+            return (uint)x;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static DynamicModInt<T> operator ++(DynamicModInt<T> value)
+        {
+            var v = value._v + 1;
+            if (v == bt.Mod)
+            {
+                v = 0;
+            }
+            return new DynamicModInt<T>(v);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static DynamicModInt<T> operator --(DynamicModInt<T> value)
+        {
+            var v = value._v;
+            if (v == 0)
+            {
+                v = bt.Mod;
+            }
+            return new DynamicModInt<T>(v - 1);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static DynamicModInt<T> operator +(DynamicModInt<T> lhs, DynamicModInt<T> rhs)
+        {
+            var v = lhs._v + rhs._v;
+            if (v >= bt.Mod)
+            {
+                v -= bt.Mod;
+            }
+            return new DynamicModInt<T>(v);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static DynamicModInt<T> operator -(DynamicModInt<T> lhs, DynamicModInt<T> rhs)
+        {
+            unchecked
+            {
+                var v = lhs._v - rhs._v;
+                if (v >= bt.Mod)
+                {
+                    v += bt.Mod;
+                }
+                return new DynamicModInt<T>(v);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static DynamicModInt<T> operator *(DynamicModInt<T> lhs, DynamicModInt<T> rhs)
+        {
+            uint z = bt.Mul(lhs._v, rhs._v);
+            return new DynamicModInt<T>(z);
+        }
+
+        /// <summary>
+        /// 除算を行います。
+        /// </summary>
+        /// <remarks>
+        /// <para>- 制約: <paramref name="rhs"/> に乗法の逆元が存在する。（gcd(<paramref name="rhs"/>, mod) = 1）</para>
+        /// <para>- 計算量: O(log(mod))</para>
+        /// </remarks>
+        public static DynamicModInt<T> operator /(DynamicModInt<T> lhs, DynamicModInt<T> rhs) => lhs * rhs.Inverse();
+
+        public static DynamicModInt<T> operator +(DynamicModInt<T> value) => value;
+        public static DynamicModInt<T> operator -(DynamicModInt<T> value) => new DynamicModInt<T>() - value;
+        public static bool operator ==(DynamicModInt<T> lhs, DynamicModInt<T> rhs) => lhs._v == rhs._v;
+        public static bool operator !=(DynamicModInt<T> lhs, DynamicModInt<T> rhs) => lhs._v != rhs._v;
+        public static implicit operator DynamicModInt<T>(int value) => new DynamicModInt<T>(value);
+        public static implicit operator DynamicModInt<T>(long value) => new DynamicModInt<T>(value);
+
+        /// <summary>
+        /// 自身を x として、x^<paramref name="n"/> を返します。
+        /// </summary>
+        /// <remarks>
+        /// <para>制約: 0≤|<paramref name="n"/>|</para>
+        /// <para>計算量: O(log(<paramref name="n"/>))</para>
+        /// </remarks>
+        public DynamicModInt<T> Pow(long n)
+        {
+            Debug.Assert(0 <= n);
+            var x = this;
+            var r = Raw(1);
+
+            while (n > 0)
+            {
+                if ((n & 1) > 0)
+                {
+                    r *= x;
+                }
+                x *= x;
+                n >>= 1;
+            }
+
+            return r;
+        }
+
+        /// <summary>
+        /// 自身を x として、 xy≡1 なる y を返します。
+        /// </summary>
+        /// <remarks>
+        /// <para>制約: gcd(x, mod) = 1</para>
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public DynamicModInt<T> Inverse()
+        {
+            var (g, x) = InternalMath.InvGCD(_v, bt.Mod);
+            Debug.Assert(g == 1);
+            return new DynamicModInt<T>(x);
+        }
+
+        public override string ToString() => _v.ToString();
+        public override bool Equals(object obj) => obj is DynamicModInt<T> && Equals((DynamicModInt<T>)obj);
+        public bool Equals(DynamicModInt<T> other) => Value == other.Value;
+        public override int GetHashCode() => _v.GetHashCode();
+    }
+
+    /// <summary>
+    /// Fast moduler by barrett reduction
+    /// <seealso href="https://en.wikipedia.org/wiki/Barrett_reduction"/>
+    /// </summary>
+    public class Barrett
+    {
+        public uint Mod { get; private set; }
+        private ulong IM;
+        public Barrett(uint m)
+        {
+            Mod = m;
+            IM = unchecked((ulong)-1) / m + 1;
+        }
+
+        /// <summary>
+        /// <paramref name="a"/> * <paramref name="b"/> mod m
+        /// </summary>
+        public uint Mul(uint a, uint b)
+        {
+            ulong z = a;
+            z *= b;
+            if (!Bmi2.X64.IsSupported) return (uint)(z % Mod);
+            var x = Bmi2.X64.MultiplyNoFlags(z, IM);
+            var v = unchecked((uint)(z - x * Mod));
+            if (Mod <= v) v += Mod;
+            return v;
+        }
+    }
+
+    public static class InternalMath
+    {
+        /// <summary>
+        /// g=gcd(a,b),xa=g(mod b) となるような 0≤x&lt;b/g の(g, x)
+        /// </summary>
+        /// <remarks>
+        /// <para>制約: 1≤<paramref name="b"/></para>
+        /// </remarks>
+        public static (long, long) InvGCD(long a, long b)
+        {
+            a = SafeMod(a, b);
+            if (a == 0) return (b, 0);
+
+            long s = b, t = a;
+            long m0 = 0, m1 = 1;
+
+            long u;
+            while (true)
+            {
+                if (t == 0)
+                {
+                    if (m0 < 0) m0 += b / s;
+                    return (s, m0);
+                }
+                u = s / t;
+                s -= t * u;
+                m0 -= m1 * u;
+
+                if (s == 0)
+                {
+                    if (m1 < 0) m1 += b / t;
+                    return (t, m1);
+                }
+                u = t / s;
+                t -= s * u;
+                m1 -= m0 * u;
+            }
+        }
+
+        public static long SafeMod(long x, long m)
+        {
+            x %= m;
+            if (x < 0) x += m;
+            return x;
+        }
+    }
+
+    public class ModCombination<T> where T : struct, IStaticMod
+    {
+        readonly StaticModInt<T>[] _factorials;
+        readonly StaticModInt<T>[] _invFactorials;
+
+        public ModCombination(int max = 1000000)
+        {
+            if (max >= default(T).Mod)
+            {
+                ThrowArgumentOutOfRangeException();
+            }
+
+            _factorials = new StaticModInt<T>[max + 1];
+            _invFactorials = new StaticModInt<T>[max + 1];
+
+            _factorials[0] = _factorials[1] = StaticModInt<T>.Raw(1);
+            _invFactorials[0] = _invFactorials[1] = StaticModInt<T>.Raw(1);
+
+            for (int i = 2; i < _factorials.Length; i++)
+            {
+                _factorials[i] = _factorials[i - 1] * StaticModInt<T>.Raw(i);
+            }
+
+            _invFactorials[^1] = _factorials[^1].Inverse();
+
+            for (int i = _invFactorials.Length - 2; i >= 0; i--)
+            {
+                _invFactorials[i] = _invFactorials[i + 1] * StaticModInt<T>.Raw(i + 1);
+            }
+        }
+
+        public StaticModInt<T> Factorial(int n) => _factorials[n];
+
+        public StaticModInt<T> Permutation(int n, int k) => _factorials[n] * _invFactorials[n - k];
+
+        public StaticModInt<T> Combination(int n, int k) => _factorials[n] * _invFactorials[k] * _invFactorials[n - k];
+
+        public StaticModInt<T> CombinationWithRepetition(int n, int k) => Combination(n + k - 1, k);
+
+        public void ThrowArgumentOutOfRangeException() => throw new ArgumentOutOfRangeException();
+    }
+
+    public class ModMatrix<T> where T : struct, IStaticMod
+    {
+        readonly StaticModInt<T>[] _values;
         public int Height { get; }
         public int Width { get; }
 
-        public Span<Modular> this[int row]
+        public Span<StaticModInt<T>> this[int row]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _values.AsSpan(row * Width, Width);
         }
 
-        public Modular this[int row, int column]
+        public StaticModInt<T> this[int row, int column]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
@@ -691,10 +1085,10 @@ namespace AtCoderTemplateForNetCore.Numerics
                 throw new ArgumentOutOfRangeException(nameof(width));
             Height = height;
             Width = width;
-            _values = new Modular[height * width];
+            _values = new StaticModInt<T>[height * width];
         }
 
-        public ModMatrix(Modular[][] values) : this(values.Length, values[0].Length)
+        public ModMatrix(StaticModInt<T>[][] values) : this(values.Length, values[0].Length)
         {
             for (int row = 0; row < Height; row++)
             {
@@ -705,7 +1099,7 @@ namespace AtCoderTemplateForNetCore.Numerics
             }
         }
 
-        public ModMatrix(Modular[,] values) : this(values.GetLength(0), values.GetLength(1))
+        public ModMatrix(StaticModInt<T>[,] values) : this(values.GetLength(0), values.GetLength(1))
         {
             for (int row = 0; row < Height; row++)
             {
@@ -717,17 +1111,17 @@ namespace AtCoderTemplateForNetCore.Numerics
             }
         }
 
-        public ModMatrix(ModMatrix matrix)
+        public ModMatrix(ModMatrix<T> matrix)
         {
             Height = matrix.Height;
             Width = matrix.Width;
-            _values = new Modular[matrix._values.Length];
+            _values = new StaticModInt<T>[matrix._values.Length];
             matrix._values.AsSpan().CopyTo(_values);
         }
 
-        public static ModMatrix GetIdentity(int dimension)
+        public static ModMatrix<T> GetIdentity(int dimension)
         {
-            var result = new ModMatrix(dimension);
+            var result = new ModMatrix<T>(dimension);
             for (int i = 0; i < dimension; i++)
             {
                 result._values[i * result.Width + i] = 1;
@@ -735,11 +1129,11 @@ namespace AtCoderTemplateForNetCore.Numerics
             return result;
         }
 
-        public static ModMatrix operator +(ModMatrix a, ModMatrix b)
+        public static ModMatrix<T> operator +(ModMatrix<T> a, ModMatrix<T> b)
         {
             CheckSameShape(a, b);
 
-            var result = new ModMatrix(a.Height, a.Width);
+            var result = new ModMatrix<T>(a.Height, a.Width);
             for (int i = 0; i < result._values.Length; i++)
             {
                 result._values[i] = a._values[i] + b._values[i];
@@ -747,11 +1141,11 @@ namespace AtCoderTemplateForNetCore.Numerics
             return result;
         }
 
-        public static ModMatrix operator -(ModMatrix a, ModMatrix b)
+        public static ModMatrix<T> operator -(ModMatrix<T> a, ModMatrix<T> b)
         {
             CheckSameShape(a, b);
 
-            var result = new ModMatrix(a.Height, a.Width);
+            var result = new ModMatrix<T>(a.Height, a.Width);
             for (int i = 0; i < result._values.Length; i++)
             {
                 result._values[i] = a._values[i] - b._values[i];
@@ -759,12 +1153,12 @@ namespace AtCoderTemplateForNetCore.Numerics
             return result;
         }
 
-        public static ModMatrix operator *(ModMatrix a, ModMatrix b)
+        public static ModMatrix<T> operator *(ModMatrix<T> a, ModMatrix<T> b)
         {
             if (a.Width != b.Height)
                 throw new ArgumentException($"{nameof(a)}の列数と{nameof(b)}の行数は等しくなければなりません。");
 
-            var result = new ModMatrix(a.Height, b.Width);
+            var result = new ModMatrix<T>(a.Height, b.Width);
             for (int i = 0; i < result.Height; i++)
             {
                 var aSpan = a._values.AsSpan(i * a.Width, a.Width);
@@ -781,12 +1175,12 @@ namespace AtCoderTemplateForNetCore.Numerics
             return result;
         }
 
-        public static ModVector operator *(ModMatrix matrix, ModVector vector)
+        public static ModVector<T> operator *(ModMatrix<T> matrix, ModVector<T> vector)
         {
             if (matrix.Width != vector.Length)
                 throw new ArgumentException($"{nameof(matrix)}の列数と{nameof(vector)}の行数は等しくなければなりません。");
 
-            var result = new ModVector(vector.Length);
+            var result = new ModVector<T>(vector.Length);
             for (int i = 0; i < result.Length; i++)
             {
                 var matrixSpan = matrix[i];
@@ -798,14 +1192,14 @@ namespace AtCoderTemplateForNetCore.Numerics
             return result;
         }
 
-        public ModMatrix Pow(long pow)
+        public ModMatrix<T> Pow(long pow)
         {
             if (Height != Width)
                 throw new ArgumentException("累乗を行う行列は正方行列である必要があります。");
             if (pow < 0)
                 throw new ArgumentException($"{nameof(pow)}は0以上の整数である必要があります。");
 
-            var powMatrix = new ModMatrix(this);
+            var powMatrix = new ModMatrix<T>(this);
             var result = GetIdentity(Height);
             while (pow > 0)
             {
@@ -819,7 +1213,7 @@ namespace AtCoderTemplateForNetCore.Numerics
             return result;
         }
 
-        private static void CheckSameShape(ModMatrix a, ModMatrix b)
+        private static void CheckSameShape(ModMatrix<T> a, ModMatrix<T> b)
         {
             if (a.Height != b.Height)
                 throw new ArgumentException($"{nameof(a)}の行数と{nameof(b)}の行数は等しくなければなりません。");
@@ -831,38 +1225,38 @@ namespace AtCoderTemplateForNetCore.Numerics
         public override string ToString() => $"({Height}x{Width})matrix";
     }
 
-    public class ModVector
+    public class ModVector<T> where T : struct, IStaticMod
     {
-        readonly Modular[] _values;
+        readonly StaticModInt<T>[] _values;
         public int Length => _values.Length;
 
         public ModVector(int length)
         {
             if (length <= 0)
                 throw new ArgumentOutOfRangeException(nameof(length));
-            _values = new Modular[length];
+            _values = new StaticModInt<T>[length];
         }
 
-        public ModVector(ReadOnlySpan<Modular> vector)
+        public ModVector(ReadOnlySpan<StaticModInt<T>> vector)
         {
-            _values = new Modular[vector.Length];
+            _values = new StaticModInt<T>[vector.Length];
             vector.CopyTo(_values);
         }
 
-        public ModVector(ModVector vector) : this(vector._values) { }
+        public ModVector(ModVector<T> vector) : this(vector._values) { }
 
-        public Modular this[int index]
+        public StaticModInt<T> this[int index]
         {
             get => _values[index];
             set => _values[index] = value;
         }
 
-        public static ModVector operator +(ModVector a, ModVector b)
+        public static ModVector<T> operator +(ModVector<T> a, ModVector<T> b)
         {
             if (a.Length != b.Length)
                 throw new ArgumentException($"{nameof(a)}と{nameof(b)}の次元は等しくなければなりません。");
 
-            var result = new ModVector(a.Length);
+            var result = new ModVector<T>(a.Length);
             for (int i = 0; i < result.Length; i++)
             {
                 result[i] = a[i] + b[i];
@@ -870,12 +1264,12 @@ namespace AtCoderTemplateForNetCore.Numerics
             return result;
         }
 
-        public static ModVector operator -(ModVector a, ModVector b)
+        public static ModVector<T> operator -(ModVector<T> a, ModVector<T> b)
         {
             if (a.Length != b.Length)
                 throw new ArgumentException($"{nameof(a)}と{nameof(b)}の次元は等しくなければなりません。");
 
-            var result = new ModVector(a.Length);
+            var result = new ModVector<T>(a.Length);
             for (int i = 0; i < result.Length; i++)
             {
                 result[i] = a[i] - b[i];
@@ -883,12 +1277,12 @@ namespace AtCoderTemplateForNetCore.Numerics
             return result;
         }
 
-        public static Modular operator *(ModVector a, ModVector b)
+        public static StaticModInt<T> operator *(ModVector<T> a, ModVector<T> b)
         {
             if (a.Length != b.Length)
                 throw new ArgumentException($"{nameof(a)}と{nameof(b)}の次元は等しくなければなりません。");
 
-            var result = Modular.Zero;
+            var result = StaticModInt<T>.Zero;
             for (int i = 0; i < a.Length; i++)
             {
                 result += a[i] * b[i];

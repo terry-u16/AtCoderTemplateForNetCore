@@ -1,6 +1,8 @@
 ﻿using System;
-using AtCoderTemplateForNetCore.Numerics;
 using Xunit;
+using ModInt = AtCoderTemplateForNetCore.Numerics.StaticModInt<AtCoderTemplateForNetCore.Numerics.Mod1000000007>;
+using ModMatrix = AtCoderTemplateForNetCore.Numerics.ModMatrix<AtCoderTemplateForNetCore.Numerics.Mod1000000007>;
+using ModVector = AtCoderTemplateForNetCore.Numerics.ModVector<AtCoderTemplateForNetCore.Numerics.Mod1000000007>;
 
 namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
 {
@@ -39,10 +41,10 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
         [Fact]
         public void InitializeByJaggedArrayTest()
         {
-            var data = new Modular[3][] { 
-                new Modular[] { 0, 1 }, 
-                new Modular[] { 2, 3 }, 
-                new Modular[] { 4, 5 } 
+            var data = new ModInt[3][] { 
+                new ModInt[] { 0, 1 }, 
+                new ModInt[] { 2, 3 }, 
+                new ModInt[] { 4, 5 } 
             };
 
             var matrix = new ModMatrix(data);
@@ -54,7 +56,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
         [Fact]
         public void InitializeByTwoDimensionalArrayTest()
         {
-            var data = new Modular[3, 2];
+            var data = new ModInt[3, 2];
             for (int i = 0; i < 6; i++)
             {
                 data[i >> 1, i & 1] = i;
@@ -75,8 +77,8 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
         [Fact]
         public void AddTest()
         {
-            var data1 = new Modular[3, 2];
-            var data2 = new Modular[3, 2];
+            var data1 = new ModInt[3, 2];
+            var data2 = new ModInt[3, 2];
             for (int i = 0; i < 6; i++)
             {
                 data1[i >> 1, i & 1] = i * i;
@@ -97,8 +99,8 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
         [Fact]
         public void SubtractTest()
         {
-            var data1 = new Modular[3, 2];
-            var data2 = new Modular[3, 2];
+            var data1 = new ModInt[3, 2];
+            var data2 = new ModInt[3, 2];
             for (int i = 0; i < 6; i++)
             {
                 data1[i >> 1, i & 1] = i * i;
@@ -119,8 +121,8 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
         [Fact]
         public void MultiplyTest()
         {
-            var data1 = new Modular[3, 2];
-            var data2 = new Modular[2, 4];
+            var data1 = new ModInt[3, 2];
+            var data2 = new ModInt[2, 4];
             for (int i = 0; i < 6; i++)
             {
                 data1[i >> 1, i & 1] = i;
@@ -130,11 +132,11 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
                 data2[i >> 2, i & 11] = i;
             }
 
-            var expected = new Modular[3][]
+            var expected = new ModInt[3][]
             {
-                new Modular[] { 4, 5, 6, 7 },
-                new Modular[] { 12, 17, 22, 27 },
-                new Modular[] { 20, 29, 38, 47 }
+                new ModInt[] { 4, 5, 6, 7 },
+                new ModInt[] { 12, 17, 22, 27 },
+                new ModInt[] { 20, 29, 38, 47 }
             };
 
             var matrix1 = new ModMatrix(data1);
@@ -148,8 +150,8 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
         [Fact]
         public void MultiplyVectorTest()
         {
-            var matrixData = new Modular[3, 2];
-            var vectorData = new Modular[2];
+            var matrixData = new ModInt[3, 2];
+            var vectorData = new ModInt[2];
             for (int i = 0; i < 6; i++)
             {
                 matrixData[i >> 1, i & 1] = i;
@@ -157,7 +159,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
             vectorData[0] = 3;
             vectorData[1] = 7;
 
-            var expected = new Modular[] { 7, 27, 47 };
+            var expected = new ModInt[] { 7, 27, 47 };
 
             var matrix = new ModMatrix(matrixData);
             var vector = new ModVector(vectorData);
@@ -174,7 +176,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
         [InlineData(60, 8745084)]
         public void FibonacciTest(int n, long fibonacci)
         {
-            var expected = new Modular(fibonacci);
+            var expected = new ModInt(fibonacci);
             var initial = new ModVector(2);
             initial[0] = 1;
             var matrix = new ModMatrix(2);
