@@ -1766,36 +1766,27 @@ namespace AtCoderTemplateForNetCore.Algorithms
         }
     }
 
-    public class CoordinateShrinker<T> : IEnumerable<(int shrinkedIndex, T rawIndex)> where T : IComparable<T>, IEquatable<T>
+    public class CompressedCoordinate<T> where T : IComparable<T>, IEquatable<T>
     {
-        Dictionary<T, int> _shrinkMapper;
-        T[] _expandMapper;
-        public int Count => _expandMapper.Length;
+        readonly int[] _compressed;
+        readonly T[] _expander;
+        public int Count => _expander.Length;
 
-        public CoordinateShrinker(IEnumerable<T> data)
+        public CompressedCoordinate(ReadOnlySpan<T> data)
         {
-            _expandMapper = data.Distinct().ToArray();
-            Array.Sort(_expandMapper);
+            _expander = data.ToArray().Distinct().ToArray();
+            Array.Sort(_expander);
 
-            _shrinkMapper = new Dictionary<T, int>();
-            for (int i = 0; i < _expandMapper.Length; i++)
+            _compressed = new int[data.Length];
+            var span = _expander.AsSpan();
+            for (int i = 0; i < _compressed.Length; i++)
             {
-                _shrinkMapper.Add(_expandMapper[i], i);
+                _compressed[i] = span.BinarySearch(data[i]);
             }
         }
 
-        public int Shrink(T rawCoordinate) => _shrinkMapper[rawCoordinate];
-        public T Expand(int shrinkedCoordinate) => _expandMapper[shrinkedCoordinate];
-
-        public IEnumerator<(int shrinkedIndex, T rawIndex)> GetEnumerator()
-        {
-            for (int i = 0; i < _expandMapper.Length; i++)
-            {
-                yield return (i, _expandMapper[i]);
-            }
-        }
-
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+        public int this[int index] => _compressed[index];
+        public T Expand(int compressedValue) => _expander[compressedValue];
     }
 }
 
