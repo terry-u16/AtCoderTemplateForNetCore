@@ -1471,24 +1471,24 @@ namespace AtCoderTemplateForNetCore.Numerics
         public int CompareTo([System.Diagnostics.CodeAnalysis.AllowNull] Fraction other) => ((double)this).CompareTo(other);
     }
 
-    public interface ISemigroup<TSet> where TSet : ISemigroup<TSet>
+    public interface ISemigroup<TSet>
     {
         public TSet Merge(TSet other);
     }
 
-    public interface IMonoid<TSet> : ISemigroup<TSet> where TSet : IMonoid<TSet>, new()
+    public interface IMonoid<TSet> : ISemigroup<TSet>
     {
         public TSet Identity { get; }
     }
 
     public interface IMonoidWithAct<TMonoid, TOperator> : IMonoid<TOperator>
-        where TMonoid : IMonoid<TMonoid>, new()
-        where TOperator : IMonoid<TOperator>, new()
+        where TMonoid : IMonoid<TMonoid>
+        where TOperator : IMonoid<TOperator>
     {
         public TMonoid Act(TMonoid monoid);
     }
 
-    public interface IGroup<TSet> : IMonoid<TSet> where TSet : IGroup<TSet>, new()
+    public interface IGroup<TSet> : IMonoid<TSet> 
     {
         public TSet Invert();
         public static TSet operator ~(IGroup<TSet> a) => a.Invert();
