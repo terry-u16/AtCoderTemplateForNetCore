@@ -1725,6 +1725,14 @@ namespace AtCoderTemplateForNetCore.Algorithms
         public int Next(int exclusiveMax) => (int)(Next() % (uint)exclusiveMax);
 
         /// <summary>
+        /// [0, <c>exclusiveMax</c>)の乱数を生成します。
+        /// </summary>
+        /// <param name="exclusiveMax"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public long Next(long exclusiveMax) => (long)(Next() % (ulong)exclusiveMax);
+
+        /// <summary>
         /// [0.0, 1.0)の乱数を生成します。
         /// </summary>
         /// <returns></returns>
