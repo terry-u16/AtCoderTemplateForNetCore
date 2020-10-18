@@ -14,8 +14,8 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
         public void PrimeFactorizationTest4()
         {
             var n = 4;
-            var result = NumericalAlgorithms.PrimeFactorization(n);
-            var expected = new[] { (prime: 2, count: 2) };
+            var result = NumericalAlgorithms.PrimeFactorize(n);
+            var expected = new (long, int)[] { (2, 2) };
 
             Assert.Equal(expected, result);
         }
@@ -24,8 +24,8 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
         public void PrimeFactorizationTest24()
         {
             var n = 24;
-            var result = NumericalAlgorithms.PrimeFactorization(n);
-            var expected = new[] { (prime: 2, count: 3), (prime: 3, count: 1) };
+            var result = NumericalAlgorithms.PrimeFactorize(n);
+            var expected = new (long, int)[] { (2, 3), (3, 1) };
 
             Assert.Equal(expected, result);
         }
@@ -34,8 +34,8 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
         public void PrimeFactorizationTest13()
         {
             var n = 13;
-            var result = NumericalAlgorithms.PrimeFactorization(n);
-            var expected = new[] { (prime: 13, count: 1) };
+            var result = NumericalAlgorithms.PrimeFactorize(n);
+            var expected = new (long, int)[] { (13, 1) };
 
             Assert.Equal(expected, result);
         }

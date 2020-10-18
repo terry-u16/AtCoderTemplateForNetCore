@@ -389,95 +389,48 @@ namespace AtCoderTemplateForNetCore.Numerics
             return a / Gcd(a, b) * b;
         }
 
-        public static long Factorial(int n)
+        public static IEnumerable<long> GetDivisiors(long n)
         {
-            if (n < 0)
+            var lastHalf = new Stack<long>();
+            for (long i = 1; i * i <= n; i++)
             {
-                throw new ArgumentOutOfRangeException(nameof(n), $"{n}は0以上の整数でなければなりません。");
-            }
-
-            long result = 1;
-            for (int i = 2; i <= n; i++)
-            {
-                result *= i;
-            }
-            return result;
-        }
-
-        public static long Permutation(int n, int r)
-        {
-            CheckNR(n, r);
-            long result = 1;
-            for (int i = 0; i < r; i++)
-            {
-                result *= n - i;
-            }
-            return result;
-        }
-
-        public static long Combination(int n, int r)
-        {
-            CheckNR(n, r);
-            r = Math.Min(r, n - r);
-
-            // See https://stackoverflow.com/questions/1838368/calculating-the-amount-of-combinations
-            long result = 1;
-            for (int i = 1; i <= r; i++)
-            {
-                result *= n--;
-                result /= i;
-            }
-            return result;
-        }
-
-        public static long CombinationWithRepetition(int n, int r) => Combination(n + r - 1, r);
-
-        public static IEnumerable<(int prime, int count)> PrimeFactorization(int n)
-        {
-            if (n <= 1)
-            {
-                throw new ArgumentOutOfRangeException(nameof(n), $"{n}は2以上の整数でなければなりません。");
-            }
-
-            var dictionary = new Dictionary<int, int>();
-            for (int i = 2; i * i <= n; i++)
-            {
-                while (n % i == 0)
+                if (n % i == 0)
                 {
-                    if (dictionary.ContainsKey(i))
+                    yield return i;
+                    if (i * i != n)
                     {
-                        dictionary[i]++;
+                        lastHalf.Push(n / i);
                     }
-                    else
-                    {
-                        dictionary[i] = 1;
-                    }
+                }
+            }
 
-                    n /= i;
+            while (lastHalf.Count > 0)
+            {
+                yield return lastHalf.Pop();
+            }
+        }
+
+        public static IEnumerable<(long prime, int count)> PrimeFactorize(long n)
+        {
+            for (long p = 2; p * p <= n; p++)
+            {
+                var count = 0;
+
+                while (n % p == 0)
+                {
+                    count++;
+                    n /= p;
+                }
+
+                if (count > 0)
+                {
+                    yield return (p, count);
                 }
             }
 
             if (n > 1)
             {
-                dictionary[n] = 1;
-            }
-
-            return dictionary.Select(p => (p.Key, p.Value));
-        }
-
-        private static void CheckNR(int n, int r)
-        {
-            if (n <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(n), $"{nameof(n)}は正の整数でなければなりません。");
-            }
-            if (r < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(r), $"{nameof(r)}は0以上の整数でなければなりません。");
-            }
-            if (n < r)
-            {
-                throw new ArgumentOutOfRangeException($"{nameof(n)},{nameof(r)}", $"{nameof(r)}は{nameof(n)}以下でなければなりません。");
+                yield return (n, 1);
             }
         }
     }
@@ -1321,7 +1274,7 @@ namespace AtCoderTemplateForNetCore.Numerics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsPrime(int n) => n >= 2 && _spf[n] == n;
 
-        public IEnumerable<PrimeAndCount> PrimeFactorize(int n)
+        public IEnumerable<(int prime, int count)> PrimeFactorize(int n)
         {
             if (n <= 0 || _spf.Length <= n)
             {
@@ -1343,14 +1296,14 @@ namespace AtCoderTemplateForNetCore.Numerics
                     }
                     else
                     {
-                        yield return new PrimeAndCount(last, streak);
+                        yield return (last, streak);
                         last = _spf[n];
                         streak = 1;
                     }
 
                     n /= last;
                 }
-                yield return new PrimeAndCount(last, streak);
+                yield return (last, streak);
             }
         }
 
@@ -1367,7 +1320,7 @@ namespace AtCoderTemplateForNetCore.Numerics
             }
         }
 
-        IEnumerable<int> GetDivisiors(PrimeAndCount[] primes, int depth)
+        IEnumerable<int> GetDivisiors((int prime, int count)[] primes, int depth)
         {
             if (depth == primes.Length)
             {
@@ -1383,9 +1336,9 @@ namespace AtCoderTemplateForNetCore.Numerics
                     yield return child;
                 }
 
-                for (int i = 0; i < primes[depth].Count; i++)
+                for (int i = 0; i < primes[depth].count; i++)
                 {
-                    current *= primes[depth].Prime;
+                    current *= primes[depth].prime;
                     foreach (var child in children)
                     {
                         yield return current * child;
@@ -1393,46 +1346,6 @@ namespace AtCoderTemplateForNetCore.Numerics
                 }
             }
         }
-    }
-
-    public static class Divisiors
-    {
-        public static IEnumerable<long> GetDivisiors(long n)
-        {
-            var lastHalf = new Stack<long>();
-            for (long i = 1; i * i <= n; i++)
-            {
-                if (n % i == 0)
-                {
-                    yield return i;
-                    if (i * i != n)
-                    {
-                        lastHalf.Push(n / i);
-                    }
-                }
-            }
-
-            while (lastHalf.Count > 0)
-            {
-                yield return lastHalf.Pop();
-            }
-        }
-    }
-
-    [StructLayout(LayoutKind.Auto)]
-    public readonly struct PrimeAndCount
-    {
-        public int Prime { get; }
-        public int Count { get; }
-
-        public PrimeAndCount(int prime, int count)
-        {
-            Prime = prime;
-            Count = count;
-        }
-
-        public void Deconstruct(out int prime, out int count) => (prime, count) = (Prime, Count);
-        public override string ToString() => $"{nameof(Prime)}: {Prime}, {nameof(Count)}: {Count}";
     }
 
     public readonly struct Fraction : IEquatable<Fraction>, IComparable<Fraction>

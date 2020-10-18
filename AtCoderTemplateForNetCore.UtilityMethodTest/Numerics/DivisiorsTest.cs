@@ -19,7 +19,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
         [InlineData(606449, 1, 606449)]
         public void GetDivisiorsTest(int n, params int[] divisiors)
         {
-            Assert.Equal(divisiors, Divisiors.GetDivisiors(n).Select(i => (int)i));
+            Assert.Equal(divisiors, NumericalAlgorithms.GetDivisiors(n).Select(i => (int)i));
         }
     }
 }

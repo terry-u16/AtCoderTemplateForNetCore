@@ -11,61 +11,6 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
 {
     public class PermutationTest
     {
-        [Theory]
-        [InlineData(0, 1)]
-        [InlineData(1, 1)]
-        [InlineData(3, 6)]
-        [InlineData(6, 720)]
-        [InlineData(15, 1307674368000)]
-        public void FactorialCountTest(int n, long expected)
-        {
-            var result = NumericalAlgorithms.Factorial(n);
-            Assert.Equal(expected, result);
-        }
-
-        [Theory]
-        [InlineData(2, 0, 1)]
-        [InlineData(2, 1, 2)]
-        [InlineData(2, 2, 2)]
-        [InlineData(6, 3, 120)]
-        [InlineData(12, 5, 95040)]
-        [InlineData(20, 10, 670442572800)]
-        public void PermutationCountTest(int n, int r, long expected)
-        {
-            var result = NumericalAlgorithms.Permutation(n, r);
-            Assert.Equal(expected, result);
-        }
-
-        [Theory]
-        [InlineData(2, 0, 1)]
-        [InlineData(2, 1, 2)]
-        [InlineData(2, 2, 1)]
-        [InlineData(6, 3, 20)]
-        [InlineData(12, 5, 792)]
-        [InlineData(20, 10, 184756)]
-        [InlineData(50, 20, 47129212243960)]
-        [InlineData(50, 30, 47129212243960)]
-        public void CombinationCountTest(int n, int r, long expected)
-        {
-            var result = NumericalAlgorithms.Combination(n, r);
-            Assert.Equal(expected, result);
-        }
-
-        [Theory]
-        [InlineData(2, 0, 1)]
-        [InlineData(2, 1, 2)]
-        [InlineData(2, 2, 3)]
-        [InlineData(6, 3, 56)]
-        [InlineData(12, 5, 4368)]
-        [InlineData(20, 10, 20030010)]
-        [InlineData(30, 18, 4568648125690)]
-        [InlineData(50, 14, 37387265592825)]
-        public void CombinationWithRepetitionCountTest(int n, int r, long expected)
-        {
-            var result = NumericalAlgorithms.CombinationWithRepetition(n, r);
-            Assert.Equal(expected, result);
-        }
-
         [Fact]
         public void Permutation1Test()
         {
