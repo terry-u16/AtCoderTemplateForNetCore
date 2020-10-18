@@ -334,7 +334,9 @@ namespace AtCoderTemplateForNetCore
     {
         private class ArrayWrapper<T>
         {
+#pragma warning disable CS0649
             public T[] Array;
+#pragma warning restore CS0649
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
