@@ -2169,6 +2169,27 @@ namespace AtCoderTemplateForNetCore.Collections
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
+    readonly struct MinInt : IMonoid<MinInt>
+    {
+        public readonly int Value;
+        public MinInt Identity => new MinInt(int.MaxValue);
+        public MinInt(int value) => Value = value;
+
+        public MinInt Merge(MinInt other) => Value < other.Value ? this : other;
+        public override string ToString() => Value.ToString();
+        public static implicit operator int(MinInt value) => value.Value;
+    }
+
+    readonly struct MaxInt : IMonoid<MaxInt>
+    {
+        public readonly int Value;
+        public MaxInt Identity => new MaxInt(int.MinValue);
+        public MaxInt(int value) => Value = value;
+
+        public MaxInt Merge(MaxInt other) => Value > other.Value ? this : other;
+        public override string ToString() => Value.ToString();
+        public static implicit operator int(MaxInt value) => value.Value;
+    }
     public class SegmentTree<T> where T : struct, IMonoid<T>
     {
         // 1-indexed
