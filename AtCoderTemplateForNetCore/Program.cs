@@ -3272,7 +3272,57 @@ namespace AtCoderTemplateForNetCore.Collections
         #endregion
 
         /// <summary>
-        /// [inclusiveMin, exclusiveMax)を満たす要素を昇順に列挙します。
+        /// <paramref name="item"/>未満の最大の要素を取得します。見付からなかった場合、defaultを返します。
+        /// </summary>
+        public T GetLessThan(T item)
+        {
+            var current = _root;
+            var result = default(T);
+
+            while (current != null)
+            {
+                var order = current.Item.CompareTo(item);
+                if (order < 0)
+                {
+                    result = current.Item;
+                    current = current.Right;
+                }
+                else
+                {
+                    current = current.Left;
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// <paramref name="item"/>以上の最小の要素を取得します。見付からなかった場合、defaultを返します。
+        /// </summary>
+        public T GetGreaterEqual(T item)
+        {
+            var current = _root;
+            var result = default(T);
+
+            while (current != null)
+            {
+                var order = current.Item.CompareTo(item);
+                if (order >= 0)
+                {
+                    result = current.Item;
+                    current = current.Left;
+                }
+                else
+                {
+                    current = current.Right;
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// [<paramref name="inclusiveMin"/>, <paramref name="exclusiveMax"/>)を満たす要素を昇順に列挙します。
         /// </summary>
         /// <param name="inclusiveMin">区間の最小値（それ自身を含む）</param>
         /// <param name="exclusiveMax">区間の最大値（それ自身を含まない）</param>
