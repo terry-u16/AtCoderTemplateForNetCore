@@ -14,7 +14,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
         public void DescendingEnqueueDequeueTest()
         {
             var values = new[] { 4, 1, 3, 0, 2, 5, 8, 11, 10 };
-            var queue = new PriorityQueue<int>(true);
+            var queue = new PriorityQueue<int>(PriorityQueue<int>.Order.Descending);
 
             Assert.True(queue.IsDescending);
 
@@ -41,7 +41,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
         public void InitializeWithCollectionTest()
         {
             var values = new[] { 4, 1, 3, 0, 2, 5, 8, 11, 10 };
-            var queue = new PriorityQueue<int>(true, values);
+            var queue = new PriorityQueue<int>(PriorityQueue<int>.Order.Descending, values);
 
             Array.Sort(values);
             Array.Reverse(values);
@@ -56,7 +56,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
         [InlineData(2020, 100000)]
         public void DescendingEnqueueDequeueRandomTest(int seed, int length)
         {
-            var priorityQueue = new PriorityQueue<int>(true);
+            var priorityQueue = new PriorityQueue<int>(PriorityQueue<int>.Order.Descending);
             EnqueDequeRandomTest(seed, length, priorityQueue, true);
         }
 
@@ -66,7 +66,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
         [InlineData(2020, 100000)]
         public void AscendingEnqueueDequeueRandomTest(int seed, int length)
         {
-            var priorityQueue = new PriorityQueue<int>(false);
+            var priorityQueue = new PriorityQueue<int>(PriorityQueue<int>.Order.Ascending);
             EnqueDequeRandomTest(seed, length, priorityQueue, false);
         }
 
@@ -102,7 +102,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
         public void EnumerableCancellTest()
         {
             var values = new[] { 4, 1, 3, 0, 2, 5, 8, 11, 10 };
-            var queue = new PriorityQueue<int>(true, values);
+            var queue = new PriorityQueue<int>(PriorityQueue<int>.Order.Descending, values);
 
             Array.Sort(values);
             Array.Reverse(values);
@@ -118,7 +118,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
         public void PeekTest()
         {
             var values = new[] { 4, 1, 3, 0, 2, 5, 8, 11, 10 };
-            var queue = new PriorityQueue<int>(true, values);
+            var queue = new PriorityQueue<int>(PriorityQueue<int>.Order.Descending, values);
 
             Assert.Equal(11, queue.Peek());
         }

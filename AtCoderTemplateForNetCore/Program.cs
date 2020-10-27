@@ -2066,11 +2066,11 @@ namespace AtCoderTemplateForNetCore.Collections
         public int Count => _heap.Count;
         public bool IsDescending => _reverseFactor == 1;
 
-        public PriorityQueue(bool descending) : this(descending, null) { }
+        public PriorityQueue(Order order) : this(order, null) { }
 
-        public PriorityQueue(bool descending, IEnumerable<T> collection)
+        public PriorityQueue(Order order, IEnumerable<T> collection)
         {
-            _reverseFactor = descending ? 1 : -1;
+            _reverseFactor = order == Order.Ascending ? -1 : 1;
             _heap = new List<T>();
 
             if (collection != null)
@@ -2167,6 +2167,12 @@ namespace AtCoderTemplateForNetCore.Collections
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public enum Order
+        {
+            Ascending,
+            Descending
+        }
     }
 
     readonly struct MinInt : IMonoid<MinInt>
@@ -4240,7 +4246,7 @@ namespace AtCoderTemplateForNetCore.Graphs
                 const long Inf = 1L << 60;
                 var distances = Enumerable.Repeat(Inf, _graph.NodeCount).ToArray();
                 distances[startNode] = 0;
-                var todo = new PriorityQueue<State>(false);
+                var todo = new PriorityQueue<State>(PriorityQueue<State>.Order.Ascending);
                 todo.Enqueue(new State(startNode, 0));
 
                 while (todo.Count > 0)
