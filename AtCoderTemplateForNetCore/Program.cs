@@ -218,6 +218,9 @@ namespace AtCoderTemplateForNetCore
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Write<T>(T value) => _writer.Write(value.ToString());
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteLine<T>(T value) => _writer.WriteLine(value.ToString());
 
         public void WriteLine<T>(IEnumerable<T> values, char separator)
