@@ -441,6 +441,8 @@ namespace AtCoderTemplateForNetCore.Numerics
         }
     }
 
+    #region ModInt
+
     /// <summary>
     /// コンパイル時に決定する mod を表します。
     /// </summary>
@@ -999,6 +1001,8 @@ namespace AtCoderTemplateForNetCore.Numerics
 
         public void ThrowArgumentOutOfRangeException() => throw new ArgumentOutOfRangeException();
     }
+
+    #endregion
 
     public class ModMatrix<T> where T : struct, IStaticMod
     {
