@@ -2081,6 +2081,7 @@ namespace AtCoderTemplateForNetCore.Collections
         public override string ToString() => Value.ToString();
         public static implicit operator int(MaxInt value) => value.Value;
     }
+
     public class SegmentTree<T> where T : struct, IMonoid<T>
     {
         // 1-indexed
@@ -2655,17 +2656,10 @@ namespace AtCoderTemplateForNetCore.Collections
 
         public BinaryIndexedTree(ICollection<long> collection) : this(collection, collection.Count) { }
 
-        public long this[Index index]
+        public long this[int index]
         {
-            get => Sum(index..(index.GetOffset(Length) + 1));
-            set 
-            {
-                if (value < 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value), $"{nameof(value)}は0以上の値である必要があります。");
-                }
-                AddAt(index, value - this[index]);
-            }
+            get => Sum(index..(index + 1));
+            set => AddAt(index, value - this[index]);
         }
 
         /// <summary>
