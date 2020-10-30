@@ -237,6 +237,7 @@ namespace AtCoderTemplateForNetCore
             _writer.WriteLine();
         }
 
+        public void WriteLine<T>(T[] values, char separator) => WriteLine((ReadOnlySpan<T>)values, separator);
         public void WriteLine<T>(Span<T> values, char separator) => WriteLine((ReadOnlySpan<T>)values, separator);
 
         public void WriteLine<T>(ReadOnlySpan<T> values, char separator)
