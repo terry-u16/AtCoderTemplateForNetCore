@@ -3,7 +3,6 @@ using Xunit;
 using AtCoderTemplateForNetCore.Questions;
 using System.Collections.Generic;
 using System.Linq;
-using AtCoderTemplateForNetCore.Collections;
 
 namespace AtCoderTemplateForNetCore.Test
 {
@@ -79,16 +78,6 @@ namespace AtCoderTemplateForNetCore.Test
             var answers = SplitByNewLine(question.Solve(input).Trim());
 
             Assert.Equal(outputs, answers);
-        }
-
-        void AssertNearlyEqual(IEnumerable<string> expected, IEnumerable<string> actual, double acceptableError = 1e-6)
-        {
-            Assert.Equal(expected.Count(), actual.Count());
-            foreach (var (exp, act) in (expected, actual).Zip().Select(p => (double.Parse(p.v1), double.Parse(p.v2))))
-            {
-                var error = act - exp;
-                Assert.InRange(Math.Abs(error), 0, acceptableError);
-            }
         }
 
         IEnumerable<string> SplitByNewLine(string input) => input?.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None) ?? new string[0];
