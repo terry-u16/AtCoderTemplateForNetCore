@@ -333,7 +333,6 @@ namespace AtCoderTemplateForNetCore
         public static void Sort<T>(this T[] array, Comparison<T> comparison) => Array.Sort(array, comparison);
     }
 
-
     public static class CollectionExtensions
     {
         private class ArrayWrapper<T>
@@ -353,6 +352,92 @@ namespace AtCoderTemplateForNetCore
         public static void Fill<T>(this T[,] array, T value) => MemoryMarshal.CreateSpan(ref array[0, 0], array.Length).Fill(value);
         public static void Fill<T>(this T[,,] array, T value) => MemoryMarshal.CreateSpan(ref array[0, 0, 0], array.Length).Fill(value);
         public static void Fill<T>(this T[,,,] array, T value) => MemoryMarshal.CreateSpan(ref array[0, 0, 0, 0], array.Length).Fill(value);
+    }
+
+    public static class SearchExtensions
+    {
+        struct LowerBoundComparer<T> : IComparer<T> where T : IComparable<T>
+        {
+            public int Compare(T x, T y) => 0 <= x.CompareTo(y) ? 1 : -1;
+        }
+
+        struct UpperBoundComparer<T> : IComparer<T> where T : IComparable<T>
+        {
+            public int Compare(T x, T y) => 0 < x.CompareTo(y) ? 1 : -1;
+        }
+
+        // https://trsing.hatenablog.com/entry/2019/08/27/211038
+        public static int GetGreaterEqualIndex<T>(this ReadOnlySpan<T> span, T inclusiveMin) where T : IComparable<T> => ~span.BinarySearch(inclusiveMin, new UpperBoundComparer<T>());
+        public static int GetGreaterThanIndex<T>(this ReadOnlySpan<T> span, T exclusiveMin) where T : IComparable<T> => ~span.BinarySearch(exclusiveMin, new LowerBoundComparer<T>());
+        public static int GetLessEqualIndex<T>(this ReadOnlySpan<T> span, T inclusiveMax) where T : IComparable<T> => ~span.BinarySearch(inclusiveMax, new LowerBoundComparer<T>()) - 1;
+        public static int GetLessThanIndex<T>(this ReadOnlySpan<T> span, T exclusiveMax) where T : IComparable<T> => ~span.BinarySearch(exclusiveMax, new UpperBoundComparer<T>()) - 1;
+        public static int GetGreaterEqualIndex<T>(this Span<T> span, T inclusiveMin) where T : IComparable<T> => ((ReadOnlySpan<T>)span).GetGreaterEqualIndex(inclusiveMin);
+        public static int GetGreaterThanIndex<T>(this Span<T> span, T exclusiveMin) where T : IComparable<T> => ((ReadOnlySpan<T>)span).GetGreaterThanIndex(exclusiveMin);
+        public static int GetLessEqualIndex<T>(this Span<T> span, T inclusiveMax) where T : IComparable<T> => ((ReadOnlySpan<T>)span).GetLessEqualIndex(inclusiveMax);
+        public static int GetLessThanIndex<T>(this Span<T> span, T exclusiveMax) where T : IComparable<T> => ((ReadOnlySpan<T>)span).GetLessThanIndex(exclusiveMax);
+
+        public static int BoundaryBinarySearch(Predicate<int> predicate, int ok, int ng)
+        {
+            while (Math.Abs(ok - ng) > 1)
+            {
+                int mid = (ok + ng) / 2;
+                if (predicate(mid))
+                {
+                    ok = mid;
+                }
+                else
+                {
+                    ng = mid;
+                }
+            }
+            return ok;
+        }
+
+        public static long BoundaryBinarySearch(Predicate<long> predicate, long ok, long ng)
+        {
+            while (Math.Abs(ok - ng) > 1)
+            {
+                long mid = (ok + ng) / 2;
+                if (predicate(mid))
+                {
+                    ok = mid;
+                }
+                else
+                {
+                    ng = mid;
+                }
+            }
+            return ok;
+        }
+
+        public static double Bisection(Func<double, double> f, double a, double b, double eps = 1e-9)
+        {
+            if (f(a) * f(b) >= 0)
+            {
+                throw new ArgumentException("f(a)とf(b)は異符号である必要があります。");
+            }
+
+            const int maxLoop = 100;
+            double mid = (a + b) / 2;
+
+            for (int i = 0; i < maxLoop; i++)
+            {
+                if (f(a) * f(mid) < 0)
+                {
+                    b = mid;
+                }
+                else
+                {
+                    a = mid;
+                }
+                mid = (a + b) / 2;
+                if (Math.Abs(b - a) < eps)
+                {
+                    break;
+                }
+            }
+            return mid;
+        }
     }
 }
 
@@ -3855,93 +3940,6 @@ namespace AtCoderTemplateForNetCore.Collections
         public bool Equals(BitSet other) => _value == other._value;
         public override string ToString() => Convert.ToString(_value, 2);
         public override int GetHashCode() => _value.GetHashCode();
-    }
-
-    public static class SearchExtensions
-    {
-        struct LowerBoundComparer<T> : IComparer<T> where T : IComparable<T>
-        {
-            public int Compare(T x, T y) => 0 <= x.CompareTo(y) ? 1 : -1;
-        }
-
-        struct UpperBoundComparer<T> : IComparer<T> where T : IComparable<T>
-        {
-            public int Compare(T x, T y) => 0 < x.CompareTo(y) ? 1 : -1;
-        }
-
-        // https://trsing.hatenablog.com/entry/2019/08/27/211038
-        public static int GetGreaterEqualIndex<T>(this ReadOnlySpan<T> span, T inclusiveMin) where T : IComparable<T> => ~span.BinarySearch(inclusiveMin, new UpperBoundComparer<T>());
-        public static int GetGreaterThanIndex<T>(this ReadOnlySpan<T> span, T exclusiveMin) where T : IComparable<T> => ~span.BinarySearch(exclusiveMin, new LowerBoundComparer<T>());
-        public static int GetLessEqualIndex<T>(this ReadOnlySpan<T> span, T inclusiveMax) where T : IComparable<T> => ~span.BinarySearch(inclusiveMax, new LowerBoundComparer<T>()) - 1;
-        public static int GetLessThanIndex<T>(this ReadOnlySpan<T> span, T exclusiveMax) where T : IComparable<T> => ~span.BinarySearch(exclusiveMax, new UpperBoundComparer<T>()) - 1;
-        public static int GetGreaterEqualIndex<T>(this Span<T> span, T inclusiveMin) where T : IComparable<T> => ((ReadOnlySpan<T>)span).GetGreaterEqualIndex(inclusiveMin);
-        public static int GetGreaterThanIndex<T>(this Span<T> span, T exclusiveMin) where T : IComparable<T> => ((ReadOnlySpan<T>)span).GetGreaterThanIndex(exclusiveMin);
-        public static int GetLessEqualIndex<T>(this Span<T> span, T inclusiveMax) where T : IComparable<T> => ((ReadOnlySpan<T>)span).GetLessEqualIndex(inclusiveMax);
-        public static int GetLessThanIndex<T>(this Span<T> span, T exclusiveMax) where T : IComparable<T> => ((ReadOnlySpan<T>)span).GetLessThanIndex(exclusiveMax);
-
-        public static int BoundaryBinarySearch(Predicate<int> predicate, int ok, int ng)
-        {
-            // めぐる式二分探索
-            while (Math.Abs(ok - ng) > 1)
-            {
-                int mid = (ok + ng) / 2;
-                if (predicate(mid))
-                {
-                    ok = mid;
-                }
-                else
-                {
-                    ng = mid;
-                }
-            }
-            return ok;
-        }
-
-        public static long BoundaryBinarySearch(Predicate<long> predicate, long ok, long ng)
-        {
-            while (Math.Abs(ok - ng) > 1)
-            {
-                long mid = (ok + ng) / 2;
-                if (predicate(mid))
-                {
-                    ok = mid;
-                }
-                else
-                {
-                    ng = mid;
-                }
-            }
-            return ok;
-        }
-
-        public static double Bisection(Func<double, double> f, double a, double b, double eps = 1e-9)
-        {
-            if (f(a) * f(b) >= 0)
-            {
-                throw new ArgumentException("f(a)とf(b)は異符号である必要があります。");
-            }
-
-            const int maxLoop = 100;
-            double mid = (a + b) / 2;
-
-            for (int i = 0; i < maxLoop; i++)
-            {
-                if (f(a) * f(mid) < 0)
-                {
-                    b = mid;
-                }
-                else
-                {
-                    a = mid;
-                }
-                mid = (a + b) / 2;
-                if (Math.Abs(b - a) < eps)
-                {
-                    break;
-                }
-            }
-            return mid;
-        }
     }
 
     public static class PermutationAlgorithms
