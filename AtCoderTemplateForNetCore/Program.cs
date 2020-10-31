@@ -2658,7 +2658,7 @@ namespace AtCoderTemplateForNetCore.Collections
 
         public long this[int index]
         {
-            get => Sum(index..(index + 1));
+            get => Sum(index, index + 1);
             set => AddAt(index, value - this[index]);
         }
 
