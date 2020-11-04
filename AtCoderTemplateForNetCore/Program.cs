@@ -2031,98 +2031,120 @@ namespace AtCoderTemplateForNetCore.Collections
 
     public class PriorityQueue<T> : IEnumerable<T> where T : IComparable<T>
     {
-        private List<T> _heap = new List<T>();
+        const int InitialSize = 4;
         private readonly int _reverseFactor;
-        public int Count => _heap.Count;
+        private T[] _heap;
+        public int Count { get; private set; }
         public bool IsDescending => _reverseFactor == 1;
 
-        public PriorityQueue(Order order) : this(order, null) { }
-
-        public PriorityQueue(Order order, IEnumerable<T> collection)
+        public PriorityQueue(Order order)
         {
             _reverseFactor = order == Order.Ascending ? -1 : 1;
-            _heap = new List<T>();
+            _heap = new T[InitialSize];
+            Count = 0;
+        }
 
-            if (collection != null)
+        public PriorityQueue(Order order, IEnumerable<T> collection) : this(order)
+        {
+            foreach (var item in collection)
             {
-                foreach (var item in collection)
-                {
-                    Enqueue(item);
-                }
+                Enqueue(item);
             }
         }
 
         public void Enqueue(T item)
         {
-            _heap.Add(item);
-            UpHeap();
+            if (Count >= _heap.Length)
+            {
+                var temp = new T[_heap.Length << 1];
+                _heap.AsSpan().CopyTo(temp);
+                _heap = temp;
+            }
+
+            var index = Count++;
+            ref var child = ref _heap[index];
+            child = item;
+
+            while (index > 0)
+            {
+                index = (index - 1) >> 1;
+                ref var parent = ref _heap[index];
+
+                if (Compare(child, parent) <= 0)
+                {
+                    break;
+                }
+
+                Swap(ref child, ref parent);
+                child = ref parent;
+            }
         }
 
         public T Dequeue()
         {
-            var item = _heap[0];
-            DownHeap();
+            var index = 0;
+            ref var parent = ref _heap[index];
+            var item = parent;
+            parent = _heap[--Count];
+            var span = _heap.AsSpan(0, Count);
+
+            while (true)
+            {
+                index = (index << 1) + 1;
+
+                if (unchecked((uint)index < (uint)span.Length))
+                {
+                    ref var child = ref span[index];
+                    var r = index + 1;
+
+                    if (unchecked((uint)r < (uint)span.Length))
+                    {
+                        ref var brother = ref span[r];
+                        if (Compare(child, brother) < 0)
+                        {
+                            child = ref brother;
+                            index = r;
+                        }
+                    }
+
+                    if (Compare(parent, child) < 0)
+                    {
+                        Swap(ref parent, ref child);
+                        parent = ref child;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+
             return item;
         }
 
         public T Peek() => _heap[0];
 
-        private void UpHeap()
-        {
-            var child = Count - 1;
-            while (child > 0)
-            {
-                int parent = (child - 1) / 2;
-
-                if (Compare(_heap[child], _heap[parent]) > 0)
-                {
-                    SwapAt(child, parent);
-                    child = parent;
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-
-        private void DownHeap()
-        {
-            _heap[0] = _heap[Count - 1];
-            _heap.RemoveAt(Count - 1);
-
-            var parent = 0;
-            while (true)
-            {
-                var leftChild = 2 * parent + 1;
-                
-                if (leftChild > Count - 1)
-                {
-                    break;
-                }
-
-                var target = (leftChild < Count - 1) && (Compare(_heap[leftChild], _heap[leftChild + 1]) < 0) ? leftChild + 1 : leftChild;
-
-                if (Compare(_heap[parent], _heap[target]) < 0)
-                {
-                    SwapAt(parent, target);
-                }
-                else
-                {
-                    break;
-                }
-
-                parent = target;
-            }
-        }
+        public void Clear() => Count = 0;
 
         private int Compare(T a, T b) => _reverseFactor * a.CompareTo(b);
 
-        private void SwapAt(int n, int m) => (_heap[n], _heap[m]) = (_heap[m], _heap[n]);
+        private void Swap(ref T a, ref T b)
+        {
+            var temp = a;
+            a = b;
+            b = temp;
+        }
 
         public IEnumerator<T> GetEnumerator()
         {
-            var copy = new List<T>(_heap);
+            var copy = new T[_heap.Length];
+            var cnt = Count;
+            _heap.AsSpan().CopyTo(copy);
+
             try
             {
                 while (Count > 0)
@@ -2133,6 +2155,7 @@ namespace AtCoderTemplateForNetCore.Collections
             finally
             {
                 _heap = copy;
+                Count = cnt;
             }
         }
 
