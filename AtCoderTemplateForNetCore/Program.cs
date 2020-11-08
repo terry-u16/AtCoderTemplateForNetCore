@@ -2168,6 +2168,82 @@ namespace AtCoderTemplateForNetCore.Collections
         }
     }
 
+    /// <summary>
+    /// SWAG
+    /// </summary>
+    public class SlidingWindowAggregation<T> where T : ISemigroup<T>
+    {
+        private readonly Stack<T> _frontStack;
+        private readonly Stack<(T value, T aggregation)> _backStack;
+        public int Count => _frontStack.Count + _backStack.Count;
+
+        public SlidingWindowAggregation()
+        {
+            _frontStack = new Stack<T>();
+            _backStack = new Stack<(T value, T aggregation)>();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T QueryAll()
+        {
+            if (_frontStack.Count == 0)
+            {
+                Move();
+            }
+
+            // _frontStackが空のときは死ぬということに約束する
+            if (_backStack.Count == 0)
+            {
+                return _frontStack.Peek();
+            }
+            else
+            {
+                return _frontStack.Peek().Merge(_backStack.Peek().aggregation);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Enqueue(T value)
+        {
+            if (_backStack.Count > 0)
+            {
+                _backStack.Push((value, _backStack.Peek().aggregation.Merge(value)));
+            }
+            else
+            {
+                _backStack.Push((value, value));
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Dequeue()
+        {
+            if (_frontStack.Count == 0)
+            {
+                Move();
+            }
+            _frontStack.Pop();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void Move()
+        {
+            while (_backStack.Count > 0)
+            {
+                var (value, _) = _backStack.Pop();
+
+                if (_frontStack.Count == 0)
+                {
+                    _frontStack.Push(value);
+                }
+                else
+                {
+                    _frontStack.Push(value.Merge(_frontStack.Peek()));
+                }
+            }
+        }
+    }
+
     readonly struct MinInt : IMonoid<MinInt>
     {
         public readonly int Value;
