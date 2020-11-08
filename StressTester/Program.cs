@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using AtCoderTemplateForNetCore;
-using AtCoderTemplateForNetCore.Algorithms;
 using AtCoderTemplateForNetCore.Questions;
 
 namespace StressTester
@@ -82,7 +81,7 @@ namespace StressTester
 
         private static void GenerateInput(StreamWriter writer)
         {
-            var random = new XorShift();
+            var random = new Random();
 
             // 入力を作成
         }
