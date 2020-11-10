@@ -3978,14 +3978,17 @@ namespace AtCoderTemplateForNetCore.Collections
         {
             _value = value;
         }
+
         public bool this[int digit]
         {
             get => ((_value >> digit) & 1) > 0;
         }
+
         public bool Any => _value > 0;
         public bool None => _value == 0;
         public BitSet SetAt(int digit, bool value) => value ? new BitSet(_value | (1u << digit)) : new BitSet(_value & ~(1u << digit));
         public BitSet Lsb() { unchecked { return new BitSet(_value & (uint)-(int)_value); } }
+
         public BitSet Reverse()
         {
             unchecked
@@ -3999,20 +4002,8 @@ namespace AtCoderTemplateForNetCore.Collections
                 return new BitSet(v);
             }
         }
-        public int Count()
-        {
-            unchecked
-            {
-                // Hardware Intrinsics未使用
-                uint v = _value;
-                v = (v & 0x55555555) + (v >> 1 & 0x55555555);
-                v = (v & 0x33333333) + (v >> 2 & 0x33333333);
-                v = (v & 0x0f0f0f0f) + (v >> 4 & 0x0f0f0f0f);
-                v = (v & 0x00ff00ff) + (v >> 8 & 0x00ff00ff);
-                v = (v & 0x0000ffff) + (v >> 16 & 0x0000ffff);
-                return (int)v;
-            }
-        }
+
+        public int PopCount() => BitOperations.PopCount(_value);
 
         public static BitSet Zero => new BitSet(0);
         public static BitSet One => new BitSet(1);

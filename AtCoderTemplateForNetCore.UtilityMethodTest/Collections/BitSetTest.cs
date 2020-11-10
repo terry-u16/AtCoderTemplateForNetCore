@@ -21,7 +21,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
         [InlineData(0x0, 0)]
         public void PopCountTest(uint input, int count)
         {
-            Assert.Equal(count, new BitSet(input).Count());
+            Assert.Equal(count, new BitSet(input).PopCount());
         }
 
         [Theory]
