@@ -4467,6 +4467,178 @@ namespace AtCoderTemplateForNetCore.Graphs
             }
         }
 
+        /// <summary>
+        /// HLD
+        /// </summary>
+        public class HeavyLightDecomposition
+        {
+            private readonly int[] _parents;
+            private readonly int[] _sizes;
+            private readonly int[] _leaders;
+            private readonly int[] _depths;
+            private readonly int[] _indice;
+
+            public ReadOnlySpan<int> Parents => _parents;
+
+            /// <summary>
+            /// 頂点iがHL分解後のどのインデックスにいるか
+            /// </summary>
+            public ReadOnlySpan<int> Indice => _indice;
+
+            public HeavyLightDecomposition(BasicGraph tree) : this(tree, 0) { }
+
+            public HeavyLightDecomposition(BasicGraph tree, int root)
+            {
+                var n = tree.NodeCount;
+                _parents = new int[n];
+                _sizes = new int[n];
+                _leaders = new int[n];
+                _depths = new int[n];
+                _indice = new int[n];
+
+                _parents[root] = -1;
+                SizeDfs(root, -1);
+
+                var index = 0;
+                Decompose(root, root, 0, ref index);
+
+                int SizeDfs(int current, int parent)
+                {
+                    _parents[current] = parent;
+                    var size = 1;
+
+                    foreach (var child in tree[current])
+                    {
+                        if (child == parent)
+                        {
+                            continue;
+                        }
+
+                        size += SizeDfs(child, current);
+                    }
+
+                    return _sizes[current] = size;
+                }
+
+                void Decompose(int current, int leader, int depth, ref int index)
+                {
+                    _indice[current] = index++;
+                    _leaders[current] = leader;
+                    _depths[current] = depth;
+
+                    var maxSize = 0;
+                    var maxChild = -1;
+
+                    foreach (var child in tree[current])
+                    {
+                        if (child == _parents[current])
+                        {
+                            continue;
+                        }
+
+                        if (maxSize.ChangeMax(_sizes[child]))
+                        {
+                            maxChild = child;
+                        }
+                    }
+
+                    if (maxChild == -1)
+                    {
+                        return;
+                    }
+
+                    // Heavy-path
+                    Decompose(maxChild, leader, depth + 1, ref index);
+
+                    // Light-path
+                    foreach (var child in tree[current])
+                    {
+                        if (child == _parents[current] || child == maxChild)
+                        {
+                            continue;
+                        }
+
+                        Decompose(child, child, depth + 1, ref index);
+                    }
+                }
+            }
+
+            /// <summary>
+            /// 頂点<paramref name="u"/>と頂点<paramref name="v"/>間のパスに対応する頂点集合の半開区間[l, r)を列挙する。
+            /// </summary>
+            public IEnumerable<(int l, int r)> VertexQuery(int u, int v)
+            {
+                while (_leaders[u] != _leaders[v])
+                {
+                    if (_indice[u] > _indice[v])
+                    {
+                        (u, v) = (v, u);
+                    }
+
+                    yield return (_indice[_leaders[v]], _indice[v] + 1);
+                    v = _parents[_leaders[v]];
+                }
+
+                var x = _indice[u];
+                var y = _indice[v];
+
+                if (x > y)
+                {
+                    (x, y) = (y, x);
+                }
+
+                yield return (x, y + 1);
+            }
+
+            /// <summary>
+            /// 頂点<paramref name="u"/>と頂点<paramref name="v"/>間のパスに対応する辺集合の半開区間[l, r)を列挙する。
+            /// </summary>
+            public IEnumerable<(int l, int r)> EdgeQuery(int u, int v)
+            {
+                while (_leaders[u] != _leaders[v])
+                {
+                    if (_indice[u] > _indice[v])
+                    {
+                        (u, v) = (v, u);
+                    }
+
+                    yield return (_indice[_leaders[v]], _indice[v] + 1);
+                    v = _parents[_leaders[v]];
+                }
+
+                var x = _indice[u];
+                var y = _indice[v];
+
+                if (x > y)
+                {
+                    (x, y) = (y, x);
+                }
+
+                // LCA部分を抜く
+                yield return (x + 1, y + 1);
+            }
+
+            public int GetLca(int u, int v)
+            {
+                while (true)
+                {
+                    if (_indice[u] > _indice[v])
+                    {
+                        (u, v) = (v, u);
+                    }
+
+                    if (_leaders[u] == _leaders[v])
+                    {
+                        return u;
+                    }
+
+                    v = _parents[_leaders[v]];
+                }
+            }
+
+            public int GetDistance(int u, int v) => _depths[u] + _depths[v] - 2 * _depths[GetLca(u, v)];
+        }
+
         public interface ITreeDpState<TSet> : IMonoid<TSet> where TSet : ITreeDpState<TSet>, new()
         {
             public TSet AddRoot();
