@@ -1784,8 +1784,8 @@ namespace AtCoderTemplateForNetCore.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unite(int a, int b)
         {
-            var x = FindRoot(a);
-            var y = FindRoot(b);
+            var x = GetLeader(a);
+            var y = GetLeader(b);
 
             if (x == y)
             {
@@ -1805,32 +1805,32 @@ namespace AtCoderTemplateForNetCore.Collections
             }
         }
 
-        public bool IsInSameGroup(int a, int b) => FindRoot(a) == FindRoot(b);
+        public bool IsInSameGroup(int a, int b) => GetLeader(a) == GetLeader(b);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int FindRoot(int index)
+        public int GetLeader(int index)
         {
-            if (unchecked((uint)index >= (uint)_parentsOrSizes.Length))
+            if (index >= _parentsOrSizes.Length)
             {
                 ThrowArgumentException();
             }
 
-            return FindRecursive(index);
+            return GetLeaderRecursive(index);
 
-            int FindRecursive(int index)
+            int GetLeaderRecursive(int index)
             {
-                if (_parentsOrSizes[index] < 0)
+                if (unchecked((uint)_parentsOrSizes[index]) < _parentsOrSizes.Length)
                 {
-                    return index;
+                    return _parentsOrSizes[index] = GetLeaderRecursive(_parentsOrSizes[index]);
                 }
                 else
                 {
-                    return _parentsOrSizes[index] = FindRecursive(_parentsOrSizes[index]);
+                    return index;
                 }
             }
         }
 
-        public int GetGroupSizeOf(int index) => -_parentsOrSizes[FindRoot(index)];
+        public int GetGroupSize(int index) => -_parentsOrSizes[GetLeader(index)];
 
         public int[][] GetAllGroups()
         {
@@ -1851,7 +1851,7 @@ namespace AtCoderTemplateForNetCore.Collections
 
             for (int i = 0; i < _parentsOrSizes.Length; i++)
             {
-                var group = resultIndices[FindRoot(i)];
+                var group = resultIndices[GetLeader(i)];
                 results[group][counts[group]++] = i;
             }
 

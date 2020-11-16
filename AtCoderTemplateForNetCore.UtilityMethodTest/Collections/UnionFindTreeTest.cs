@@ -50,7 +50,7 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Collections
 
             Assert.Equal(new[] { "Yes", "No", "Yes", "Yes" }, output);
 
-            var sizes = Enumerable.Range(0, n).Select(i => uf.GetGroupSizeOf(i));
+            var sizes = Enumerable.Range(0, n).Select(i => uf.GetGroupSize(i));
             Assert.Equal(new[] { 1, 4, 4, 4, 4, 1, 1, 1 }, sizes);
 
             Assert.Equal(5, uf.Groups);
