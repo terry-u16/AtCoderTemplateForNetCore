@@ -4351,6 +4351,204 @@ namespace AtCoderTemplateForNetCore.Graphs
             }
         }
 
+        public class MaxFlow
+        {
+            private readonly List<InternalEdge>[] _graph;
+            private readonly List<(int v, int index)> _edgeIndice;
+            public int VertexCount => _graph.Length;
+
+            public MaxFlow(int n)
+            {
+                _graph = Enumerable.Repeat(0, n).Select(_ => new List<InternalEdge>()).ToArray();
+                _edgeIndice = new List<(int from, int to)>();
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void AddEdge(int from, int to, int capacity)
+            {
+                _edgeIndice.Add((from, _graph[from].Count));
+                _graph[from].Add(new InternalEdge(to, _graph[to].Count, capacity));
+                _graph[to].Add(new InternalEdge(from, _graph[from].Count - 1, 0));
+            }
+
+            public IEnumerable<Edge> EnumerateEdges()
+            {
+                for (int i = 0; i < _edgeIndice.Count; i++)
+                {
+                    var (v, index) = _edgeIndice[i];
+                    var edge = _graph[v][index];
+                    var invEdge = _graph[edge.To][edge.Inv];
+                    yield return new Edge(v, edge.To, edge.Capacity + invEdge.Capacity, invEdge.Capacity);
+                }
+            }
+
+            public int Flow(int source, int sink) => Flow(source, sink, int.MaxValue);
+
+            public int Flow(int source, int sink, int flowLimit)
+            {
+                var distances = new int[VertexCount];
+                var iterations = new int[VertexCount];
+                var queue = new Queue<int>();
+
+                var flow = 0;
+
+                while (flow < flowLimit)
+                {
+                    Bfs();
+                    if (distances[sink] == -1)
+                    {
+                        break;
+                    }
+
+                    iterations.AsSpan().Clear();
+                    while (flow < flowLimit)
+                    {
+                        var dFlow = Dfs(sink, flowLimit - flow);
+                        if (dFlow == 0)
+                        {
+                            break;
+                        }
+                        flow += dFlow;
+                    }
+                }
+
+                return flow;
+
+                void Bfs()
+                {
+                    distances.Fill(-1);
+                    distances[source] = 0;
+                    queue.Clear();
+                    queue.Enqueue(source);
+
+                    while (queue.Count > 0)
+                    {
+                        var current = queue.Dequeue();
+                        var distance = distances[current];
+                        foreach (var edge in _graph[current].AsSpan())
+                        {
+                            if (edge.Capacity == 0 || distances[edge.To] >= 0)
+                            {
+                                continue;
+                            }
+
+                            distances[edge.To] = distance + 1;
+
+                            if (edge.To == sink)
+                            {
+                                return;
+                            }
+
+                            queue.Enqueue(edge.To);
+                        }
+                    }
+                }
+
+                int Dfs(int v, int flowLimit)
+                {
+                    if (v == source)
+                    {
+                        return flowLimit;
+                    }
+
+                    var result = 0;
+                    var span = _graph[v].AsSpan();
+                    var distance = distances[v];
+
+                    for (ref var iteration = ref iterations[v]; iteration < span.Length; iteration++)
+                    {
+                        ref var edge = ref span[iteration];
+                        ref var invEdge = ref _graph[edge.To].AsSpan()[edge.Inv];
+                        if (distance <= distances[edge.To] || invEdge.Capacity == 0)
+                        {
+                            continue;
+                        }
+
+                        var deltaFlow = Dfs(edge.To, Math.Min(flowLimit - result, invEdge.Capacity));
+
+                        if (deltaFlow <= 0)
+                        {
+                            continue;
+                        }
+
+                        edge += deltaFlow;
+                        invEdge -= deltaFlow;
+                        result += deltaFlow;
+
+                        if (result == flowLimit)
+                        {
+                            break;
+                        }
+                    }
+
+                    return result;
+                }
+            }
+
+            public bool[] GetMinCut(int source)
+            {
+                var visited = new bool[VertexCount];
+                var queue = new Queue<int>();
+                queue.Enqueue(source);
+
+                while (queue.Count > 0)
+                {
+                    var v = queue.Dequeue();
+                    visited[v] = true;
+                    foreach (var edge in _graph[v].AsSpan())
+                    {
+                        if (edge.Capacity > 0 && !visited[edge.To])
+                        {
+                            visited[edge.To] = true;
+                            queue.Enqueue(edge.To);
+                        }
+                    }
+                }
+
+                return visited;
+            }
+
+            [StructLayout(LayoutKind.Auto)]
+            public readonly struct Edge
+            {
+                public int From { get; }
+                public int To { get; }
+                public int Capacity { get; }
+                public int Flow { get; }
+
+                public Edge(int from, int to, int capacity, int flow)
+                {
+                    From = from;
+                    To = to;
+                    Capacity = capacity;
+                    Flow = flow;
+                }
+
+                public void Deconstruct(out int to, out int inv, out int capacity, out int flow)
+                    => (to, inv, capacity, flow) = (From, To, Capacity, Flow);
+                public override string ToString() => $"{nameof(From)}: {From}, {nameof(To)}: {To}, {nameof(Capacity)}: {Capacity}, {nameof(Flow)}: {Flow}";
+            }
+
+            [StructLayout(LayoutKind.Auto)]
+            private readonly struct InternalEdge
+            {
+                public int To { get; }
+                public int Inv { get; }
+                public int Capacity { get; }
+
+                public InternalEdge(int to, int inv, int capacity)
+                {
+                    To = to;
+                    Inv = inv;
+                    Capacity = capacity;
+                }
+
+                public static InternalEdge operator +(InternalEdge edge, int flow) => new InternalEdge(edge.To, edge.Inv, edge.Capacity + flow);
+                public static InternalEdge operator -(InternalEdge edge, int flow) => new InternalEdge(edge.To, edge.Inv, edge.Capacity - flow);
+                public override string ToString() => $"{nameof(To)}: {To}, {nameof(Inv)}: {Inv}, {nameof(Capacity)}: {Capacity}";
+            }
+        }
+
         /// <summary>
         /// LCAを求めるクラス。
         /// </summary>
