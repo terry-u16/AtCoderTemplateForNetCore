@@ -4371,13 +4371,13 @@ namespace AtCoderTemplateForNetCore.Graphs
                 _graph[to].Add(new InternalEdge(from, _graph[from].Count - 1, 0));
             }
 
-            public IEnumerable<Edge> EnumerateEdges()
+            public IEnumerable<Edge> GetEdges()
             {
                 for (int i = 0; i < _edgeIndice.Count; i++)
                 {
                     var (v, index) = _edgeIndice[i];
                     var edge = _graph[v][index];
-                    var invEdge = _graph[edge.To][edge.Inv];
+                    var invEdge = _graph[edge.To][edge.InvIndex];
                     yield return new Edge(v, edge.To, edge.Capacity + invEdge.Capacity, invEdge.Capacity);
                 }
             }
@@ -4452,13 +4452,13 @@ namespace AtCoderTemplateForNetCore.Graphs
                     }
 
                     var result = 0;
-                    var span = _graph[v].AsSpan();
+                    var edges = _graph[v].AsSpan();
                     var distance = distances[v];
 
-                    for (ref var iteration = ref iterations[v]; iteration < span.Length; iteration++)
+                    for (ref var iteration = ref iterations[v]; iteration < edges.Length; iteration++)
                     {
-                        ref var edge = ref span[iteration];
-                        ref var invEdge = ref _graph[edge.To].AsSpan()[edge.Inv];
+                        ref var edge = ref edges[iteration];
+                        ref var invEdge = ref _graph[edge.To].AsSpan()[edge.InvIndex];
                         if (distance <= distances[edge.To] || invEdge.Capacity == 0)
                         {
                             continue;
@@ -4533,19 +4533,19 @@ namespace AtCoderTemplateForNetCore.Graphs
             private readonly struct InternalEdge
             {
                 public int To { get; }
-                public int Inv { get; }
+                public int InvIndex { get; }
                 public int Capacity { get; }
 
-                public InternalEdge(int to, int inv, int capacity)
+                public InternalEdge(int to, int invIndex, int capacity)
                 {
                     To = to;
-                    Inv = inv;
+                    InvIndex = invIndex;
                     Capacity = capacity;
                 }
 
-                public static InternalEdge operator +(InternalEdge edge, int flow) => new InternalEdge(edge.To, edge.Inv, edge.Capacity + flow);
-                public static InternalEdge operator -(InternalEdge edge, int flow) => new InternalEdge(edge.To, edge.Inv, edge.Capacity - flow);
-                public override string ToString() => $"{nameof(To)}: {To}, {nameof(Inv)}: {Inv}, {nameof(Capacity)}: {Capacity}";
+                public static InternalEdge operator +(InternalEdge edge, int flow) => new InternalEdge(edge.To, edge.InvIndex, edge.Capacity + flow);
+                public static InternalEdge operator -(InternalEdge edge, int flow) => new InternalEdge(edge.To, edge.InvIndex, edge.Capacity - flow);
+                public override string ToString() => $"{nameof(To)}: {To}, {nameof(InvIndex)}: {InvIndex}, {nameof(Capacity)}: {Capacity}";
             }
         }
 
