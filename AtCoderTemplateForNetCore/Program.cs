@@ -4549,6 +4549,232 @@ namespace AtCoderTemplateForNetCore.Graphs
             }
         }
 
+        public class MinCostFlow
+        {
+            private readonly List<InternalEdge>[] _graph;
+            private readonly List<(int v, int index)> _edgeIndice;
+            public int VertexCount => _graph.Length;
+
+            public MinCostFlow(int n)
+            {
+                _graph = Enumerable.Repeat(0, n).Select(_ => new List<InternalEdge>()).ToArray();
+                _edgeIndice = new List<(int v, int index)>();
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void AddEdge(int from, int to, int capacity, long cost)
+            {
+                _edgeIndice.Add((from, _graph[from].Count));
+                _graph[from].Add(new InternalEdge(to, _graph[to].Count, capacity, cost));
+                _graph[to].Add(new InternalEdge(from, _graph[from].Count - 1, 0, -cost));
+            }
+
+            public IEnumerable<Edge> GetEdges()
+            {
+                for (int i = 0; i < _edgeIndice.Count; i++)
+                {
+                    var (v, index) = _edgeIndice[i];
+                    var edge = _graph[v][index];
+                    var invEdge = _graph[edge.To][edge.InvIndex];
+                    yield return new Edge(v, edge.To, edge.Capacity + invEdge.Capacity, invEdge.Capacity, edge.Cost);
+                }
+            }
+
+            public (int flow, long cost) Flow(int source, int sink) => Flow(source, sink, int.MaxValue);
+
+            public (int flow, long cost) Flow(int source, int sink, int flowLimit) => GetCostSlope(source, sink, flowLimit)[^1];
+
+            public ReadOnlySpan<(int flow, long cost)> GetCostSlope(int source, int sink) => GetCostSlope(source, sink, int.MaxValue);
+
+            public ReadOnlySpan<(int flow, long cost)> GetCostSlope(int source, int sink, int flowLimit)
+            {
+                if (source == sink)
+                {
+                    throw new ArgumentException();
+                }
+
+                var potentials = new long[VertexCount];
+                var distances = new long[VertexCount];
+                var prevVertice = new int[VertexCount];
+                var prevEdges = new int[VertexCount];
+                var visited = new bool[VertexCount];
+
+                var flow = 0;
+                long cost = 0;
+                long prevCost = -1;
+                var result = new List<(int flow, long cost)>();
+                result.Add((flow, cost));
+
+                while (flow < flowLimit)
+                {
+                    if (!Update())
+                    {
+                        break;
+                    }
+
+                    var capacity = flowLimit - flow;
+
+                    var v = sink;
+                    while (v != source)
+                    {
+                        var pv = prevVertice[v];
+                        var pe = prevEdges[v];
+                        capacity.ChangeMin(_graph[pv][pe].Capacity);
+                        v = pv;
+                    }
+
+                    v = sink;
+                    while (v != source)
+                    {
+                        var pv = prevVertice[v];
+                        var pe = prevEdges[v];
+                        ref var edge = ref _graph[pv].AsSpan()[pe];
+                        ref var invEdge = ref _graph[v].AsSpan()[edge.InvIndex];
+
+                        edge = edge.Flow(-capacity);
+                        invEdge = invEdge.Flow(capacity);
+
+                        v = pv;
+                    }
+
+                    var d = -potentials[source];
+                    flow += capacity;
+                    cost += capacity * d;
+                    if (prevCost == d)
+                    {
+                        result.RemoveAt(result.Count - 1);
+                    }
+                    result.Add((flow, cost));
+                    prevCost = cost;
+                }
+
+                return result.AsSpan();
+
+                bool Update()
+                {
+                    distances.AsSpan().Fill(long.MaxValue);
+                    prevVertice.AsSpan().Fill(-1);
+                    prevEdges.AsSpan().Fill(-1);
+                    visited.AsSpan().Clear();
+
+                    var queue = new PriorityQueue<DijkstraState>(PriorityQueue<DijkstraState>.Order.Ascending);
+                    distances[source] = 0;
+                    queue.Enqueue(new DijkstraState(source, 0));
+
+                    while (queue.Count > 0)
+                    {
+                        var (current, currentDistance) = queue.Dequeue();
+                        if (visited[current])
+                        {
+                            continue;
+                        }
+
+                        visited[current] = true;
+                        if (current == sink)
+                        {
+                            break;
+                        }
+
+                        var edges = _graph[current].AsSpan();
+
+                        for (int i = 0; i < edges.Length; i++)
+                        {
+                            ref var edge = ref edges[i];
+                            if (visited[edge.To] || edge.Capacity == default)
+                            {
+                                continue;
+                            }
+
+                            var cost = edge.Cost - potentials[edge.To] + potentials[current];
+                            ref var nextDistance = ref distances[edge.To];
+                            if (nextDistance - currentDistance > cost)
+                            {
+                                nextDistance = currentDistance + cost;
+                                prevVertice[edge.To] = current;
+                                prevEdges[edge.To] = i;
+                                queue.Enqueue(new DijkstraState(edge.To, nextDistance));
+                            }
+                        }
+                    }
+
+                    if (!visited[sink])
+                    {
+                        return false;
+                    }
+
+                    var sinkDistance = distances[sink];
+                    for (int v = 0; v < visited.Length; v++)
+                    {
+                        if (visited[v])
+                        {
+                            potentials[v] -= sinkDistance - distances[v];
+                        }
+                    }
+
+                    return true;
+                }
+            }
+
+            [StructLayout(LayoutKind.Auto)]
+            public readonly struct Edge
+            {
+                public int From { get; }
+                public int To { get; }
+                public int Capacity { get; }
+                public int Flow { get; }
+                public long Cost { get; }
+
+                public Edge(int from, int to, int capacity, int flow, long cost)
+                {
+                    From = from;
+                    To = to;
+                    Capacity = capacity;
+                    Flow = flow;
+                    Cost = cost;
+                }
+
+                public override string ToString() => $"{nameof(From)}: {From}, {nameof(To)}: {To}, {nameof(Capacity)}: {Capacity}, {nameof(Flow)}: {Flow}, {nameof(Cost)}: {Cost}";
+            }
+
+            [StructLayout(LayoutKind.Auto)]
+            private readonly struct InternalEdge
+            {
+                public int To { get; }
+                public int InvIndex { get; }
+                public int Capacity { get; }
+                public long Cost { get; }
+
+                public InternalEdge(int to, int invIndex, int capacity, long cost)
+                {
+                    To = to;
+                    InvIndex = invIndex;
+                    Capacity = capacity;
+                    Cost = cost;
+                }
+
+                public InternalEdge Flow(int flow) => new InternalEdge(To, InvIndex, Capacity + flow, Cost);
+
+                public override string ToString() => $"{nameof(To)}: {To}, {nameof(InvIndex)}: {InvIndex}, {nameof(Capacity)}: {Capacity}, {nameof(Cost)}: {Cost}";
+            }
+
+            [StructLayout(LayoutKind.Auto)]
+            readonly struct DijkstraState : IComparable<DijkstraState>
+            {
+                public readonly int Vertex;
+                public readonly long Distance;
+
+                public DijkstraState(int v, long distance)
+                {
+                    Vertex = v;
+                    Distance = distance;
+                }
+
+                public int CompareTo([AllowNull] DijkstraState other) => Distance.CompareTo(other.Distance);
+                public void Deconstruct(out int v, out long distance) => (v, distance) = (Vertex, Distance);
+                public override string ToString() => $"{nameof(Vertex)}: {Vertex}, {nameof(Distance)}: {Distance}";
+            }
+        }
+
         /// <summary>
         /// LCAを求めるクラス。
         /// </summary>
