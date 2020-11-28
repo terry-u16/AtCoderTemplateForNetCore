@@ -4769,7 +4769,7 @@ namespace AtCoderTemplateForNetCore.Graphs
                     Distance = distance;
                 }
 
-                public int CompareTo([AllowNull] DijkstraState other) => Distance.CompareTo(other.Distance);
+                public int CompareTo(DijkstraState other) => Distance.CompareTo(other.Distance);
                 public void Deconstruct(out int v, out long distance) => (v, distance) = (Vertex, Distance);
                 public override string ToString() => $"{nameof(Vertex)}: {Vertex}, {nameof(Distance)}: {Distance}";
             }
