@@ -399,7 +399,7 @@ namespace AtCoderTemplateForNetCore
 
         public static int BoundaryBinarySearch(Predicate<int> predicate, int ok, int ng)
         {
-            while (ok - ng > 1)
+            while (Math.Abs(ok - ng) > 1)
             {
                 var mid = (ok + ng) / 2;
                 if (predicate(mid))
@@ -416,7 +416,7 @@ namespace AtCoderTemplateForNetCore
 
         public static long BoundaryBinarySearch(Predicate<long> predicate, long ok, long ng)
         {
-            while (ok - ng > 1)
+            while (Math.Abs(ok - ng) > 1)
             {
                 var mid = (ok + ng) / 2;
                 if (predicate(mid))
@@ -433,7 +433,7 @@ namespace AtCoderTemplateForNetCore
 
         public static BigInteger BoundaryBinarySearch(Predicate<BigInteger> predicate, BigInteger ok, BigInteger ng)
         {
-            while (ok - ng > 1)
+            while (BigInteger.Abs(ok - ng) > 1)
             {
                 var mid = (ok + ng) / 2;
                 if (predicate(mid))
