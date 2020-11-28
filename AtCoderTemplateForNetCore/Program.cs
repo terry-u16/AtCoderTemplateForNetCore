@@ -4446,7 +4446,7 @@ namespace AtCoderTemplateForNetCore.Graphs
                     {
                         var current = queue.Dequeue();
                         var distance = distances[current];
-                        foreach (var edge in _graph[current].AsSpan())
+                        foreach (ref readonly var edge in _graph[current].AsSpan())
                         {
                             if (edge.Capacity == 0 || distances[edge.To] >= 0)
                             {
@@ -4700,7 +4700,7 @@ namespace AtCoderTemplateForNetCore.Graphs
 
                         for (int i = 0; i < edges.Length; i++)
                         {
-                            ref var edge = ref edges[i];
+                            ref readonly var edge = ref edges[i];
                             if (visited[edge.To] || edge.Capacity == default)
                             {
                                 continue;
