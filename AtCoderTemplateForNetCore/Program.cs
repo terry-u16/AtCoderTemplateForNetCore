@@ -348,6 +348,27 @@ namespace AtCoderTemplateForNetCore
             return Unsafe.As<ArrayWrapper<T>>(list).Array.AsSpan(0, list.Count);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Span<T> GetRowSpan<T>(this T[,] array, int i)
+        {
+            var width = array.GetLength(1);
+            return MemoryMarshal.CreateSpan(ref array[i, 0], width);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Span<T> GetRowSpan<T>(this T[,,] array, int i, int j)
+        {
+            var width = array.GetLength(2);
+            return MemoryMarshal.CreateSpan(ref array[i, j, 0], width);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Span<T> GetRowSpan<T>(this T[,,,] array, int i, int j, int k)
+        {
+            var width = array.GetLength(3);
+            return MemoryMarshal.CreateSpan(ref array[i, j, k, 0], width);
+        }
+
         public static void Fill<T>(this T[] array, T value) => array.AsSpan().Fill(value);
         public static void Fill<T>(this T[,] array, T value) => MemoryMarshal.CreateSpan(ref array[0, 0], array.Length).Fill(value);
         public static void Fill<T>(this T[,,] array, T value) => MemoryMarshal.CreateSpan(ref array[0, 0, 0], array.Length).Fill(value);
