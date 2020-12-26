@@ -448,6 +448,26 @@ namespace AtCoderTemplateForNetCore
             return ok;
         }
 
+        public static double BoundaryBinarySearch(Predicate<double> predicate, double ok, double ng, double eps = 1e-9, int loopLimit = 1000)
+        {
+            var count = 0;
+
+            while (Math.Abs(ok - ng) > eps && count++ < loopLimit)
+            {
+                var mid = (ok + ng) * 0.5;
+                if (predicate(mid))
+                {
+                    ok = mid;
+                }
+                else
+                {
+                    ng = mid;
+                }
+            }
+
+            return (ok + ng) * 0.5;
+        }
+
         public static double Bisection(Func<double, double> f, double a, double b, double eps = 1e-9)
         {
             if (f(a) * f(b) >= 0)
