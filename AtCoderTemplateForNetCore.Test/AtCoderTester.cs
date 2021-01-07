@@ -3,83 +3,74 @@ using Xunit;
 using AtCoderTemplateForNetCore.Problems;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace AtCoderTemplateForNetCore.Test
 {
     public class AtCoderTester
     {
-        [Theory]
-        [InlineData(@"", @"")]
+        //[Theory]
+        //[InlineData(@"", @"")]
         public void ProblemATest(string input, string output)
         {
-            var outputs = SplitByNewLine(output);
-            IProblem question = new ProblemA();
-
-            var answers = SplitByNewLine(question.Solve(input).Trim());
-
-            Assert.Equal(outputs, answers);
+            IProblem solver = CreateInstanceOf(MethodBase.GetCurrentMethod());
+            IJudge judge = new BasicJudge(solver);
+            judge.Judge(input, output);
         }
 
         //[Theory]
         //[InlineData(@"", @"")]
         public void ProblemBTest(string input, string output)
         {
-            var outputs = SplitByNewLine(output);
-            IProblem question = new ProblemB();
-
-            var answers = SplitByNewLine(question.Solve(input).Trim());
-
-            Assert.Equal(outputs, answers);
+            IProblem solver = CreateInstanceOf(MethodBase.GetCurrentMethod());
+            IJudge judge = new BasicJudge(solver);
+            judge.Judge(input, output);
         }
 
         //[Theory]
         //[InlineData(@"", @"")]
         public void ProblemCTest(string input, string output)
         {
-            var outputs = SplitByNewLine(output);
-            IProblem question = new ProblemC();
-
-            var answers = SplitByNewLine(question.Solve(input).Trim());
-
-            Assert.Equal(outputs, answers);
+            IProblem solver = CreateInstanceOf(MethodBase.GetCurrentMethod());
+            IJudge judge = new BasicJudge(solver);
+            judge.Judge(input, output);
         }
 
         //[Theory]
         //[InlineData(@"", @"")]
         public void ProblemDTest(string input, string output)
         {
-            var outputs = SplitByNewLine(output);
-            IProblem question = new ProblemD();
-
-            var answers = SplitByNewLine(question.Solve(input).Trim());
-
-            Assert.Equal(outputs, answers);
+            IProblem solver = CreateInstanceOf(MethodBase.GetCurrentMethod());
+            IJudge judge = new BasicJudge(solver);
+            judge.Judge(input, output);
         }
 
         //[Theory]
         //[InlineData(@"", @"")]
         public void ProblemETest(string input, string output)
         {
-            var outputs = SplitByNewLine(output);
-            IProblem question = new ProblemE();
-
-            var answers = SplitByNewLine(question.Solve(input).Trim());
-
-            Assert.Equal(outputs, answers);
+            IProblem solver = CreateInstanceOf(MethodBase.GetCurrentMethod());
+            IJudge judge = new BasicJudge(solver);
+            judge.Judge(input, output);
         }
 
         //[Theory]
         //[InlineData(@"", @"")]
         public void ProblemFTest(string input, string output)
         {
-            var outputs = SplitByNewLine(output);
-            IProblem question = new ProblemF();
-
-            var answers = SplitByNewLine(question.Solve(input).Trim());
-
-            Assert.Equal(outputs, answers);
+            IProblem solver = CreateInstanceOf(MethodBase.GetCurrentMethod());
+            IJudge judge = new BasicJudge(solver);
+            judge.Judge(input, output);
         }
 
-        IEnumerable<string> SplitByNewLine(string input) => input?.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None) ?? new string[0];
+        private static IProblem CreateInstanceOf(MethodBase method)
+        {
+            var type = typeof(IProblem);
+            var nameSpace = type.Namespace;
+            var className = method.Name.Replace("Test", "");
+
+            var judgeType = Type.GetType(nameSpace + "." + className + ", " + type.Assembly.FullName);
+            return Activator.CreateInstance(judgeType) as IProblem;
+        }
     }
 }
