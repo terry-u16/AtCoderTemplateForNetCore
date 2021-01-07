@@ -12,7 +12,7 @@ using System.Runtime.Intrinsics.X86;
 using AtCoderTemplateForNetCore.Algorithms;
 using AtCoderTemplateForNetCore.Collections;
 using AtCoderTemplateForNetCore.Numerics;
-using AtCoderTemplateForNetCore.Questions;
+using AtCoderTemplateForNetCore.Problems;
 
 namespace AtCoderTemplateForNetCore
 {
@@ -20,7 +20,7 @@ namespace AtCoderTemplateForNetCore
     {
         static void Main(string[] args)
         {
-            IAtCoderQuestion question = new QuestionA();
+            IProblem question = new ProblemA();
             using var io = new IOManager(Console.OpenStandardInput(), Console.OpenStandardOutput());
             question.Solve(io);
         }
@@ -29,19 +29,19 @@ namespace AtCoderTemplateForNetCore
 
 #region Base Class
 
-namespace AtCoderTemplateForNetCore.Questions
+namespace AtCoderTemplateForNetCore.Problems
 {
-    public interface IAtCoderQuestion
+    public interface IProblem
     {
         string Solve(string input);
         void Solve(IOManager io);
     }
 
-    public abstract class AtCoderQuestionBase : IAtCoderQuestion
+    public abstract class ProblemBase : IProblem
     {
         protected bool HasMultiTestCases { get; }
 
-        protected AtCoderQuestionBase(bool hasMultiTestCases) => HasMultiTestCases = hasMultiTestCases;
+        protected ProblemBase(bool hasMultiTestCases) => HasMultiTestCases = hasMultiTestCases;
 
         public string Solve(string input)
         {

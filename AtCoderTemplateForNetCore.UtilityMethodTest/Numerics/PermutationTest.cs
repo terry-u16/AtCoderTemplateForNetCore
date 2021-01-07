@@ -1,6 +1,6 @@
 using System;
 using Xunit;
-using AtCoderTemplateForNetCore.Questions;
+using AtCoderTemplateForNetCore.Problems;
 using AtCoderTemplateForNetCore.Collections;
 using AtCoderTemplateForNetCore.Numerics;
 using System.Collections.Generic;

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using AtCoderTemplateForNetCore.Graphs;
 using AtCoderTemplateForNetCore.Graphs.Algorithms;
-using AtCoderTemplateForNetCore.Questions;
+using AtCoderTemplateForNetCore.Problems;
 using Xunit;
 
 namespace AtCoderTemplateForNetCore.UtilityMethodTest.Graphs

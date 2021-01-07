@@ -1,6 +1,6 @@
 using System;
 using Xunit;
-using AtCoderTemplateForNetCore.Questions;
+using AtCoderTemplateForNetCore.Problems;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,10 +10,10 @@ namespace AtCoderTemplateForNetCore.Test
     {
         [Theory]
         [InlineData(@"", @"")]
-        public void QuestionATest(string input, string output)
+        public void ProblemATest(string input, string output)
         {
             var outputs = SplitByNewLine(output);
-            IAtCoderQuestion question = new QuestionA();
+            IProblem question = new ProblemA();
 
             var answers = SplitByNewLine(question.Solve(input).Trim());
 
@@ -22,10 +22,10 @@ namespace AtCoderTemplateForNetCore.Test
 
         //[Theory]
         //[InlineData(@"", @"")]
-        public void QuestionBTest(string input, string output)
+        public void ProblemBTest(string input, string output)
         {
             var outputs = SplitByNewLine(output);
-            IAtCoderQuestion question = new QuestionB();
+            IProblem question = new ProblemB();
 
             var answers = SplitByNewLine(question.Solve(input).Trim());
 
@@ -34,10 +34,10 @@ namespace AtCoderTemplateForNetCore.Test
 
         //[Theory]
         //[InlineData(@"", @"")]
-        public void QuestionCTest(string input, string output)
+        public void ProblemCTest(string input, string output)
         {
             var outputs = SplitByNewLine(output);
-            IAtCoderQuestion question = new QuestionC();
+            IProblem question = new ProblemC();
 
             var answers = SplitByNewLine(question.Solve(input).Trim());
 
@@ -46,10 +46,10 @@ namespace AtCoderTemplateForNetCore.Test
 
         //[Theory]
         //[InlineData(@"", @"")]
-        public void QuestionDTest(string input, string output)
+        public void ProblemDTest(string input, string output)
         {
             var outputs = SplitByNewLine(output);
-            IAtCoderQuestion question = new QuestionD();
+            IProblem question = new ProblemD();
 
             var answers = SplitByNewLine(question.Solve(input).Trim());
 
@@ -58,10 +58,10 @@ namespace AtCoderTemplateForNetCore.Test
 
         //[Theory]
         //[InlineData(@"", @"")]
-        public void QuestionETest(string input, string output)
+        public void ProblemETest(string input, string output)
         {
             var outputs = SplitByNewLine(output);
-            IAtCoderQuestion question = new QuestionE();
+            IProblem question = new ProblemE();
 
             var answers = SplitByNewLine(question.Solve(input).Trim());
 
@@ -70,10 +70,10 @@ namespace AtCoderTemplateForNetCore.Test
 
         //[Theory]
         //[InlineData(@"", @"")]
-        public void QuestionFTest(string input, string output)
+        public void ProblemFTest(string input, string output)
         {
             var outputs = SplitByNewLine(output);
-            IAtCoderQuestion question = new QuestionF();
+            IProblem question = new ProblemF();
 
             var answers = SplitByNewLine(question.Solve(input).Trim());
 

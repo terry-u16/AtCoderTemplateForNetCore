@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using AtCoderTemplateForNetCore.Graphs;
 using AtCoderTemplateForNetCore.Graphs.Algorithms;
-using AtCoderTemplateForNetCore.Questions;
+using AtCoderTemplateForNetCore.Problems;
 using Xunit;
 
 namespace AtCoderTemplateForNetCore.UtilityMethodTest.Graphs

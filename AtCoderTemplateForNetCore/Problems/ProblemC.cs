@@ -12,13 +12,13 @@ using System.Runtime.Intrinsics.X86;
 using AtCoderTemplateForNetCore.Algorithms;
 using AtCoderTemplateForNetCore.Collections;
 using AtCoderTemplateForNetCore.Numerics;
-using AtCoderTemplateForNetCore.Questions;
+using AtCoderTemplateForNetCore.Problems;
 
-namespace AtCoderTemplateForNetCore.Questions
+namespace AtCoderTemplateForNetCore.Problems
 {
-    public class QuestionB : AtCoderQuestionBase
+    public class ProblemC : ProblemBase
     {
-        public QuestionB() : base(false) { }
+        public ProblemC() : base(false) { }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         protected override void SolveEach(IOManager io)

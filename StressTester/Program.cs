@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using AtCoderTemplateForNetCore;
-using AtCoderTemplateForNetCore.Questions;
+using AtCoderTemplateForNetCore.Problems;
 
 namespace StressTester
 {
@@ -9,8 +9,8 @@ namespace StressTester
     {
         static void Main(string[] args)
         {
-            IAtCoderQuestion question = new QuestionA();
-            IAtCoderQuestion naiveSolver = new NaiveSolver();
+            IProblem question = new ProblemA();
+            IProblem naiveSolver = new NaiveSolver();
 
             long count = 0;
 
@@ -87,7 +87,7 @@ namespace StressTester
         }
     }
 
-    class NaiveSolver : AtCoderQuestionBase
+    class NaiveSolver : ProblemBase
     {
         public override void Solve(IOManager io)
         {
