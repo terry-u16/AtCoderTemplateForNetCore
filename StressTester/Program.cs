@@ -89,7 +89,9 @@ namespace StressTester
 
     class NaiveSolver : ProblemBase
     {
-        public override void Solve(IOManager io)
+        public NaiveSolver() : base(false) { }
+
+        protected override void SolveEach(IOManager io)
         {
             // 愚直解を記述
         }
