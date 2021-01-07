@@ -39,6 +39,10 @@ namespace AtCoderTemplateForNetCore.Questions
 
     public abstract class AtCoderQuestionBase : IAtCoderQuestion
     {
+        protected bool HasMultiTestCases { get; }
+
+        protected AtCoderQuestionBase(bool hasMultiTestCases) => HasMultiTestCases = hasMultiTestCases;
+
         public string Solve(string input)
         {
             var inputStream = new MemoryStream(Encoding.UTF8.GetBytes(input));
@@ -53,7 +57,17 @@ namespace AtCoderTemplateForNetCore.Questions
             return reader.ReadToEnd();
         }
 
-        public abstract void Solve(IOManager io);
+        public void Solve(IOManager io)
+        {
+            var tests = HasMultiTestCases ? io.ReadInt() : 1;
+
+            for (var t = 0; t < tests; t++)
+            {
+                SolveEach(io);
+            }
+        }
+
+        protected abstract void SolveEach(IOManager io);
     }
 }
 

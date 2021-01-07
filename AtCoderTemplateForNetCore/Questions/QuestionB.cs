@@ -18,8 +18,10 @@ namespace AtCoderTemplateForNetCore.Questions
 {
     public class QuestionB : AtCoderQuestionBase
     {
+        public QuestionB() : base(false) { }
+
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public override void Solve(IOManager io)
+        protected override void SolveEach(IOManager io)
         {
             throw new NotImplementedException();
         }
