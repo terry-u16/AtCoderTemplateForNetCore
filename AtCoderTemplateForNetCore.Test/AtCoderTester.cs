@@ -68,8 +68,9 @@ namespace AtCoderTemplateForNetCore.Test
             var type = typeof(IProblem);
             var nameSpace = type.Namespace;
             var className = method.Name.Replace("Test", "");
+            var assemblyName = type.Assembly.FullName;
 
-            var judgeType = Type.GetType(nameSpace + "." + className + ", " + type.Assembly.FullName);
+            var judgeType = Type.GetType($"{nameSpace}.{className}, {assemblyName}");
             return Activator.CreateInstance(judgeType) as IProblem;
         }
     }
