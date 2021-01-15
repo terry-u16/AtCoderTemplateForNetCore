@@ -596,6 +596,94 @@ namespace AtCoderTemplateForNetCore.Numerics
                 yield return (n, 1);
             }
         }
+
+        /// <summary>
+        /// 「<paramref name="divisior"/>で割ると<paramref name="remainder"/>余る」というn個の条件を満たす数を求めます。
+        /// </summary>
+        /// <remarks>
+        /// <para>制約: 1≤<paramref name="divisior"/>[i], lcm(<paramref name="divisior"/>[i]) が long に収まる</para>
+        /// <para>計算量: O(n log lcm(<paramref name="divisior"/>))</para>
+        /// </remarks>
+        /// <returns>答えは(存在するならば) result, lcmを用いて result + lcm * k の形で書ける。答えがない場合は(0,0)、n=0 の時は(0,1)、それ以外の場合は(result, lcm)。</returns>
+        public static (long result, long lcm) ChineseRemainderTheorem(ReadOnlySpan<(long divisior, long remainder)> divAndMod)
+        {
+            long r0 = 0, m0 = 1;
+
+            foreach (var (divisor, remainder) in divAndMod)
+            {
+                Debug.Assert(1 <= divisor);
+                long r1 = SafeMod(remainder, divisor);
+                long m1 = divisor;
+
+                if (m0 < m1)
+                {
+                    (r0, r1) = (r1, r0);
+                    (m0, m1) = (m1, m0);
+                }
+
+                if (m0 % m1 == 0)
+                {
+                    if (r0 % m1 != r1) return (0, 0);
+                    continue;
+                }
+
+                var (g, im) = InvGCD(m0, m1);
+
+                long u1 = (m1 / g);
+                if ((r1 - r0) % g != 0) return (0, 0);
+
+                long x = (r1 - r0) / g % u1 * im % u1;
+                r0 += x * m0;
+                m0 *= u1;
+                if (r0 < 0) r0 += m0;
+            }
+
+            return (r0, m0);
+
+            static long SafeMod(long x, long m)
+            {
+                x %= m;
+                if (x < 0) x += m;
+                return x;
+            }
+
+            /// <summary>
+            /// g=gcd(a,b),xa=g(mod b) となるような 0≤x&lt;b/g の(g, x)
+            /// </summary>
+            /// <remarks>
+            /// <para>制約: 1≤<paramref name="b"/></para>
+            /// </remarks>
+            static (long, long) InvGCD(long a, long b)
+            {
+                a = SafeMod(a, b);
+                if (a == 0) return (b, 0);
+
+                long s = b, t = a;
+                long m0 = 0, m1 = 1;
+
+                long u;
+                while (true)
+                {
+                    if (t == 0)
+                    {
+                        if (m0 < 0) m0 += b / s;
+                        return (s, m0);
+                    }
+                    u = s / t;
+                    s -= t * u;
+                    m0 -= m1 * u;
+
+                    if (s == 0)
+                    {
+                        if (m1 < 0) m1 += b / t;
+                        return (t, m1);
+                    }
+                    u = t / s;
+                    t -= s * u;
+                    m1 -= m0 * u;
+                }
+            }
+        }
     }
 
     #region ModInt
