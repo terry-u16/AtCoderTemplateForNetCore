@@ -482,27 +482,37 @@ namespace AtCoderTemplateForNetCore
             return (ok + ng) * 0.5;
         }
 
-        public static double Bisection(Func<double, double> f, double a, double b, double eps = 1e-9)
+        public static double Bisection(Func<double, double> f, double a, double b, double eps = 1e-9, int loopLimit = 100)
         {
-            if (f(a) * f(b) >= 0)
+            double mid = (a + b) / 2;
+            var fa = f(a);
+
+            if (fa * f(b) >= 0)
             {
                 throw new ArgumentException("f(a)とf(b)は異符号である必要があります。");
             }
 
-            const int maxLoop = 100;
-            double mid = (a + b) / 2;
-
-            for (int i = 0; i < maxLoop; i++)
+            for (int i = 0; i < loopLimit; i++)
             {
-                if (f(a) * f(mid) < 0)
+                var fmid = f(mid);
+                var sign = fa * fmid;
+
+                if (sign < 0)
                 {
                     b = mid;
                 }
-                else
+                else if (sign > 0)
                 {
                     a = mid;
+                    fa = fmid;
                 }
+                else
+                {
+                    return mid;
+                }
+
                 mid = (a + b) / 2;
+
                 if (Math.Abs(b - a) < eps)
                 {
                     break;
