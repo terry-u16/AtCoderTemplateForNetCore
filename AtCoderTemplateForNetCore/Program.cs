@@ -2395,6 +2395,12 @@ namespace AtCoderTemplateForNetCore.Collections
             _frontStack.Pop();
         }
 
+        public void Clear()
+        {
+            _frontStack.Clear();
+            _backStack.Clear();
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Move()
         {
