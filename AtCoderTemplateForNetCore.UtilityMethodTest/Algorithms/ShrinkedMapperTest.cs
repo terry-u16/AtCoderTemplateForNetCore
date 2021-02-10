@@ -14,13 +14,13 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Algorithms
             var rawCoordinate = new[] { 3, 8, 1, 1, 4 };
             var compressed = new CompressedCoordinate<int>(rawCoordinate);
 
-            Assert.Equal(4, compressed.Count);
+            Assert.Equal(4, compressed.UniqueCount);
 
-            Assert.Equal(1, compressed[0]);
-            Assert.Equal(3, compressed[1]);
-            Assert.Equal(0, compressed[2]);
-            Assert.Equal(0, compressed[3]);
-            Assert.Equal(2, compressed[4]);
+            Assert.Equal(1, compressed.Compressed[0]);
+            Assert.Equal(3, compressed.Compressed[1]);
+            Assert.Equal(0, compressed.Compressed[2]);
+            Assert.Equal(0, compressed.Compressed[3]);
+            Assert.Equal(2, compressed.Compressed[4]);
         }
 
         [Fact]
@@ -29,12 +29,12 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Algorithms
             var rawCoordinate = new[] { 3, 8, 1, 1, 4 };
             var shrinker = new CompressedCoordinate<int>(rawCoordinate);
 
-            Assert.Equal(4, shrinker.Count);
+            Assert.Equal(4, shrinker.UniqueCount);
 
-            Assert.Equal(1, shrinker.Expand(0));
-            Assert.Equal(3, shrinker.Expand(1));
-            Assert.Equal(4, shrinker.Expand(2));
-            Assert.Equal(8, shrinker.Expand(3));
+            Assert.Equal(1, shrinker.Invert(0));
+            Assert.Equal(3, shrinker.Invert(1));
+            Assert.Equal(4, shrinker.Invert(2));
+            Assert.Equal(8, shrinker.Invert(3));
         }
     }
 }

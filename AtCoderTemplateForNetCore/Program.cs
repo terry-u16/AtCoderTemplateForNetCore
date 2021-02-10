@@ -1911,24 +1911,50 @@ namespace AtCoderTemplateForNetCore.Algorithms
     public class CompressedCoordinate<T> where T : IComparable<T>, IEquatable<T>
     {
         readonly int[] _compressed;
-        readonly T[] _expander;
-        public int Count => _expander.Length;
+        readonly T[] _raw;
+        readonly Dictionary<T, int> _converter;
+        readonly T[] _inverter;
+        public int UniqueCount => _inverter.Length;
 
-        public CompressedCoordinate(ReadOnlySpan<T> data)
+        /// <summary>
+        /// 座圧前のデータ列を返します。
+        /// </summary>
+        public ReadOnlySpan<T> Raw => _raw;
+
+        /// <summary>
+        /// 座圧後のデータ列を返します。
+        /// </summary>
+        public ReadOnlySpan<int> Compressed => _compressed;
+
+        /// <summary>
+        /// 座圧前のデータを座圧後のインデックスに変換します。
+        /// </summary>
+        public int Convert(T value) => _converter[value];
+
+        /// <summary>
+        /// 座圧後のインデックスを座圧前のデータに変換します。
+        /// </summary>
+        public T Invert(Index index) => _inverter[index];
+
+        public CompressedCoordinate(IEnumerable<T> data)
         {
-            _expander = data.ToArray().Distinct().ToArray();
-            Array.Sort(_expander);
+            _raw = data.ToArray();
+            _converter = new Dictionary<T, int>();
+            _inverter = _raw.Distinct().ToArray();
+            Array.Sort(_inverter);
 
-            _compressed = new int[data.Length];
-            var span = _expander.AsSpan();
+            _compressed = new int[_raw.Length];
+            var span = _inverter.AsSpan();
             for (int i = 0; i < _compressed.Length; i++)
             {
-                _compressed[i] = span.BinarySearch(data[i]);
+                _compressed[i] = span.BinarySearch(_raw[i]);
+            }
+
+            for (var i = 0; i < _inverter.Length; i++)
+            {
+                _converter[_inverter[i]] = i;
             }
         }
-
-        public int this[int index] => _compressed[index];
-        public T Expand(int compressedValue) => _expander[compressedValue];
     }
 }
 
