@@ -4234,6 +4234,144 @@ namespace AtCoderTemplateForNetCore.Collections
         public override int GetHashCode() => _value.GetHashCode();
     }
 
+    /// <summary>
+    /// 区間をsetで管理するやつ
+    /// </summary>
+    public class SegmentSet
+    {
+        private readonly RedBlackTree<(long left, long right)> _set;
+
+        public SegmentSet()
+        {
+            _set = new RedBlackTree<(long left, long right)>();
+        }
+
+        /// <summary>
+        /// [left, right)を追加し、追加した区間の長さを返します。
+        /// </summary>
+        public long Add(long left, long right)
+        {
+            if (left > right)
+            {
+                throw new ArgumentException();
+            }
+            else if (left == right)
+            {
+                return 0;
+            }
+
+            long addedLength = right - left;
+            var leftSegment = _set.GetLessThan((left, left));
+
+            if (leftSegment != default && leftSegment.right >= left)
+            {
+                if (leftSegment.right >= right)
+                {
+                    return 0;
+                }
+
+                _set.Remove(leftSegment);
+                addedLength -= leftSegment.right - left;
+                left = leftSegment.left;
+            }
+
+            var toRemove = new Stack<(long left, long right)>();
+
+            foreach (var rightSegment in _set.EnumerateRange((left, left), (right, long.MaxValue)))
+            {
+                toRemove.Push(rightSegment);
+                addedLength -= Math.Min(right, rightSegment.right) - rightSegment.left;
+                right = Math.Max(right, rightSegment.right);
+            }
+
+            while (toRemove.Count > 0)
+            {
+                _set.Remove(toRemove.Pop());
+            }
+
+            _set.Add((left, right));
+            return addedLength;
+        }
+
+        /// <summary>
+        /// [left, right)を削除し、削除した区間の長さを返します。
+        /// </summary>
+        public long Remove(long left, long right)
+        {
+            if (left > right)
+            {
+                throw new ArgumentException();
+            }
+            else if (left == right)
+            {
+                return 0;
+            }
+
+            long removedLength = 0;
+            var leftSegment = _set.GetLessThan((left, left));
+
+            if (leftSegment != default && leftSegment.right >= left)
+            {
+                _set.Remove(leftSegment);
+
+                if (leftSegment.right > right)
+                {
+                    _set.Add((leftSegment.left, left));
+                    _set.Add((right, leftSegment.right));
+                    return right - left;
+                }
+
+                _set.Add((leftSegment.left, left));
+                removedLength += leftSegment.right - left;
+            }
+
+            var toRemove = new Stack<(long left, long right)>();
+            (long left, long right) toAdd = default;
+
+            foreach (var rightSegment in _set.EnumerateRange((left, left), (right, long.MaxValue)))
+            {
+                toRemove.Push(rightSegment);
+                removedLength += Math.Min(right, rightSegment.right) - rightSegment.left;
+
+                if (rightSegment.right > right)
+                {
+                    toAdd = (right, rightSegment.right);
+                }
+
+                right = Math.Max(right, rightSegment.right);
+            }
+
+            while (toRemove.Count > 0)
+            {
+                _set.Remove(toRemove.Pop());
+            }
+
+            if (toAdd != default)
+            {
+                _set.Add(toAdd);
+            }
+
+            return removedLength;
+        }
+
+        public IEnumerable<(long left, long right)> EnumerateRanges() => _set;
+
+        public IEnumerable<(long left, long right)> EnumerateRanges(long left, long right)
+        {
+            foreach (var segment in _set.EnumerateRange((left, long.MinValue), (right, long.MaxValue)))
+            {
+                if (segment.right > right)
+                {
+                    yield break;
+                }
+                else
+                {
+                    yield return segment;
+                }
+            }
+        }
+    }
+
     public static class PermutationAlgorithms
     {
         public static IEnumerable<ReadOnlyMemory<T>> GetPermutations<T>(IEnumerable<T> collection) where T : IComparable<T> => GetPermutations(collection, false);
