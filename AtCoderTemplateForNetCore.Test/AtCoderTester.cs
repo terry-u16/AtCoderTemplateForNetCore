@@ -63,6 +63,24 @@ namespace AtCoderTemplateForNetCore.Test
             judge.Judge(input, output);
         }
 
+        //[Theory]
+        //[InlineData(@"", @"")]
+        public void ProblemGTest(string input, string output)
+        {
+            IProblem solver = CreateInstanceOf(MethodBase.GetCurrentMethod());
+            IJudge judge = new BasicJudge(solver);
+            judge.Judge(input, output);
+        }
+
+        //[Theory]
+        //[InlineData(@"", @"")]
+        public void ProblemHTest(string input, string output)
+        {
+            IProblem solver = CreateInstanceOf(MethodBase.GetCurrentMethod());
+            IJudge judge = new BasicJudge(solver);
+            judge.Judge(input, output);
+        }
+
         private static IProblem CreateInstanceOf(MethodBase method)
         {
             var type = typeof(IProblem);
