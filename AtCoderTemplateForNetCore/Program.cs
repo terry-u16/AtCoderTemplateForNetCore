@@ -1248,6 +1248,8 @@ namespace AtCoderTemplateForNetCore.Numerics
 
         public StaticModInt<T> Factorial(int n) => _factorials[n];
 
+        public StaticModInt<T> InvFactorial(int n) => _invFactorials[n];
+
         public StaticModInt<T> Permutation(int n, int k) => _factorials[n] * _invFactorials[n - k];
 
         public StaticModInt<T> Combination(int n, int k) => _factorials[n] * _invFactorials[k] * _invFactorials[n - k];

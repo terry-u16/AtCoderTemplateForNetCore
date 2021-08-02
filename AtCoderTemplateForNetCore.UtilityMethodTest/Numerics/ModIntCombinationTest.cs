@@ -23,6 +23,18 @@ namespace AtCoderTemplateForNetCore.UtilityMethodTest.Numerics
         }
 
         [Theory]
+        [InlineData(3)]
+        [InlineData(10)]
+        [InlineData(15)]
+        public void InvFactorialTest(int n)
+        {
+            var fact = _combination.Factorial(n);
+            var invFact = _combination.InvFactorial(n);
+            var prod = fact * invFact;
+            Assert.Equal(1, prod.Value);
+        }
+
+        [Theory]
         [InlineData(4, 2, 12)]
         [InlineData(10, 0, 1)]
         [InlineData(10, 1, 10)]
