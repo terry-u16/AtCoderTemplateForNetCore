@@ -1958,6 +1958,126 @@ namespace AtCoderTemplateForNetCore.Algorithms
             }
         }
     }
+
+    public interface IMosState<out T>
+    {
+        /// <summary>
+        /// index番目の要素を追加する
+        /// </summary>
+        /// <example>
+        /// ABC242-G
+        /// <code>
+        /// if (++_counts[_colors[index]] % 2 == 0)
+        /// {
+        ///     _answer++;
+        /// }
+        /// </code>
+        /// </example>
+        void Add(int index);
+
+        /// <summary>
+        /// index番目の要素を削除する
+        /// </summary>
+        /// <example>
+        /// ABC242-G
+        /// <code>
+        /// if (--_counts[_colors[index]] % 2 == 1)
+        /// {
+        ///     _answer--;
+        /// }
+        /// </code>
+        /// </example>
+        void Remove(int index);
+
+        /// <summary>
+        /// 現時点での解を答える
+        /// </summary>
+        /// <example>
+        /// ABC242-G
+        /// <code>
+        /// return _answer;
+        /// </code>
+        /// </example>
+        T Answer();
+    }
+
+    /// <summary>
+    /// Mo's algorithm
+    /// https://snuke.hatenablog.com/entry/2016/07/01/000000
+    /// https://nyaannyaan.github.io/library/misc/mo.hpp.html
+    /// </summary>
+    /// <typeparam name="TState">区間[l, r)の状態（struct/AggressiveInliningを推奨）</typeparam>
+    /// <typeparam name="TResult">解</typeparam>
+    public class MosAlgorithm<TState, TResult> where TState : IMosState<TResult>
+    {
+        private readonly List<(int left, int right, int id)> _queries;
+        private readonly int _n;
+
+        public MosAlgorithm(int n)
+        {
+            _n = n;
+            _queries = new List<(int left, int right, int id)>();
+        }
+
+        public void AddQuery(int left, int right) => _queries.Add((left, right, _queries.Count));
+
+        public TResult[] Solve(TState state)
+        {
+            return _queries.Count switch
+            {
+                0 => Array.Empty<TResult>(),
+                _ => Solve(state, Math.Max((int)(Math.Sqrt(3) * _n / Math.Sqrt(2 * _queries.Count)), 1))
+            };
+        }
+
+        public TResult[] Solve(TState state, int blockSize)
+        {
+            if (_queries.Count == 0)
+            {
+                return Array.Empty<TResult>();
+            }
+
+            var result = new TResult[_queries.Count];
+            var left = 0;
+            var right = 0;
+
+            SortQueries(blockSize);
+
+            foreach (var (l, r, id) in _queries)
+            {
+                while (left > l) state.Add(--left);
+                while (right < r) state.Add(right++);
+                while (left < l) state.Remove(left++);
+                while (right > r) state.Remove(--right);
+
+                result[id] = state.Answer();
+            }
+
+            return result;
+        }
+
+        private void SortQueries(int blockSize)
+        {
+            _queries.Sort((x, y) =>
+            {
+                var a = x.left / blockSize;
+                var b = y.left / blockSize;
+
+                if (a != b)
+                {
+                    return a.CompareTo(b);
+                }
+                else if ((a & 1) == 0)
+                {
+                    return x.right.CompareTo(y.right);
+                }
+                else
+                {
+                    return -x.right.CompareTo(y.right);
+                }
+            });
+        }
+    }
 }
 
 #endregion
