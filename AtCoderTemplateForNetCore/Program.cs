@@ -4706,7 +4706,7 @@ namespace AtCoderTemplateForNetCore.Graphs
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void AddEdge(int from, int to, int capacity)
+            public void AddEdge(int from, int to, long capacity)
             {
                 _edgeIndice.Add((from, _graph[from].Count));
                 _graph[from].Add(new InternalEdge(to, _graph[to].Count, capacity));
@@ -4724,15 +4724,15 @@ namespace AtCoderTemplateForNetCore.Graphs
                 }
             }
 
-            public int Flow(int source, int sink) => Flow(source, sink, int.MaxValue);
+            public long Flow(int source, int sink) => Flow(source, sink, long.MaxValue);
 
-            public int Flow(int source, int sink, int flowLimit)
+            public long Flow(int source, int sink, long flowLimit)
             {
                 var distances = new int[VertexCount];
                 var iterations = new int[VertexCount];
                 var queue = new Queue<int>();
 
-                var flow = 0;
+                long flow = 0;
 
                 while (flow < flowLimit)
                 {
@@ -4786,14 +4786,14 @@ namespace AtCoderTemplateForNetCore.Graphs
                     }
                 }
 
-                int Dfs(int v, int flowLimit)
+                long Dfs(int v, long flowLimit)
                 {
                     if (v == source)
                     {
                         return flowLimit;
                     }
 
-                    var result = 0;
+                    long result = 0;
                     var edges = _graph[v].AsSpan();
                     var distance = distances[v];
 
@@ -4855,10 +4855,10 @@ namespace AtCoderTemplateForNetCore.Graphs
             {
                 public int From { get; }
                 public int To { get; }
-                public int Capacity { get; }
-                public int Flow { get; }
+                public long Capacity { get; }
+                public long Flow { get; }
 
-                public Edge(int from, int to, int capacity, int flow)
+                public Edge(int from, int to, long capacity, long flow)
                 {
                     From = from;
                     To = to;
@@ -4866,7 +4866,7 @@ namespace AtCoderTemplateForNetCore.Graphs
                     Flow = flow;
                 }
 
-                public void Deconstruct(out int to, out int inv, out int capacity, out int flow)
+                public void Deconstruct(out int to, out int inv, out long capacity, out long flow)
                     => (to, inv, capacity, flow) = (From, To, Capacity, Flow);
                 public override string ToString() => $"{nameof(From)}: {From}, {nameof(To)}: {To}, {nameof(Capacity)}: {Capacity}, {nameof(Flow)}: {Flow}";
             }
@@ -4876,17 +4876,17 @@ namespace AtCoderTemplateForNetCore.Graphs
             {
                 public int To { get; }
                 public int InvIndex { get; }
-                public int Capacity { get; }
+                public long Capacity { get; }
 
-                public InternalEdge(int to, int invIndex, int capacity)
+                public InternalEdge(int to, int invIndex, long capacity)
                 {
                     To = to;
                     InvIndex = invIndex;
                     Capacity = capacity;
                 }
 
-                public static InternalEdge operator +(InternalEdge edge, int flow) => new InternalEdge(edge.To, edge.InvIndex, edge.Capacity + flow);
-                public static InternalEdge operator -(InternalEdge edge, int flow) => new InternalEdge(edge.To, edge.InvIndex, edge.Capacity - flow);
+                public static InternalEdge operator +(InternalEdge edge, long flow) => new InternalEdge(edge.To, edge.InvIndex, edge.Capacity + flow);
+                public static InternalEdge operator -(InternalEdge edge, long flow) => new InternalEdge(edge.To, edge.InvIndex, edge.Capacity - flow);
                 public override string ToString() => $"{nameof(To)}: {To}, {nameof(InvIndex)}: {InvIndex}, {nameof(Capacity)}: {Capacity}";
             }
         }
@@ -4904,7 +4904,7 @@ namespace AtCoderTemplateForNetCore.Graphs
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void AddEdge(int from, int to, int capacity, long cost)
+            public void AddEdge(int from, int to, long capacity, long cost)
             {
                 _edgeIndice.Add((from, _graph[from].Count));
                 _graph[from].Add(new InternalEdge(to, _graph[to].Count, capacity, cost));
@@ -4922,13 +4922,13 @@ namespace AtCoderTemplateForNetCore.Graphs
                 }
             }
 
-            public (int flow, long cost) Flow(int source, int sink) => Flow(source, sink, int.MaxValue);
+            public (long flow, long cost) Flow(int source, int sink) => Flow(source, sink, int.MaxValue);
 
-            public (int flow, long cost) Flow(int source, int sink, int flowLimit) => GetCostSlope(source, sink, flowLimit)[^1];
+            public (long flow, long cost) Flow(int source, int sink, long flowLimit) => GetCostSlope(source, sink, flowLimit)[^1];
 
-            public ReadOnlySpan<(int flow, long cost)> GetCostSlope(int source, int sink) => GetCostSlope(source, sink, int.MaxValue);
+            public ReadOnlySpan<(long flow, long cost)> GetCostSlope(int source, int sink) => GetCostSlope(source, sink, long.MaxValue);
 
-            public ReadOnlySpan<(int flow, long cost)> GetCostSlope(int source, int sink, int flowLimit)
+            public ReadOnlySpan<(long flow, long cost)> GetCostSlope(int source, int sink, long flowLimit)
             {
                 if (source == sink)
                 {
@@ -4941,10 +4941,10 @@ namespace AtCoderTemplateForNetCore.Graphs
                 var prevEdges = new int[VertexCount];
                 var visited = new bool[VertexCount];
 
-                var flow = 0;
+                long flow = 0;
                 long cost = 0;
                 long prevCost = -1;
-                var result = new List<(int flow, long cost)>();
+                var result = new List<(long flow, long cost)>();
                 result.Add((flow, cost));
 
                 while (flow < flowLimit)
@@ -4954,7 +4954,7 @@ namespace AtCoderTemplateForNetCore.Graphs
                         break;
                     }
 
-                    var capacity = flowLimit - flow;
+                    long capacity = flowLimit - flow;
 
                     var v = sink;
                     while (v != source)
@@ -5062,11 +5062,11 @@ namespace AtCoderTemplateForNetCore.Graphs
             {
                 public int From { get; }
                 public int To { get; }
-                public int Capacity { get; }
-                public int Flow { get; }
+                public long Capacity { get; }
+                public long Flow { get; }
                 public long Cost { get; }
 
-                public Edge(int from, int to, int capacity, int flow, long cost)
+                public Edge(int from, int to, long capacity, long flow, long cost)
                 {
                     From = from;
                     To = to;
@@ -5083,10 +5083,10 @@ namespace AtCoderTemplateForNetCore.Graphs
             {
                 public int To { get; }
                 public int InvIndex { get; }
-                public int Capacity { get; }
+                public long Capacity { get; }
                 public long Cost { get; }
 
-                public InternalEdge(int to, int invIndex, int capacity, long cost)
+                public InternalEdge(int to, int invIndex, long capacity, long cost)
                 {
                     To = to;
                     InvIndex = invIndex;
@@ -5094,7 +5094,7 @@ namespace AtCoderTemplateForNetCore.Graphs
                     Cost = cost;
                 }
 
-                public InternalEdge Flow(int flow) => new InternalEdge(To, InvIndex, Capacity + flow, Cost);
+                public InternalEdge Flow(long flow) => new InternalEdge(To, InvIndex, Capacity + flow, Cost);
 
                 public override string ToString() => $"{nameof(To)}: {To}, {nameof(InvIndex)}: {InvIndex}, {nameof(Capacity)}: {Capacity}, {nameof(Cost)}: {Cost}";
             }
